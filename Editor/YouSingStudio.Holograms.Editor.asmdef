@@ -1,0 +1,9 @@
+{
+	"name": "YouSingStudio.Holograms.Editor",
+	"references": [
+		"YouSingStudio.Holograms"
+	],
+	"includePlatforms": [
+		"Editor"
+	]
+}
