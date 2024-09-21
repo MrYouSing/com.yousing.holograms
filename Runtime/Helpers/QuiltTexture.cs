@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.Video;
 
 namespace YouSingStudio.Holograms {
@@ -72,6 +73,14 @@ namespace YouSingStudio.Holograms {
 					return f<0.0f?VideoAspectRatio.FitInside:VideoAspectRatio.FitOutside;
 					default:return aspect;
 				}
+			}
+		}
+
+		public virtual void SetAspect(VideoAspectRatio value) {
+			if(value!=aspect) {
+				aspect=value;
+				//
+				RefreshMesh();
 			}
 		}
 
@@ -204,11 +213,17 @@ namespace YouSingStudio.Holograms {
 
 		public virtual void RenderDestination() {
 			if(source!=null&&destination!=null) {
+#if false
 				Camera cam=UnityExtension.GetCameraHelper();
-				//
 				cam.targetTexture=destination;
 				Graphics.DrawMesh(mesh,Matrix4x4.identity,material,cam.gameObject.layer,cam);
 				cam.Render();
+#else
+				GLRenderer gl=UnityExtension.GetGLRenderer();
+				gl.Set(mesh);
+				gl.material=material;
+				gl.Render(destination);
+#endif
 			}
 		}
 

@@ -54,7 +54,7 @@ namespace YouSingStudio.Holograms {
 
 		protected virtual void InternalRender() {
 			if(material!=null) {
-				canvas.Begin(out var tmp);
+				var tmp=canvas.Begin();
 					Graphics.Blit(quiltTexture,material);
 				canvas.End(tmp);
 			}else {
