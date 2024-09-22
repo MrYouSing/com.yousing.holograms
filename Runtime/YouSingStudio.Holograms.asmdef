@@ -1,3 +1,4 @@
 {
-	"name": "YouSingStudio.Holograms"
+	"name": "YouSingStudio.Holograms",
+	"allowUnsafeCode": true
 }

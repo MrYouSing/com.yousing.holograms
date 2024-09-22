@@ -66,11 +66,7 @@ namespace YouSingStudio.Holograms {
 			if(m_IsInited) {return;}
 			m_IsInited=true;
 			//
-			string fn=Path.Combine(
-				Application.streamingAssetsPath//Path.GetDirectoryName(Application.dataPath)
-				,"Settings",name+".json"
-			);
-			this.LoadSettings(fn);
+			this.LoadSettings(name+".json");
 			//
 			if(resolution.sqrMagnitude==0) {
 				resolution.Set(Screen.width,Screen.height);

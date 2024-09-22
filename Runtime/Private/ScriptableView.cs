@@ -120,7 +120,7 @@ using UnityEngine.UI;
 
 namespace YouSingStudio.Private {
 	/// <summary>
-	/// A scriptable interface For UGUI system.<br/>
+	/// A scriptable interface for UGUI system.<br/>
 	/// <seealso cref="ScriptableObject"/>
 	/// </summary>
 	public class ScriptableView
@@ -294,8 +294,8 @@ namespace YouSingStudio.Private {
 	}
 
 	public class ScriptableView<T>:ScriptableView {
-		public System.Action<T> onValueChanged=null;
-		[System.NonSerialized]protected UnityEvent<T> m_OnValueChanged=null;
+		[System.NonSerialized]public System.Action<T> onValueChanged=null;
+		[SerializeField]protected UnityEvent<T> m_OnValueChanged=null;
 
 		public virtual void OnValueChanged(T value) {
 			onValueChanged?.Invoke(value);

@@ -10,6 +10,8 @@ namespace YouSingStudio.Private {
 	{
 		#region Fields
 
+		public static PointerEventData s_PointerEventData=null;
+
 		public Key[] keys;
 		[System.NonSerialized]public ShortcutManager.Shortcut shortcut;
 
@@ -19,7 +21,6 @@ namespace YouSingStudio.Private {
 
 		protected virtual void OnEnable()=>SetActive(true);
 		protected virtual void OnDisable()=>SetActive(false);
-
 
 		#endregion Unity Messages
 
@@ -34,7 +35,9 @@ namespace YouSingStudio.Private {
 		}
 
 		public virtual void OnClick() {
-			ExecuteEvents.Execute(gameObject,null,ExecuteEvents.pointerClickHandler);
+			// TODO: Added ugui extensions?
+			if(s_PointerEventData==null) {s_PointerEventData=new PointerEventData(null);}
+			ExecuteEvents.Execute(gameObject,s_PointerEventData,ExecuteEvents.pointerClickHandler);
 		}
 
 		#endregion Methods

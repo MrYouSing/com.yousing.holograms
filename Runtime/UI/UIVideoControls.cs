@@ -128,7 +128,9 @@ namespace YouSingStudio.Holograms {
 		public VideoPlayer video;
 		public ushort track;
 		public float rate=1.0f;
+		public CanvasGroup canvas;
 
+		[System.NonSerialized]protected bool m_Jump;
 		[System.NonSerialized]protected float m_Time;
 
 		#endregion Fields
@@ -144,6 +146,8 @@ namespace YouSingStudio.Holograms {
 			BindSlider(k_Progress,SetProgress);
 			BindSlider(k_Volume,SetVolume);
 // Macro.Patch -->
+			if(canvas==null) {canvas=GetComponent<CanvasGroup>();}
+			SetActive(false);
 		}
 
 		protected virtual void Update() {
@@ -167,22 +171,29 @@ namespace YouSingStudio.Holograms {
 			return video!=null&&!string.IsNullOrEmpty(video.url)&&video.isPrepared;
 		}
 
+		protected virtual void SetActive(bool value) {
+			canvas.SetActive(value);
+		}
+
 		protected virtual void UpdateControls() {
-			if(!IsVideo()) {return;}
-			//
-			string str=video.url;
-			float t=(float)video.time,d=(float)video.length;
-			if(!string.IsNullOrEmpty(str)) {
-				SetImage(k_PlayOrPauseUI,GetSprite(video.isPaused?k_Play:k_Pause));
-				SetText(k_Title,Path.GetFileName(str));
-				//
-				SetToggleWithoutNotify(k_Loop,video.isLooping);
-				SetText(k_Time,$"{t.ToTime()}/{d.ToTime()}");
-				SetSliderWithoutNotify(k_Progress,t/d);
-				//
-				SetToggleWithoutNotify(k_Mute,video.GetDirectAudioMute(track));
-				SetSliderWithoutNotify(k_Volume,video.GetDirectAudioVolume(track));
+			if(IsVideo()) {
+				string str=video.url;
+				float t=(float)video.time,d=(float)video.length;
+				if(!string.IsNullOrEmpty(str)) {
+					SetImage(k_PlayOrPauseUI,GetSprite(video.isPaused?k_Play:k_Pause));
+					SetText(k_Title,Path.GetFileName(str));
+					//
+					SetToggleWithoutNotify(k_Loop,video.isLooping);
+					SetText(k_Time,$"{t.ToTime()}/{d.ToTime()}");
+					if(!m_Jump) {SetSliderWithoutNotify(k_Progress,t/d);}
+					//
+					SetToggleWithoutNotify(k_Mute,video.GetDirectAudioMute(track));
+					SetSliderWithoutNotify(k_Volume,video.GetDirectAudioVolume(track));
+					//
+					SetActive(true);return;
+				}
 			}
+			SetActive(false);
 		}
 
 		protected virtual void PlayOrPause() {
@@ -206,8 +217,18 @@ namespace YouSingStudio.Holograms {
 
 		protected virtual void SetProgress(float value) {
 			if(IsVideo()) {
+				m_Jump=true;
+				video.seekCompleted-=OnVideoSeek;
+				video.seekCompleted+=OnVideoSeek;
+				//
 				video.time=value*video.length;
 			}
+		}
+
+		protected virtual void OnVideoSeek(VideoPlayer vp) {
+			vp.seekCompleted-=OnVideoSeek;
+			//
+			m_Jump=false;
 		}
 
 		protected virtual void SetMute(bool value) {

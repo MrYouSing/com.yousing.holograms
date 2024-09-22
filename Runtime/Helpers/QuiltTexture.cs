@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.Video;
 
 namespace YouSingStudio.Holograms {
@@ -27,6 +26,7 @@ namespace YouSingStudio.Holograms {
 		#region Unity Messages
 
 		protected virtual void Start() {
+			if(m_Args.sqrMagnitude!=0.0f) {return;}
 			//
 			var device=GetComponent<HologramDevice>();
 			if(device!=null) {
@@ -80,7 +80,7 @@ namespace YouSingStudio.Holograms {
 			if(value!=aspect) {
 				aspect=value;
 				//
-				RefreshMesh();
+				if(m_Args.sqrMagnitude!=0.0f) {RefreshMesh();}
 			}
 		}
 

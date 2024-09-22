@@ -49,3 +49,11 @@ if(d!,//
 else if(asset is,if(asset is
  Macro.End --> */
 // Macro.End -->
+
+//<!-- Macro.File ShellThumbs.cs
+/* <!-- Macro.Copy File
+:Packages/com.yousing.io/Runtime/Plugins/$(GeneratedFileName).cs
+ Macro.End --> */
+/* <!-- Macro.Replace Replace
+ Macro.End --> */
+// Macro.End -->
