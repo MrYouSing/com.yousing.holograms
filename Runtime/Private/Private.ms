@@ -57,3 +57,11 @@ else if(asset is,if(asset is
 /* <!-- Macro.Replace Replace
  Macro.End --> */
 // Macro.End -->
+
+//<!-- Macro.File AsyncTask.cs
+/* <!-- Macro.Copy File
+:Packages/com.yousing.io/Runtime/OS/$(GeneratedFileName).cs
+ Macro.End --> */
+/* <!-- Macro.Replace Replace
+ Macro.End --> */
+// Macro.End -->

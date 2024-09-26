@@ -212,7 +212,7 @@ namespace YouSingStudio.Holograms {
 		}
 
 		public virtual void RenderDestination() {
-			if(source!=null&&destination!=null) {
+			if(mesh!=null&&destination!=null) {
 #if false
 				Camera cam=UnityExtension.GetCameraHelper();
 				cam.targetTexture=destination;

@@ -1,6 +1,6 @@
 /* <!-- Macro.Copy File
 :Packages/com.yousing.io/Runtime/Modules/MediaModule/Core/MediaExtension.cs,80~89,223,234~258,265
-:Packages/com.yousing.io/Runtime/APIs/TextureAPI.cs,133,297~306,311~326,421~445
+:Packages/com.yousing.io/Runtime/APIs/TextureAPI.cs,136,300~309,314~329,424~448,461~474
 :Packages/com.yousing.input-extensions/Runtime/Internal/LangExtension.cs,15~25
 :Packages/com.yousing.ui/Runtime/Internal/LangExtension.cs,238~243,320~331
  Macro.End --> */
@@ -8,11 +8,13 @@
 MediaExtension,UnityExtension
 if(FileUtility.Exists(json),json=json.GetFullPath();if(File.Exists(json)
 FileUtility,File
+TempTexture2D,GetTemp2D();}//
+else if(texture.GetSizeI()!=s) {,if(texture.GetSizeI()!=s) {
  Macro.End --> */
 /* <!-- Macro.Patch
 ,AutoGen
  Macro.End --> */
-#if UNITY_EDITOR_WIN||UNITY_STANDALONE_WIN
+#if (UNITY_EDITOR_WIN||UNITY_STANDALONE_WIN)&&!NET_STANDARD
 #define DOTNET_GDI_PLUS
 #endif
 using System.Collections.Generic;
@@ -119,11 +121,25 @@ namespace YouSingStudio.Holograms {
 		}
 
 		public static void CopyFrom(this RenderTexture thiz,Texture texture) {
-			if(thiz==null||texture==null) {return;}
+			if(thiz==null||texture==null||thiz==texture) {return;}
 			//
 			var rt=thiz.Begin();
 				Graphics.Blit(texture,thiz);
 			thiz.End(rt);
+		}
+
+		public static Texture2D ToTexture2D(this RenderTexture thiz,Texture2D texture=null,bool apply=true) {
+			if(thiz!=null) {
+				Vector2Int s=thiz.GetSizeI();
+				if(texture==null) {texture=GetTemp2D();}//(s.x,s.y);}
+				if(texture.GetSizeI()!=s) {texture.Reinitialize(s.x,s.y);}
+				//
+				var rt=thiz.Begin();
+					texture.ReadPixels(new Rect(0,0,s.x,s.y),0,0,false);
+					if(apply) {texture.Apply();}
+				thiz.End(rt);
+			}
+			return texture;
 		}
 
 		public static T FromJson<T>(string json) {
@@ -164,6 +180,14 @@ namespace YouSingStudio.Holograms {
 		/// </summary>
 		public static string s_TempTag="HideFlags.HideAndDontSave";
 		public static Vector3 s_DefaultQuilt=new Vector3(8,5,0.5625f);
+		public static string s_ExeRoot=
+#if UNITY_EDITOR_WIN
+			"Packages/com.yousing.holograms/GameAssets/StreamingAssets/Windows";
+#elif UNITY_STANDALONE_WIN
+			Application.streamingAssetsPath+"/Windows";
+#else
+			"";
+#endif
 		public static string[] s_Settings=new string[]{
 			"",
 			"Settings/",
@@ -192,7 +216,8 @@ namespace YouSingStudio.Holograms {
 			if(!string.IsNullOrEmpty(thiz)) {
 				int i=thiz.LastIndexOf("_qs");
 				if(i>=0) {
-					i+=2;int j=thiz.IndexOf('x',i),k=thiz.IndexOf('a',j),l=thiz.LastIndexOf('.');
+					string ext=Path.GetExtension(thiz);bool b=IsImage(ext)||IsVideo(ext);
+					i+=2;int j=thiz.IndexOf('x',i),k=thiz.IndexOf('a',j),l=b?thiz.LastIndexOf('.'):thiz.Length;
 					if(j>=0&&k>=0&&l>=0) {
 						return new Vector3(
 							float.Parse(thiz.Substring(i+1,j-i-1)),
@@ -276,7 +301,15 @@ namespace YouSingStudio.Holograms {
 
 		//
 
-		public static void LoadSettings(this Object thiz,string path) {
+		public static bool IsTemporary(this Object thiz) {
+			if(thiz!=null) {
+				string tmp=thiz.name;
+				return tmp?.StartsWith(s_TempTag)??false;
+			}
+			return false;
+		}
+
+		public static void LoadSettings(this object thiz,string path) {
 			if(thiz!=null) {
 				string it;for(int i=0,imax=s_Settings?.Length??0;i<imax;++i) {
 					it=(s_Settings[i]+path).GetFullPath();
@@ -323,7 +356,7 @@ namespace YouSingStudio.Holograms {
 					rt=tex as RenderTexture;
 				}else if(tex!=null) {Vector2Int a=tex.GetSizeI(),b=rt.GetSizeI();if(a!=b){
 					if(resize) {
-						if(rt.name==s_TempTag) {RenderTexture.ReleaseTemporary(rt);}
+						if(rt.IsTemporary()) {RenderTexture.ReleaseTemporary(rt);}
 						rt=RenderTexture.GetTemporary(a.x,a.y);rt.name=s_TempTag;
 						thiz.targetTexture=rt;
 					}else {
@@ -357,6 +390,17 @@ namespace YouSingStudio.Holograms {
 				thiz.alpha=value?1.0f:0.0f;
 				thiz.blocksRaycasts=value;
 				thiz.interactable=value;
+			}
+		}
+
+		public static void StretchParent(this RectTransform thiz,Transform parent) {
+			if(thiz!=null) {
+				thiz.SetParent(parent,false);
+				//
+				thiz.anchorMin=Vector2.zero;
+				thiz.anchorMax=Vector2.one;
+				thiz.anchoredPosition=Vector2.zero;
+				thiz.sizeDelta=Vector2.zero;
 			}
 		}
 
@@ -397,12 +441,6 @@ namespace YouSingStudio.Holograms {
 				s_GLRenderer.enabled=false;
 			}
 			return s_GLRenderer;
-		}
-
-		public static void Pause() {
-#if UNITY_EDITOR
-			UnityEditor.EditorApplication.isPaused=true;
-#endif
 		}
 
 		#endregion Methods

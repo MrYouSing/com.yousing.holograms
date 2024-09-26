@@ -6,6 +6,9 @@ namespace YouSingStudio.Holograms {
 	public class TextureManager
 		:AssetManager<Texture,TextureManager>
 	{
+		#region Fields
+		#endregion Fields
+
 		#region Methods
 
 		public override Texture Load(string path) {
@@ -13,7 +16,8 @@ namespace YouSingStudio.Holograms {
 			if(File.Exists(path)) {
 				if(UnityExtension.IsImage(Path.GetExtension(path))) {
 					var tex=UnityExtension.NewTexture2D(1,1);
-					tex.LoadImage(File.ReadAllBytes(path));return tex;
+					tex.LoadImage(File.ReadAllBytes(path));
+					tex.name=path;return tex;
 				}else {
 					return AssetManager.Load<Texture>(path);
 				}
@@ -22,7 +26,7 @@ namespace YouSingStudio.Holograms {
 		}
 
 		public virtual bool IsLinear(RenderTexture rt) {
-			return !rt.name.StartsWith("TempBuffer");
+			return !rt.sRGB;
 		}
 
 		/// <summary>

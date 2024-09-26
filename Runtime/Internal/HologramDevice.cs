@@ -1,11 +1,14 @@
 using System.IO;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
 
 namespace YouSingStudio.Holograms {
 	public class HologramDevice
 		:MonoBehaviour
 	{
 		#region Fields
+
+		public static GraphicsFormat s_GraphicsFormat=GraphicsFormat.R8G8B8A8_SRGB;
 
 		public int display=-1;
 		public Vector2Int resolution;
@@ -28,11 +31,10 @@ namespace YouSingStudio.Holograms {
 		}
 
 		protected virtual void OnDestroy() {
-			if(canvas!=null) {
-			if(canvas.name=="RenderTexture.Temporary") {
+			if(canvas.IsTemporary()) {
 				RenderTexture.ReleaseTemporary(canvas);
 				canvas=null;
-			}}
+			}
 		}
 
 
@@ -73,8 +75,8 @@ namespace YouSingStudio.Holograms {
 			}
 			if(display<0) {display=FindDisplay(resolution);}
 			if(canvas==null) {
-				canvas=RenderTexture.GetTemporary(resolution.x,resolution.y);
-				canvas.name="RenderTexture.Temporary";
+				canvas=RenderTexture.GetTemporary(resolution.x,resolution.y,0,s_GraphicsFormat);
+				canvas.name=UnityExtension.s_TempTag;
 			}
 		}
 

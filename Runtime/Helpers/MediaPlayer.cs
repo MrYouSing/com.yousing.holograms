@@ -20,9 +20,8 @@ namespace YouSingStudio.Holograms {
 		[Tooltip("x:Rate\ny:Time\nz:Wait\nw:Count")]
 		public Vector4 refresh=new Vector4(10.0f,1.0f,1.0f,10.0f);
 		[Header("UI")]
-		public Canvas canvas;
 		public Text text;
-		public RawImage[] images=new RawImage[3];
+		public RawImage[] images=new RawImage[2];
 		[Header("Media")]
 		public QuiltTexture quilt;
 		public VideoPlayer video;
@@ -32,13 +31,20 @@ namespace YouSingStudio.Holograms {
 		[System.NonSerialized]protected bool m_IsInited;
 		[System.NonSerialized]protected bool m_Loop;
 		[System.NonSerialized]protected int m_Retry;
+		[System.NonSerialized]protected int m_Refresh;
 		[System.NonSerialized]protected string m_Path;
 		[System.NonSerialized]protected RenderTexture m_RT;
 		[System.NonSerialized]protected YieldInstruction m_Wait;
+		[System.NonSerialized]protected System.IDisposable m_FFmpeg;
 
 		#endregion Fields
 
 		#region Unity Messages
+
+		protected virtual void OnDestroy() {
+			ImageConverter.Exit();
+		}
+
 		#endregion Unity Messages
 
 		#region Methods
@@ -64,7 +70,6 @@ namespace YouSingStudio.Holograms {
 			//
 			this.LoadSettings(name+".json");
 			if(device==null) {device=GetComponent<HologramDevice>();}
-			if(canvas==null) {canvas=images[2].GetComponentInParent<Canvas>();}
 			if(video==null) {video=FindAnyObjectByType<VideoPlayer>();}
 			m_Wait=new WaitForSeconds(1.0f/refresh.x);
 			//
@@ -85,18 +90,8 @@ namespace YouSingStudio.Holograms {
 			}
 			if(screen!=null) {
 				screen.Init();
+				if(screen.quiltTexture==null) {screen.quiltTexture=quilt.destination;}
 				SetTexture(1,screen.canvas);
-			}
-			if(device!=null)  {
-				device.Init();
-				if(device.display>=0) {
-					Log($"Display:{device.display}");
-					Display.displays[device.display].Activate();
-					canvas.targetDisplay=device.display;
-				}else {
-					canvas.enabled=false;
-				}
-				SetTexture(2,device.canvas);
 			}
 		}
 
@@ -116,12 +111,12 @@ namespace YouSingStudio.Holograms {
 				}else {
 					device.Quilt(texture,Vector2Int.zero);
 					//
-					quilt.enabled=false;
-					quilt.destination.CopyFrom(texture);
+					quilt.enabled=false;// Sync for hologram preview.
+					if((images?.Length??0)>=0) {quilt.destination.CopyFrom(texture);}
 				}
 			}else {// Free
 				if(device.quiltTexture!=quilt.destination) {// Sync for hologram preview.
-					quilt.destination.CopyFrom(device.quiltTexture);
+					if((images?.Length??0)>=0) {quilt.destination.CopyFrom(device.quiltTexture);}
 				}
 				//
 				video.url=null;
@@ -143,7 +138,7 @@ namespace YouSingStudio.Holograms {
 				tex=tm.Get(m_Path);
 				Log("Load a picture at "+m_Path);
 				Quilt(tex,m_Path);
-			}else if(tm.assets?.TryGetValue(m_Path,out tex)??false) {
+			}else if((tm.assets?.TryGetValue(m_Path,out tex)??false)&&tex!=null) {
 				Log("Reuse a cache at "+m_Path);
 				Quilt(tex,m_Path);
 			}else if(UnityExtension.IsVideo(ext)) {
@@ -161,6 +156,7 @@ namespace YouSingStudio.Holograms {
 			if(!m_IsInited) {Init();}
 			//
 			StopCoroutine("OnVideoTicked");m_Retry=0;
+			m_FFmpeg?.Dispose();m_FFmpeg=null;
 			m_Loop=false;video.url=m_Path=null;
 			video.GetTexture().Clear();
 			//
@@ -180,11 +176,17 @@ namespace YouSingStudio.Holograms {
 			if(num<=s_PictureFrames) {
 				m_Loop=false;
 				video.skipOnDrop=false;
-				StartCoroutine(OnVideoTicked());
-				// TODO: Use Mp4ToPng.exe
+				//
+				if(true) {StartCoroutine(OnVideoTicked());}
+				else {video.Stop();}
+				//
+				if(ImageConverter.IsSupported()) {
+					//ImageConverter.settings.taskWait=refresh.x+refresh.y;
+					m_FFmpeg=ImageConverter.VideoToImage(m_Path,OnVideoConverted);
+				}
 			}else {
 				m_Loop=true;
-				video.skipOnDrop=true;
+				video.skipOnDrop=false;
 				Log("Play "+m_Path);
 			}
 		}
@@ -197,6 +199,7 @@ namespace YouSingStudio.Holograms {
 		}
 
 		protected virtual IEnumerator OnVideoTicked() {
+			int id=++m_Refresh;
 			// Wait for the first render frame.
 			int i=Mathf.RoundToInt(refresh.x*refresh.y);bool b;
 			while((b=device.canvas.IsNullOrEmpty())&&i-->0) {
@@ -211,19 +214,46 @@ namespace YouSingStudio.Holograms {
 					i=Mathf.RoundToInt(refresh.x*refresh.z);
 					while(i-->0) {yield return m_Wait;}
 					//
-					Log("Refresh "+m_Path);
-					i=m_Retry;Play(m_Path);m_Retry=i+1;
+					OnVideoRefreshed(id);
 				}
 			}else {
-				if(m_Retry>0) {Log("Retry "+m_Retry+"/"+refresh.w);}
-				Log("Load a picture at "+m_Path);
-				Quilt(null,null);
-				if(cache) {
-					Log("Create a cache at "+m_Path);
-					var tm=TextureManager.instance;
-					tm.Save(m_Path,device.quiltTexture as RenderTexture);
-				}
+				OnVideoConverted();
 			}
+		}
+
+		protected virtual void OnVideoRefreshed(int id) {
+			if(id!=m_Refresh) {
+				Log("Keep "+m_Path);
+			}else {
+				Log("Refresh "+m_Path);
+				int i=m_Retry;var d=m_FFmpeg;m_FFmpeg=null;// VideoPlayer.Begin
+					Play(m_Path);
+				m_Retry=i+1;m_FFmpeg=d;// VideoPlayer.End
+			}
+		}
+
+		protected virtual void OnVideoConverted() {
+			m_FFmpeg?.Dispose();m_FFmpeg=null;// Stop other.
+			//
+			if(m_Retry>0) {Log("Retry "+m_Retry+"/"+refresh.w);}
+			Log("VideoPlayer load a picture at "+m_Path);
+			Quilt(null,null);ImageConverter.OnVideoPlayerConvert(m_Path);
+			if(cache) {
+				Log("Create a cache at "+m_Path);
+				TextureManager tm=TextureManager.instance;
+				tm.Save(m_Path,device.quiltTexture as RenderTexture);
+			}
+		}
+
+		  // External
+
+		protected virtual void OnVideoConverted(string video,string image) {
+			if(m_Path!=video) {return;}
+			StopCoroutine("OnVideoTicked");++m_Refresh;m_FFmpeg=null;// Stop other.
+			//
+			Log("FFmpeg load a picture at "+m_Path);
+			TextureManager tm=TextureManager.instance;
+			tm.Set(video,tm.Load(image));Play(m_Path);
 		}
 
 		#endregion Methods

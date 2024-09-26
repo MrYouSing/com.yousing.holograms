@@ -1,3 +1,4 @@
+using System.IO;
 using Newtonsoft.Json;
 using UnityEngine;
 
@@ -11,6 +12,7 @@ namespace YouSingStudio.Holograms {
 		public static readonly int _OutputSize=Shader.PropertyToID("_OutputSize");
 		public static readonly int _Arguments=Shader.PropertyToID("_Arguments");
 
+		[SerializeField]protected GameObject m_Actor;
 		[Header("Parameters")]
 		[JsonProperty("obliquity")]
 		public float slope;
@@ -47,6 +49,12 @@ namespace YouSingStudio.Holograms {
 			//
 			if(material==null) {
 				material=new Material(Shader.Find("Hidden/C1_Blit"));
+			}
+			string fn="$(AppData)/Roaming/realplayplatform/deviceConfig.json".GetFullPath();
+			if(File.Exists(fn)) {
+				JsonConvert.PopulateObject(File.ReadAllText(fn),this);
+				Debug.Log("Load official settings at "+fn);
+				if(m_Actor!=null) {m_Actor.SetActive(true);}
 			}
 		}
 

@@ -50,6 +50,9 @@ namespace YouSingStudio.Holograms {
 				case WrapMode.PingPong:
 					OnSliderChanged(GetIndex(Time.time-m_Time,true));
 				break;
+				case WrapMode.ClampForever+1:
+					OnSliderChanged(GetIndex(-(Time.time-m_Time),false));
+				break;
 				default:
 				break;
 			}
@@ -126,8 +129,8 @@ namespace YouSingStudio.Holograms {
 			if(slider!=null) {
 				slider.wholeNumbers=true;
 				if(screen!=null) {
-					slider.maxValue=cnt-1;slider.SetValueWithoutNotify(idx);
-					if(text!=null) {text.text=string.Format(format,idx+1,cnt);}
+					slider.maxValue=cnt-1;slider.SetValueWithoutNotify(idx);// H2C
+					if(text!=null) {text.text=string.Format(format,idx+1,cnt);}// C2H
 				}
 			}
 		}

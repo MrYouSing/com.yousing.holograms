@@ -1,6 +1,6 @@
 // Generated automatically by MacroCodeGenerator (from "Packages/com.yousing.holograms/Runtime/Private/Private.ms")
 
-#if UNITY_EDITOR_WIN||UNITY_STANDALONE_WIN
+#if (UNITY_EDITOR_WIN||UNITY_STANDALONE_WIN)&&!NET_STANDARD
 /*
  * --- Shell Thumbs ---
  * 
