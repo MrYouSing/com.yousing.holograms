@@ -4,6 +4,8 @@
 /* <!-- Macro.Table Sprite
 Play,
 Pause,
+Mute,
+Unmute,
  Macro.End --> */
 /* <!-- Macro.Table Text
 Title,
@@ -11,14 +13,15 @@ Time,
  Macro.End --> */
 /* <!-- Macro.Table Image
 PlayOrPauseUI,
+MuteOrUnmuteUI,
  Macro.End --> */
 /* <!-- Macro.Table Button
 PlayOrPause,
+MuteOrUnmute,
 Stop,
  Macro.End --> */
 /* <!-- Macro.Table Toggle
 Loop,
-Mute,
  Macro.End --> */
 /* <!-- Macro.Table Slider
 Progress,
@@ -72,10 +75,14 @@ namespace YouSingStudio.Holograms {
 // <!-- Macro.Patch AutoGen
 		public const int k_Play=0;
 		public const int k_Pause=1;
+		public const int k_Mute=2;
+		public const int k_Unmute=3;
 #if UNITY_EDITOR
 		protected virtual string[] GetSprites()=>new string[]{
 			"Play",
 			"Pause",
+			"Mute",
+			"Unmute",
 		};
 #endif
 
@@ -89,27 +96,29 @@ namespace YouSingStudio.Holograms {
 #endif
 
 		public const int k_PlayOrPauseUI=0;
+		public const int k_MuteOrUnmuteUI=1;
 #if UNITY_EDITOR
 		protected virtual string[] GetImages()=>new string[]{
 			"PlayOrPauseUI",
+			"MuteOrUnmuteUI",
 		};
 #endif
 
 		public const int k_PlayOrPause=0;
-		public const int k_Stop=1;
+		public const int k_MuteOrUnmute=1;
+		public const int k_Stop=2;
 #if UNITY_EDITOR
 		protected virtual string[] GetButtons()=>new string[]{
 			"PlayOrPause",
+			"MuteOrUnmute",
 			"Stop",
 		};
 #endif
 
 		public const int k_Loop=0;
-		public const int k_Mute=1;
 #if UNITY_EDITOR
 		protected virtual string[] GetToggles()=>new string[]{
 			"Loop",
-			"Mute",
 		};
 #endif
 
@@ -140,9 +149,9 @@ namespace YouSingStudio.Holograms {
 		protected virtual void Start() {
 // <!-- Macro.Patch Start
 			BindButton(k_PlayOrPause,PlayOrPause);
+			BindButton(k_MuteOrUnmute,MuteOrUnmute);
 			BindButton(k_Stop,Stop);
 			BindToggle(k_Loop,SetLoop);
-			BindToggle(k_Mute,SetMute);
 			BindSlider(k_Progress,SetProgress);
 			BindSlider(k_Volume,SetVolume);
 // Macro.Patch -->
@@ -181,6 +190,7 @@ namespace YouSingStudio.Holograms {
 				float t=(float)video.time,d=(float)video.length;
 				if(!string.IsNullOrEmpty(str)) {
 					SetImage(k_PlayOrPauseUI,GetSprite(video.isPaused?k_Play:k_Pause));
+					SetImage(k_MuteOrUnmuteUI,GetSprite(video.GetDirectAudioMute(track)?k_Unmute:k_Mute));
 					SetText(k_Title,Path.GetFileName(str));
 					//
 					SetToggleWithoutNotify(k_Loop,video.isLooping);
@@ -200,6 +210,13 @@ namespace YouSingStudio.Holograms {
 			if(IsVideo()) {
 				if(video.isPaused) {video.Play();}
 				else {video.Pause();}
+			}
+		}
+
+		protected virtual void MuteOrUnmute() {
+			if(IsVideo()) {
+				bool b=video.GetDirectAudioMute(track);
+				video.SetDirectAudioMute(track,!b);
 			}
 		}
 

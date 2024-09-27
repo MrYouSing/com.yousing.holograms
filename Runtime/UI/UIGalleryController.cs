@@ -130,11 +130,23 @@ namespace YouSingStudio.Holograms {
 		}
 
 		public virtual void Refresh() {
+			string tmp=m_Index<(m_Paths?.Count??0)?m_Paths[m_Index]:null;
+			//
 			m_Paths=paths.UnpackPaths(CanPlay,m_Paths);
 			m_Views.Render(m_Paths,RenderView,CreateView);
 			if(m_Scroll!=null) {
 				m_Scroll.normalizedPosition=Vector2.up;
 			}
+			//
+			if(!string.IsNullOrEmpty(tmp)) {Set(tmp);}
+		}
+
+		public virtual int Add(string path) {
+			int i=m_Paths.Count;m_Paths.Add(path);
+			GameObject v=null;
+			if(i<m_Views.Count) {v=m_Views[i];}
+			else {v=CreateView();m_Views.Add(v);}
+			RenderView(v,path);return i;
 		}
 
 		public virtual void Set(int index) {
@@ -144,6 +156,13 @@ namespace YouSingStudio.Holograms {
 			var es=EventSystem.current;if(es!=null) {es.SetSelectedGameObject(null);}
 			if(arrow!=null) {arrow.SetParent(m_Views[index].transform,false);}
 			if(player!=null) {player.Play(m_Paths[index]);}
+			// TODO: Select in ScrollRect.
+		}
+
+		public virtual void Set(string path) {
+			int i=m_Paths.IndexOf(path);
+			if(i<0&&CanPlay(path)) {i=Add(path);}
+			if(i>=0) {Set(i);}
 		}
 
 		public virtual void Play() {
@@ -172,41 +191,46 @@ namespace YouSingStudio.Holograms {
 		}
 
 		protected virtual void LoadIcon(RawImage image,string path) {
-			Texture2D tex=image.texture as Texture2D;
-			if(tex.IsTemporary()) {Texture2D.Destroy(tex);}
+			TextureManager tm=TextureManager.instance;
+			Texture tex=null;float a=0.0f;
+			Vector3 count=path.ParseQuilt();
+			// TODO: Icons may be wrong because of caches.
+			bool b=tm.assets?.TryGetValue(UnityExtension.s_TempTag+path,out tex)??false;
+			if(!b||tex==null) {
+				b=false;string ext=Path.GetExtension(path);
+				if(UnityExtension.IsImage(ext)) {ext="image_00";}
+				else if(UnityExtension.IsVideo(ext)) {ext="movie_00";}
+				else {ext="Icon_"+ext.Substring(1);}
+				//
+				tex=tm.Get(ext);if(tex!=null) {
+					a=(float)tex.width/tex.height;
+				}
+			}
 			//
-			string ext=Path.GetExtension(path);float a=1.0f;
-			if(UnityExtension.IsImage(ext)) {ext="image_24dp_FFFFFF_FILL1_wght400_GRAD0_opsz24";}
-			else if(UnityExtension.IsVideo(ext)) {ext="movie_24dp_FFFFFF_FILL1_wght400_GRAD0_opsz24";}
-			else {ext=null;}image.texture=tex=TextureManager.instance.Get(ext) as Texture2D;
-			if(tex!=null) {a=(float)tex.width/tex.height;}
-			//
-			if(preview>0) {
-#if (UNITY_EDITOR_WIN||UNITY_STANDALONE_WIN)
-#if !NET_STANDARD
-				Vector3 count=path.ParseQuilt();a=Mathf.Abs(count.z);
-				int size=Mathf.ClosestPowerOfTwo((int)Mathf.Min(preview*count.x,preview*count.y));
+			if(!b&&preview>0) {
+#if (UNITY_EDITOR_WIN||UNITY_STANDALONE_WIN)&&!NET_STANDARD
+				a=0.0f;int size=Mathf.ClosestPowerOfTwo((int)Mathf.Min(preview*count.x,preview*count.y));
 				Rect rect=count.ToPreviewRect();
 				using(var bm=ShellThumbs.WindowsThumbnailProvider.GetThumbnail(
 					path,size,size,ShellThumbs.ThumbnailOptions.None
 				)) {
 					count.x=bm.Width;count.y=bm.Height;
-					tex=UnityExtension.NewTexture2D(1,1);tex.name=UnityExtension.s_TempTag;
-					tex.LoadBitmap(bm,new RectInt(
+					var tmp=UnityExtension.NewTexture2D(1,1);
+					tmp.LoadBitmap(bm,new RectInt(
 						(int)(count.x*rect.x),
 						(int)(count.y*rect.y),
 						(int)(count.x*rect.width),
 						(int)(count.y*rect.height)
-					));image.texture=tex;
+					));
+					tmp.name=UnityExtension.s_TempTag+path;
+					tm.Set(tmp.name,tmp);tex=tmp;
 				}
-#else
-				//Debug.Log("");
-#endif
-#else
-				throw new System.NotImplementedException();
 #endif
 			}
 			//
+			if(tex==null) {image.enabled=false;}
+			else {image.enabled=true;image.texture=tex;}
+			if(a==0.0f) {a=Mathf.Abs(count.z);}
 			var fit=image.GetComponent<AspectRatioFitter>();
 			if(fit!=null) {fit.aspectRatio=a;}
 		}

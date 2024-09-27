@@ -80,16 +80,19 @@ namespace YouSingStudio.Holograms {
 		public override void OnValueChanged(T value) {
 			var tmp=current;current=this;
 				base.OnValueChanged(value);
-				//
-				bool b;for(int i=0,imax=keys?.Length??0;i<imax;++i) {
-					b=object.Equals(values[i],value);
-					SetToggleWithoutNotify(i,b);
-					if(b) {
-						SetDropdownWithoutNotify(0,i);
-						PlayerPrefs.SetInt(name,i);
-					}
-				}
+				SetValueWithoutNotify(value);
 			current=tmp;
+		}
+
+		public virtual void SetValueWithoutNotify(T value) {
+			bool b;for(int i=0,imax=keys?.Length??0;i<imax;++i) {
+				b=object.Equals(values[i],value);
+				SetToggleWithoutNotify(i,b);
+				if(b) {
+					SetDropdownWithoutNotify(0,i);
+					PlayerPrefs.SetInt(name,i);
+				}
+			}
 		}
 
 		#endregion Methods

@@ -30,8 +30,8 @@ namespace YouSingStudio.Holograms {
 		
 		[System.NonSerialized]protected bool m_IsInited;
 		[System.NonSerialized]protected bool m_Loop;
+		[System.NonSerialized]protected int m_Lock;
 		[System.NonSerialized]protected int m_Retry;
-		[System.NonSerialized]protected int m_Refresh;
 		[System.NonSerialized]protected string m_Path;
 		[System.NonSerialized]protected RenderTexture m_RT;
 		[System.NonSerialized]protected YieldInstruction m_Wait;
@@ -199,7 +199,7 @@ namespace YouSingStudio.Holograms {
 		}
 
 		protected virtual IEnumerator OnVideoTicked() {
-			int id=++m_Refresh;
+			int id=++m_Lock;
 			// Wait for the first render frame.
 			int i=Mathf.RoundToInt(refresh.x*refresh.y);bool b;
 			while((b=device.canvas.IsNullOrEmpty())&&i-->0) {
@@ -214,22 +214,20 @@ namespace YouSingStudio.Holograms {
 					i=Mathf.RoundToInt(refresh.x*refresh.z);
 					while(i-->0) {yield return m_Wait;}
 					//
-					OnVideoRefreshed(id);
+					if(id==m_Lock) {OnVideoRefreshed();}
+					else {Log("Skip "+m_Path);}
 				}
 			}else {
-				OnVideoConverted();
+				if(id==m_Lock) {OnVideoConverted();}
+				else {Log("Skip "+m_Path);}
 			}
 		}
 
-		protected virtual void OnVideoRefreshed(int id) {
-			if(id!=m_Refresh) {
-				Log("Keep "+m_Path);
-			}else {
-				Log("Refresh "+m_Path);
-				int i=m_Retry;var d=m_FFmpeg;m_FFmpeg=null;// VideoPlayer.Begin
-					Play(m_Path);
-				m_Retry=i+1;m_FFmpeg=d;// VideoPlayer.End
-			}
+		protected virtual void OnVideoRefreshed() {
+			Log("Refresh "+m_Path);
+			int i=m_Retry;var d=m_FFmpeg;m_FFmpeg=null;// VideoPlayer.Begin
+				Play(m_Path);
+			m_Retry=i+1;m_FFmpeg=d;// VideoPlayer.End
 		}
 
 		protected virtual void OnVideoConverted() {
@@ -249,11 +247,15 @@ namespace YouSingStudio.Holograms {
 
 		protected virtual void OnVideoConverted(string video,string image) {
 			if(m_Path!=video) {return;}
-			StopCoroutine("OnVideoTicked");++m_Refresh;m_FFmpeg=null;// Stop other.
+			StopCoroutine("OnVideoTicked");++m_Lock;m_FFmpeg=null;// Stop other.
 			//
 			Log("FFmpeg load a picture at "+m_Path);
 			TextureManager tm=TextureManager.instance;
-			tm.Set(video,tm.Load(image));Play(m_Path);
+			Texture tex=tm.Load(image);Quilt(tex,m_Path);
+			if(cache) {
+				Log("Create a cache at "+m_Path);
+				tm.Set(video,tex);
+			}
 		}
 
 		#endregion Methods

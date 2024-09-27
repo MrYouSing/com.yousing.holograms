@@ -1,0 +1,138 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &3931905279859474241
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 3764806723596461366, guid: ba6490c99f7e67c4eaca8d94aa2e32f8, type: 3}
+      propertyPath: m_Name
+      value: Aspect_00
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3764806723596461366, guid: ba6490c99f7e67c4eaca8d94aa2e32f8, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3979398042532799443}
+    - targetCorrespondingSourceObject: {fileID: 3764806723596461366, guid: ba6490c99f7e67c4eaca8d94aa2e32f8, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5149591304918899148}
+  m_SourcePrefab: {fileID: 100100000, guid: ba6490c99f7e67c4eaca8d94aa2e32f8, type: 3}
+--- !u!1 &193558858960575095 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3764806723596461366, guid: ba6490c99f7e67c4eaca8d94aa2e32f8, type: 3}
+  m_PrefabInstance: {fileID: 3931905279859474241}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3979398042532799443
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 193558858960575095}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e0b269bacab5fc4459f3cc244b6dca2f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Strings:
+  - Stretch
+  - Horizontal
+  - Vertical
+  - Inside
+  - Outside
+  m_Sprites:
+  - {fileID: 21300000, guid: 4f9badd1bd455b54ea9b8d60d1f984db, type: 3}
+  - {fileID: 21300000, guid: b4ef57e86c37030498ac2fdbb646a93f, type: 3}
+  - {fileID: 21300000, guid: d1012b517490e4249821e0ef99eca595, type: 3}
+  - {fileID: 21300000, guid: 4aef77fc2c4c42e448a0b633ec591826, type: 3}
+  - {fileID: 21300000, guid: 17d88022e1ca31740b422c975e21faef, type: 3}
+  m_Textures: []
+  m_Texts: []
+  m_Images: []
+  m_RawImages: []
+  m_Buttons: []
+  m_Toggles: []
+  m_Sliders: []
+  m_Dropdowns:
+  - {fileID: 4662649063763771452}
+  m_OnValueChanged:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: YouSingStudio.Holograms.QuiltTexture, YouSingStudio.Holograms
+        m_MethodName: SetAspect
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: YouSingStudio.Holograms.MediaPlayer, YouSingStudio.Holograms
+        m_MethodName: Play
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: YouSingStudio.Holograms.UIEnumView`1[[UnityEngine.Video.VideoAspectRatio,
+          UnityEngine
+        m_MethodName: SetValueWithoutNotify
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  modifiers: 32010000
+  index: 4
+  keys: 3100000032000000330000003400000035000000
+  values: 0500000002000000010000000300000004000000
+--- !u!1818360608 &5149591304918899148
+PositionConstraint:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 193558858960575095}
+  m_Enabled: 0
+  serializedVersion: 2
+  m_Weight: 1
+  m_TranslationAtRest: {x: -222, y: -508, z: 0}
+  m_TranslationOffset: {x: 0, y: 0, z: 0}
+  m_AffectTranslationX: 1
+  m_AffectTranslationY: 1
+  m_AffectTranslationZ: 1
+  m_Active: 1
+  m_IsLocked: 1
+  m_Sources:
+  - sourceTransform: {fileID: 0}
+    weight: 1
+--- !u!114 &4662649063763771452 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8513458729628417917, guid: ba6490c99f7e67c4eaca8d94aa2e32f8, type: 3}
+  m_PrefabInstance: {fileID: 3931905279859474241}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 193558858960575095}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d0b652f32a2cc243917e4028fa0f046, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
