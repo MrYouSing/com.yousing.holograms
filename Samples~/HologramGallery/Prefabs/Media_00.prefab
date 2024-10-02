@@ -48,7 +48,7 @@ MonoBehaviour:
   resolution: {x: 1440, y: 2560}
   canvas: {fileID: 8400000, guid: 875115adf9244a448840135bba89d59d, type: 2}
   material: {fileID: 0}
-  quiltTexture: {fileID: 0}
+  quiltTexture: {fileID: 8400000, guid: 62e351ff4de16e94fbda9549b789fe46, type: 2}
   quiltSize: {x: 8, y: 5}
   m_Actor: {fileID: 0}
   slope: 0

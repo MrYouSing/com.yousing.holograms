@@ -1,4 +1,3 @@
-using System.IO;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 
@@ -43,11 +42,14 @@ namespace YouSingStudio.Holograms {
 		#region Methods
 
 		public static int FindDisplay(Vector2Int size) {
-			var tmp=Display.displays;Display it;
+			var tmp=Private.ScreenManager.GetRects();RectInt it;
 			for(int i=0,imax=tmp?.Length??0;i<imax;++i) {it=tmp[i];
-				if(it.systemWidth==size.x
-				&&it.systemHeight==size.y
-				) {
+				if(it.width==size.x&&it.height==size.y) {
+#if UNITY_EDITOR
+					if(Private.ScreenManager.IndexOf(Display.main)!=i) {// Sub
+						i=Private.ScreenManager.SetupDisplay(i,it);
+					}
+#endif
 					return i;
 				}
 			}

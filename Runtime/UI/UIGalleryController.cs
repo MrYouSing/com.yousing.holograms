@@ -52,6 +52,7 @@ namespace YouSingStudio.Holograms {
 
 		[System.NonSerialized]protected int m_Index;
 		[System.NonSerialized]protected int m_Page;
+		[System.NonSerialized]protected int m_Display;
 		[System.NonSerialized]protected List<string> m_Paths;
 		[System.NonSerialized]protected List<GameObject> m_Views=new List<GameObject>();
 		[System.NonSerialized]protected ScrollRect m_Scroll;
@@ -79,6 +80,7 @@ namespace YouSingStudio.Holograms {
 			var g=container.GetComponent<GridLayoutGroup>();
 			if(g!=null) {m_Page=g.constraintCount;}
 			//
+			m_Display=ScreenManager.IndexOf(Display.main);
 			Refresh();
 			StartCoroutine(StartDelayed());
 		}
@@ -86,7 +88,7 @@ namespace YouSingStudio.Holograms {
 		protected virtual IEnumerator StartDelayed() {
 			yield return new WaitForSeconds(2.5f);
 			//
-			//FullScreen(Screen.fullScreen);
+			FullScreen(ScreenManager.FullScreen(m_Display));
 			if(m_Index==0) {Set(0);}
 		}
 
@@ -111,18 +113,14 @@ namespace YouSingStudio.Holograms {
 
 		public virtual void FullScreen(bool value) {
 			if(resolution.sqrMagnitude==0.0f) {return;}
-			// TODO: Other display maximum.
-#if UNITY_EDITOR
-#else
 			if(!value) {
-				Screen.SetResolution((int)resolution.x,(int)resolution.y,FullScreenMode.Windowed);
+				ScreenManager.SetResolution(m_Display,(int)resolution.x,(int)resolution.y,false);
 			}else {
-				Screen.SetResolution((int)resolution.z,(int)resolution.w,FullScreenMode.FullScreenWindow);
+				ScreenManager.SetResolution(m_Display,(int)resolution.z,(int)resolution.w,true);
 			}
-#endif
 		}
 
-		public virtual void FullScreen()=>FullScreen(!Screen.fullScreen);
+		public virtual void FullScreen()=>FullScreen(!ScreenManager.FullScreen(m_Display));
 
 		[System.Obsolete]
 		public virtual void Reload() {

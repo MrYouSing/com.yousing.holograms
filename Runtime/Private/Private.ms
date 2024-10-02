@@ -65,3 +65,19 @@ else if(asset is,if(asset is
 /* <!-- Macro.Replace Replace
  Macro.End --> */
 // Macro.End -->
+
+//<!-- Macro.File ScreenManager.cs
+/* <!-- Macro.Copy File
+:Packages/com.yousing.io/Runtime/Modules/DeviceModule/$(GeneratedFileName).cs
+ Macro.End --> */
+/* <!-- Macro.Replace Replace
+ Macro.End --> */
+// Macro.End -->
+
+//<!-- Macro.File ScreenManager.Windows.cs
+/* <!-- Macro.Copy File
+:Packages/com.yousing.io/Runtime/Modules/DeviceModule/$(GeneratedFileName).cs
+ Macro.End --> */
+/* <!-- Macro.Replace Replace
+ Macro.End --> */
+// Macro.End -->

@@ -90,7 +90,7 @@ namespace YouSingStudio.Holograms {
 			}
 			if(screen!=null) {
 				screen.Init();
-				if(screen.quiltTexture==null) {screen.quiltTexture=quilt.destination;}
+				if(screen.quiltTexture==null) {screen.quiltTexture=m_RT;}
 				SetTexture(1,screen.canvas);
 			}
 		}

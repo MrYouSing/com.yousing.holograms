@@ -1,5 +1,41 @@
 // Generated automatically by MacroCodeGenerator (from "Packages/com.yousing.holograms/Runtime/Private/Private.ms")
 
+/* <!-- Macro.Table Events
+Complete,
+Kill,
+ Macro.End --> */
+
+/* <!-- Macro.Call  Events
+				tmp.on{0}=on{0};
+ Macro.End --> */
+/* <!-- Macro.Patch
+,Obtain
+ Macro.End --> */
+ 
+/* <!-- Macro.Call  Events
+		public System.Action on{0};
+		public override void On{0}() {{base.On{0}();on{0}?.Invoke();}}
+
+ Macro.End --> */
+/* <!-- Macro.Copy
+		public override void Dispose() {
+			if(id>=0) {
+				base.Dispose();
+ Macro.End --> */
+/* <!-- Macro.Call  Events
+				on{0}=null;
+ Macro.End --> */
+/* <!-- Macro.Copy
+				GenericPool<_AsyncTask>.Release(this);
+			}else {
+				base.Dispose();
+			}
+		}
+
+ Macro.End --> */
+/* <!-- Macro.Patch
+,_AsyncTask
+ Macro.End --> */
 using System.Threading;
 using UnityEngine;using YouSingStudio.Holograms;
 using UnityEngine.Pool;
@@ -46,21 +82,40 @@ namespace YouSingStudio.Private {
 			else {action?.Invoke();}
 		}
 
+		public static AsyncTask Obtain(float delay,System.Action onComplete,System.Action onKill) {
+			var tmp=GenericPool<_AsyncTask>.Get();
+				++s_ID;tmp.id=s_ID;
+				tmp.delay=delay;
+// <!-- Macro.Patch Obtain
+				tmp.onComplete=onComplete;
+				tmp.onKill=onKill;
+// Macro.Patch -->
+			return tmp;
+		}
+
+		public virtual void Reset() {
+			id=-(id+1);delay=0.0f;
+			/*thread?.Abort();*/thread=null;
+		}
+
 		public virtual void Dispose() {
 			if(id>=0) {
-				id=-(id+1);delay=0.0f;
-				/*thread?.Abort();*/thread=null;
+				Reset();
 			}else {
 				Debug.LogWarning("It is disposed.");
 			}
 		}
 
 		public virtual void OnComplete() {
+#if _DEBUG
 			Debug.Log("Complete the AsyncTask@"+id);
+#endif
 		}
 
 		public virtual void OnKill() {
+#if _DEBUG
 			Debug.Log("Kill the AsyncTask@"+(id<0?(-id-1):id));
+#endif
 		}
 
 		public virtual System.Collections.IEnumerator Run() {
@@ -104,6 +159,8 @@ namespace YouSingStudio.Private {
 			if(id>=0) {
 				base.Dispose();
 				GenericPool<AsyncTask<T>>.Release(this);
+			}else {
+				base.Dispose();
 			}
 		}
 
@@ -116,5 +173,29 @@ namespace YouSingStudio.Private {
 		}
 
 		#endregion Methods
+	}
+
+	public class _AsyncTask
+		:AsyncTask
+	{
+// <!-- Macro.Patch _AsyncTask
+		public System.Action onComplete;
+		public override void OnComplete() {base.OnComplete();onComplete?.Invoke();}
+
+		public System.Action onKill;
+		public override void OnKill() {base.OnKill();onKill?.Invoke();}
+
+		public override void Dispose() {
+			if(id>=0) {
+				base.Dispose();
+				onComplete=null;
+				onKill=null;
+				GenericPool<_AsyncTask>.Release(this);
+			}else {
+				base.Dispose();
+			}
+		}
+
+// Macro.Patch -->
 	}
 }
