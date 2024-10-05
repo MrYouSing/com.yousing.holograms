@@ -195,6 +195,7 @@ namespace YouSingStudio.Holograms {
 		};
 
 		public static Texture2D s_Temp2D;
+		public static Material s_Unlit;
 		public static Camera s_CameraHelper;
 		public static GLRenderer s_GLRenderer;
 
@@ -318,6 +319,12 @@ namespace YouSingStudio.Holograms {
 			}
 		}
 
+		public static T NewActor<T>(this Component thiz,string key) where T:Component {
+			GameObject go=new GameObject(key);
+			if(thiz!=null) {go.transform.SetParent(thiz.transform,false);}
+			return go.AddComponent<T>();
+		}
+
 		  //
 
 		public static Vector2Int GetSizeI(this Texture thiz) {
@@ -411,6 +418,13 @@ namespace YouSingStudio.Holograms {
 				s_Temp2D=NewTexture2D(1,1);
 			}
 			return s_Temp2D;
+		}
+
+		public static Material GetUnlit() {
+			if(s_Unlit==null) {
+				s_Unlit=new Material(Shader.Find("Sprites/Default"));
+			}
+			return s_Unlit;
 		}
 
 		public static Camera GetCameraHelper() {

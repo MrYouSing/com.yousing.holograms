@@ -14,6 +14,8 @@ namespace YouSingStudio.Holograms {
 #if UNITY_EDITOR
 		public RectInt rect;
 #endif
+		protected bool m_IsCreated;
+
 		#endregion Fields
 
 		#region Unity Messages
@@ -33,6 +35,8 @@ namespace YouSingStudio.Holograms {
 		#region Methods
 
 		public virtual bool CreateUnityDisplay() {
+			if(m_IsCreated) {return device!=null&&device.display>=0;}
+			m_IsCreated=true;
 			//
 			if(device==null) {return false;}device.Init();
 			if(device.display<0) {

@@ -37,7 +37,7 @@ namespace YouSingStudio.Holograms {
 			if(video!=null) {
 				SetSource(video);
 			}else if(source!=null) {
-				SetSource(source,source.name);
+				SetSource(source,source.name.ParseQuilt());
 			}
 		}
 
@@ -161,9 +161,10 @@ namespace YouSingStudio.Holograms {
 			m_Id=0;aspect=GetAspect(m_Args.z,size.z);
 			string key=GetName(m_Args,size);
 			if(!m_Meshes.TryGetValue(key,out mesh)||mesh==null) {
-				int[] ids=null;
-				TextAsset ta=Resources.Load<TextAsset>($"Settings/{name}_{m_Args.ToQuilt()}"+
-					(m_Args!=size?("_To_"+size.ToQuilt()):null));
+				int[] ids=null;Vector3 u=m_Args,v=size;
+				u.z=System.MathF.Sign(u.z);v.z=System.MathF.Sign(v.z);
+				TextAsset ta=Resources.Load<TextAsset>($"Settings/{name}_{u.ToQuilt()}"+
+					(u!=v?("_To_"+v.ToQuilt()):null));
 				if(ta!=null) {
 					ids=Newtonsoft.Json.JsonConvert.DeserializeObject<int[]>(ta.text);
 				}else {
@@ -182,16 +183,15 @@ namespace YouSingStudio.Holograms {
 			size.z=z;aspect=a;
 		}
 
-		public virtual void SetSource(Texture texture,string path) {
+		public virtual void SetSource(Texture texture,Vector3 args) {
 			if(texture!=null) {
 				source=texture;
 				//
-				if(material==null) {material=new Material(Shader.Find("Sprites/Default"));}
+				if(material==null) {material=UnityExtension.GetUnlit();}
 				material.mainTexture=source;
 				//
-				Vector3 v=path.ParseQuilt();
-				if(v!=m_Args) {
-					m_Args=v;
+				if(args!=m_Args) {
+					m_Args=args;
 					//
 					RefreshMesh();
 				}
@@ -200,7 +200,7 @@ namespace YouSingStudio.Holograms {
 
 		public virtual void SetSource(VideoPlayer player) {
 			if(player!=null) {
-				SetSource(player.texture,player.url);
+				SetSource(player.texture,player.url.ParseQuilt());
 			}
 		}
 

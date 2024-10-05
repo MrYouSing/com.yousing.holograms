@@ -113,6 +113,12 @@ namespace YouSingStudio.Holograms {
 				(float)quiltTexture.width/quiltSize.x/quiltTexture.height*quiltSize.y);
 		}
 
+		public virtual Vector4 PreferredSize() {
+			if(!m_IsInited) {Init();}
+			//
+			return new Vector4(quiltTexture.width,quiltTexture.height,quiltSize.x,quiltSize.y);
+		}
+
 		#endregion Methods
 	}
 }

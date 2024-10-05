@@ -12,7 +12,6 @@ namespace YouSingStudio.Holograms {
 		public static readonly int _OutputSize=Shader.PropertyToID("_OutputSize");
 		public static readonly int _Arguments=Shader.PropertyToID("_Arguments");
 
-		[SerializeField]protected GameObject m_Actor;
 		[Header("Parameters")]
 		[JsonProperty("obliquity")]
 		public float slope;
@@ -20,6 +19,8 @@ namespace YouSingStudio.Holograms {
 		public float interval;
 		[JsonProperty("deviation")]
 		public float x0;
+		[Header("Others")]
+		[SerializeField]protected GameObject m_Actor;
 
 		#endregion Fields
 
@@ -27,12 +28,16 @@ namespace YouSingStudio.Holograms {
 
 		protected virtual void Reset() {
 			resolution=new Vector2Int(1440,2560);
-			quiltSize=new Vector2Int(8,5);
+			Vector4 v=PreferredSize();
+			quiltSize=new Vector2Int((int)v.z,(int)v.w);
 		}
 
 		#endregion Unity Messages
 
 		#region Methods
+
+		public override Vector3 ParseQuilt()=>quiltTexture!=null?base.ParseQuilt():new Vector3(8.0f,5.0f,0.5625f);
+		public override Vector4 PreferredSize()=>quiltTexture!=null?base.PreferredSize():new Vector4(4320.0f,4800.0f,8.0f,5.0f);
 
 		protected override void InternalRender() {
 			if(material!=null) {

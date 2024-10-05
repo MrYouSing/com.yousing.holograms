@@ -107,7 +107,7 @@ namespace YouSingStudio.Holograms {
 					//
 					quilt.enabled=true;
 					quilt.SetDestination(device);
-					quilt.SetSource(texture,path);
+					quilt.SetSource(texture,path.ParseQuilt());
 				}else {
 					device.Quilt(texture,Vector2Int.zero);
 					//

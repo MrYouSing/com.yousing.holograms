@@ -1,4 +1,7 @@
 {
 	"name": "YouSingStudio.Holograms",
+	"references": [
+		"LookingGlass"
+	],
 	"allowUnsafeCode": true
 }

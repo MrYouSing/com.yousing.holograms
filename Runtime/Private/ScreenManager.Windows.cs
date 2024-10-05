@@ -323,6 +323,7 @@ namespace YouSingStudio.Private {
 // Macro.Patch -->
 			;it.fullScreen=fullscreen;
 			it.width=width;it.height=height;
+			if(it.index==0) {PlayerPrefs.SetInt("Screenmanager Fullscreen mode",fullscreen?1:3);}
 			//
 			if(it.fixWindow) {// FullScreenMode.Windowed
 				SetResolution(it.handle,it.rect,width,height,fullscreen);
