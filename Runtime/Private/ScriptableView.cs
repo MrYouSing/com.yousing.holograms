@@ -75,6 +75,7 @@ RawImage,Texture,texture,//,,
 Toggle,bool,isOn,,IsOn,
 Slider,float,value,,Value,
 Dropdown,int,value,,Value,
+InputField,string,text,,Text,
  Macro.End --> */
 
 /* <!-- Macro.Call DeclareField Get
@@ -137,6 +138,7 @@ namespace YouSingStudio.Private {
 		[SerializeField,ArrayElement(names="GetToggles")]public Toggle[] m_Toggles;
 		[SerializeField,ArrayElement(names="GetSliders")]public Slider[] m_Sliders;
 		[SerializeField,ArrayElement(names="GetDropdowns")]public Dropdown[] m_Dropdowns;
+		[SerializeField,ArrayElement(names="GetInputFields")]public InputField[] m_InputFields;
 
 		public virtual string GetString(int index) {
 			if(index>=0&&index<(m_Strings?.Length??0)) return m_Strings[index];
@@ -273,6 +275,25 @@ namespace YouSingStudio.Private {
 			}
 		}
 
+		public virtual string GetInputField(int index) {
+			if(index>=0&&index<(m_InputFields?.Length??0)) {
+				var tmp=m_InputFields[index];if(tmp!=null) {return tmp.text;}
+			}
+			return default;//string
+		}
+
+		public virtual void SetInputField(int index,string value) {
+			if(index>=0&&index<(m_InputFields?.Length??0)) {
+				var tmp=m_InputFields[index];if(tmp!=null) {tmp.text=value;}
+			}
+		}
+
+		public virtual void SetInputFieldWithoutNotify(int index,string value) {
+			if(index>=0&&index<(m_InputFields?.Length??0)) {
+				var tmp=m_InputFields[index];if(tmp!=null) {tmp.SetTextWithoutNotify(value);}
+			}
+		}
+
 		public virtual void BindToggle(int index,UnityAction<bool> action) {
 			if(index>=0&&index<(m_Toggles?.Length??0)) {
 				var tmp=m_Toggles[index];if(tmp!=null) {tmp.onValueChanged.AddListener(action);}//Toggle
@@ -290,7 +311,31 @@ namespace YouSingStudio.Private {
 				var tmp=m_Dropdowns[index];if(tmp!=null) {tmp.onValueChanged.AddListener(action);}//Dropdown
 			}
 		}
+
+		public virtual void BindInputField(int index,UnityAction<string> action) {
+			if(index>=0&&index<(m_InputFields?.Length??0)) {
+				var tmp=m_InputFields[index];if(tmp!=null) {tmp.onValueChanged.AddListener(action);}//InputField
+			}
+		}
 // Macro.Patch -->
+		#region Methods
+
+		public virtual void SetSlider(int index,Vector3 value) {
+			if(index>=0&&index<(m_Sliders?.Length??0)) {
+				var tmp=m_Sliders[index];if(tmp!=null) {
+					if(value.x!=value.y) {tmp.minValue=value.x;tmp.maxValue=value.y;}
+					if(value.z!=0.0f) {tmp.wholeNumbers=value.z==1.0f;}
+				}
+			}
+		}
+
+		public virtual void BindSubmit(int index,UnityAction<string> action) {
+			if(index>=0&&index<(m_InputFields?.Length??0)) {
+				var tmp=m_InputFields[index];if(tmp!=null) {tmp.onSubmit.AddListener(action);}//InputField
+			}
+		}
+
+		#endregion Methods
 	}
 
 	public class ScriptableView<T>:ScriptableView {

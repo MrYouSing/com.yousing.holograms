@@ -31,7 +31,7 @@ namespace YouSingStudio.Private {
 		/// - Powered by UnityEngine.AssetBundle.
 		/// </summary>
 		public static T Load<T>(string path) where T:Object {
-			var ab=File.Exists(path)?AssetBundle.LoadFromFile(path):null;
+			var ab=File.Exists(path)?AssetBundle.LoadFromFile(Path.GetFullPath(path)):null;
 			if(ab!=null) {return ab.LoadAsset<T>(Path.GetFileNameWithoutExtension(path));}//<T>(out path,out T asset);return asset;}
 			return null;
 		}

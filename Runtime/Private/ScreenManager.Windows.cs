@@ -26,8 +26,13 @@ namespace YouSingStudio.Private {
 
 			public int width=>right-left;
 			public int height=>bottom-top;
+			public Vector2Int center=>new Vector2Int((left+right)/2,(top+bottom)/2);
 
 			public RectInt ToRectInt()=>new RectInt(left,top,width,height);
+			public void CopyFrom(RectInt other) {
+				left=other.xMin;right=other.xMax;
+				top=other.yMin;bottom=other.yMax;
+			}
 		}
 
 		// https://referencesource.microsoft.com/#System.Windows.Forms/winforms/Managed/System/WinForms/Screen.cs
@@ -79,11 +84,11 @@ namespace YouSingStudio.Private {
 				}
 #else// TODO: Fallback to Unity.
 				if(GetWindowRect(handle,out rect)) {
-					int w=display.systemWidth,h=display.systemHeight;
-					if(rect.width!=w||rect.height!=h) {
-						rect.right=rect.left+w;
-						rect.bottom=rect.top+h;
-					}
+					Vector2Int p=rect.center;RectInt[] rects=null;
+					int i=0,imax=GetRects(ref rects);
+					for(;i<imax;++i) {if(rects[i].Contains(p)) {
+						rect.CopyFrom(rects[i]);break;
+					}}
 				}
 #endif
 				Debug.Log($"{name}:{rect.left},{rect.top},{rect.width},{rect.height}");
@@ -207,7 +212,7 @@ namespace YouSingStudio.Private {
 			SetWindowPos(hwnd,System.IntPtr.Zero,x,y,width,height,0);
 		}
 
-		public static void SetEditorWindow(string title,RectInt rect) {
+		public static bool SetEditorWindow(string title,RectInt rect) {
 			System.IntPtr hwnd=FindWindow(null,title);
 			if(hwnd!=System.IntPtr.Zero) {
 				int h=42;
@@ -217,7 +222,19 @@ namespace YouSingStudio.Private {
 					,rect.width+(int)(s_Border.x+s_Border.z)
 					,rect.height+(int)(s_Border.y+s_Border.w+h)
 				,0);
+				return true;
 			}
+			return false;
+		}
+
+		public static int GetRects(ref RectInt[] rects) {
+			RectInt[] tmp=s_Rects;s_Monitor=1;
+				int imax=GetSystemMetrics(80);// SM_CMONITORS
+				if((rects?.Length??0)<imax) {rects=new RectInt[imax];}s_Rects=rects;
+				if(!EnumDisplayMonitors(System.IntPtr.Zero,System.IntPtr.Zero,EnumMonitorCallBack,System.IntPtr.Zero)) {
+					s_Monitor=0;
+				}
+			s_Rects=tmp;return s_Monitor;
 		}
 
 		public static void Init() {
@@ -256,9 +273,8 @@ namespace YouSingStudio.Private {
 			//
 			if(s_Rects==null) {
 #if UNITY_EDITOR
-				int imax=GetSystemMetrics(80);// SM_CMONITORS
-				s_Rects=new RectInt[imax];s_Monitor=1;
-				if(EnumDisplayMonitors(System.IntPtr.Zero,System.IntPtr.Zero,EnumMonitorCallBack,System.IntPtr.Zero)) {
+				RectInt[] tmp=null;if(GetRects(ref tmp)>0) {
+					s_Rects=tmp;
 				}else {
 #else// TODO: Fallback to Unity.
 				if(true) {

@@ -83,7 +83,11 @@ namespace YouSingStudio.Private {
 					type.GetMethod("SetTargetDisplay",bf).Invoke(game,new object[]{display});
 					type.GetMethod("SnapZoom",bf).Invoke(game,new object[]{1.0f});
 #if UNITY_EDITOR_WIN||UNITY_STANDALONE_WIN
-					AsyncTask.Obtain(1.0f,()=>{SetEditorWindow(key,rect);},null).StartAsCoroutine();
+					AsyncTask.Obtain(1.0f,()=>{
+						if(!SetEditorWindow(key,rect)) {
+							Debug.LogWarning("Please close other GameViews manually and play again.");
+						}
+					},null).StartAsCoroutine();
 #endif
 				return display;
 			}

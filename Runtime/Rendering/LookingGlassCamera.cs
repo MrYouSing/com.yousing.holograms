@@ -2,8 +2,8 @@
 using System.Collections;
 using LookingGlass;
 using LookingGlass.Toolkit;
-using UnityEngine;
 #endif
+using UnityEngine;
 
 namespace YouSingStudio.Holograms {
 	/// <summary>
@@ -26,6 +26,7 @@ namespace YouSingStudio.Holograms {
 #if ENABLE_LKG
 			if(camera==null) {camera=FindAnyObjectByType<HologramCamera>();}
 			//
+			//camera.ForceDisplayIndex=false;
 			HologramDevice.s_GraphicsFormat=camera.QuiltTexture.graphicsFormat;// GetQuiltFormat().
 			if(camera.UseQuiltAsset) {
 				StartCoroutine(SetupCameraDelayed(0));

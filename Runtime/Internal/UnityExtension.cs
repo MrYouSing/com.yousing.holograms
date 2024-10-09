@@ -241,6 +241,14 @@ namespace YouSingStudio.Holograms {
 			return new Rect(new Vector2((i%w)*dw,(i/w)*dh),new Vector2(dw,dh));
 		}
 
+		public static Rect GetRect(this Video3DLayout thiz,int index) {
+			switch(thiz) {
+				case Video3DLayout.SideBySide3D:return new Rect(0.5f*index,0.0f,0.5f,1.0f);
+				case Video3DLayout.OverUnder3D:return new Rect(0.0f,0.5f*index,1.0f,0.5f);
+				default:return new Rect(Vector2.zero,Vector2.one);
+			}
+		}
+
 		/// <summary>
 		/// <seealso cref="UnityEditor.L10n.Tr(string)"/>
 		/// </summary>
@@ -385,6 +393,61 @@ namespace YouSingStudio.Holograms {
 				thiz.targetTexture=null;
 				thiz.renderMode=VideoRenderMode.APIOnly;
 			}
+		}
+
+		public static void Set(this Material thiz,int id,Vector2 offset,Vector2 scale) {
+			if(thiz!=null) {
+				thiz.SetTextureOffset(id,offset);
+				thiz.SetTextureScale(id,scale);
+			}
+		}
+
+		public static void Set(this Material thiz,int id,Rect rect) {
+			if(thiz!=null) {
+				thiz.SetTextureOffset(id,rect.position);
+				thiz.SetTextureScale(id,rect.size);
+			}
+		}
+
+		public static void Set(this Renderer thiz,Mesh mesh) {
+			if(thiz!=null) {
+				if(thiz is SkinnedMeshRenderer sr) {sr.sharedMesh=mesh;}
+				else {
+					var mf=thiz.GetComponent<MeshFilter>();
+					if(mf!=null) {mf.sharedMesh=mesh;}
+				}
+			}
+		}
+
+		public static Mesh CreatePlane(this Mesh thiz,int cols,int rows) {
+			if(thiz==null) {thiz=new Mesh();}else {thiz.Clear();}
+			float w=1.0f/cols,h=1.0f/rows;int i=0,imax=(cols+1)*(rows+1),j=0;
+			Vector3[] vertices=new Vector3[imax];
+			Vector2[] uv=new Vector2[imax];
+			int[] triangles=new int[cols*rows*6];
+			for(int y=0;y<=rows;++y) {for(int x=0;x<=cols;++x) {
+				vertices[i]=new Vector3(-x*w+0.5f,y*h-0.5f,0.0f);// Flip X
+				uv[i]=new Vector2(x*w,y*h);
+				if(x<cols&&y<rows) {
+					triangles[j++]=i;
+					triangles[j++]=i+cols+2;
+					triangles[j++]=i+1;
+					triangles[j++]=i+cols+1;
+					triangles[j++]=i+cols+2;
+					triangles[j++]=i;
+				}++i;
+			}}
+			if(imax>=uint.MaxValue) {
+				Debug.LogError($"{vertices.Length}>={uint.MaxValue}");
+			}
+			thiz.indexFormat=imax>=ushort.MaxValue
+				?UnityEngine.Rendering.IndexFormat.UInt32
+				:UnityEngine.Rendering.IndexFormat.UInt16;
+			thiz.vertices=vertices;
+			thiz.uv=uv;
+			thiz.triangles=triangles;
+			thiz.RecalculateBounds();
+			return thiz;
 		}
 
 		  //
