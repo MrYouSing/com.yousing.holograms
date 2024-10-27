@@ -33,6 +33,9 @@ namespace YouSingStudio.Holograms {
 			if(screen==null) {screen=FindAnyObjectByType<ScreenDevice>();}
 			if(slider==null) {slider=GetComponentInChildren<Slider>();}
 			//
+			if(screen!=null) {
+				screen.onDefaultChanged+=()=>SetWrap(wrap);
+			}
 			if(slider!=null) {
 				slider.onValueChanged.AddListener(OnSliderChanged);
 				m_SliderV=slider.gameObject;

@@ -31,7 +31,7 @@ namespace YouSingStudio.Holograms {
 
 		protected virtual void OnDestroy() {
 			if(canvas.IsTemporary()) {
-				RenderTexture.ReleaseTemporary(canvas);
+				canvas.Free();
 				canvas=null;
 			}
 		}
@@ -64,6 +64,13 @@ namespace YouSingStudio.Holograms {
 			}else {
 				Graphics.Blit(quiltTexture,canvas);
 			}
+		}
+
+		/// <summary>
+		/// <seealso cref="Input.mousePresent"/>
+		/// </summary>
+		public virtual bool IsPresent() {
+			return true;
 		}
 
 		public virtual void Init() {

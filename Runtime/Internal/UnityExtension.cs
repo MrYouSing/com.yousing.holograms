@@ -31,12 +31,6 @@ using Graphics=UnityEngine.Graphics;
 #endif
 
 namespace YouSingStudio.Holograms {
-	public class ArrayElementAttribute:PropertyAttribute {
-		public string names;
-
-		public void Foo()=>throw new System.NotImplementedException();
-	}
-
 	public static partial class UnityExtension {
 // <!-- Macro.Patch AutoGen
 		public static HashSet<string> s_ImageExtensions=new HashSet<string>(System.StringComparer.OrdinalIgnoreCase);
@@ -174,6 +168,7 @@ namespace YouSingStudio.Holograms {
 // Macro.Patch -->
 		#region Fields
 
+		public const System.StringComparison k_Comparison=System.StringComparison.OrdinalIgnoreCase;
 		public static readonly char[] k_Split_Dir=new char[]{'\\','/'};
 		/// <summary>
 		/// <seealso cref="HideFlags.HideAndDontSave"/>
@@ -198,6 +193,8 @@ namespace YouSingStudio.Holograms {
 		public static Material s_Unlit;
 		public static Camera s_CameraHelper;
 		public static GLRenderer s_GLRenderer;
+		public static Vector3[] s_Vector3Helper=new Vector3[8];
+		public static Dictionary<string,Vector3> s_QuiltMap=new Dictionary<string,Vector3>();
 
 		#endregion Fields
 
@@ -210,11 +207,93 @@ namespace YouSingStudio.Holograms {
 			a-=b;return a*a<=c*c;
 		}
 
+		public static bool IsSerialNumber(this string thiz) {
+			int cnt=thiz?.Length??0;if(cnt>0) {
+				int i=thiz.LastIndexOfAny(k_Split_Dir),j=thiz.LastIndexOf('.');
+				if(j<0) {j=cnt;}if(i<j) {
+					char[] pch=thiz.ToCharArray();
+					for(++i;i<j;++i) {if(!char.IsDigit(pch[i])) {return false;}}
+					return true;
+				}
+			}
+			return false;
+		}
+
+		public static bool TwoPieces(this Vector3 thiz) {
+			return Approximately(thiz.x*thiz.y,2.0f);
+		}
+
+		public static float ToFloat(this string thiz,string flag,float value=0.0f) {
+			if(!string.IsNullOrEmpty(thiz)&&!string.IsNullOrEmpty(flag)) {
+				thiz=Path.GetFileNameWithoutExtension(thiz);
+				char[] pch=thiz.ToCharArray();
+				int i=thiz.LastIndexOf(flag,k_Comparison),jmax=pch.Length;
+				if(i>=0) {i+=flag.Length;}else {i=jmax;}
+				if(i<jmax&&char.IsDigit(pch[i])) {
+					int j=i+1;for(;j<jmax;++j) {
+						if(pch[j]!='.'&&!char.IsDigit(pch[j])) {break;}
+					}
+					return float.Parse(new string(pch,i,j-i));
+				}
+			}
+			return value;
+		}
+
+		public static float ToAspect(this string thiz) {
+			return thiz.ToFloat("_a",float.NaN);
+		}
+
+		public static Video3DLayout To3DLayout(this string thiz) {
+			if(!string.IsNullOrEmpty(thiz)) {
+				thiz=Path.GetFileName(thiz);
+				if(thiz.LastIndexOf("_sbs.",k_Comparison)>=0||thiz.LastIndexOf("_sbs_",k_Comparison)>=0) {
+					return Video3DLayout.SideBySide3D;
+				}
+				if(thiz.LastIndexOf("_ou.",k_Comparison)>=0||thiz.LastIndexOf("_ou_",k_Comparison)>=0) {
+					return Video3DLayout.SideBySide3D;
+				}
+			}
+			return Video3DLayout.No3D;
+		}
+
+		public static TextureType ToTextureType(this string thiz,TextureType type=TextureType.Default) {
+			if(!string.IsNullOrEmpty(thiz)) {
+				bool b=thiz.IsSerialNumber();thiz=Path.GetFileNameWithoutExtension(thiz);
+				if(thiz.EndsWith("_sbs",k_Comparison)||thiz.EndsWith("_ou",k_Comparison)) {// Video3DLayout
+					return TextureType.Stereo;
+				}
+				if(thiz.EndsWith("_rgb",k_Comparison)||thiz.EndsWith("_rgbd",k_Comparison)) {
+					return TextureType.Depth;
+				}
+				if(thiz.EndsWith("_vr",k_Comparison)||thiz.EndsWith("_xr",k_Comparison)) {
+					return TextureType.Panoramic;
+				}
+				int i=thiz.LastIndexOf("_qs");
+				if((i>=0&&char.IsDigit(thiz[i+3]))||b) {
+					return TextureType.Quilt;
+				}
+			}
+			return type;
+		}
+
+		public static Vector3 ParseLayout(this string thiz) {
+			switch(thiz.To3DLayout()) {
+				case Video3DLayout.SideBySide3D:
+					return new Vector3(2.0f,1.0f,thiz.ToAspect());
+				case Video3DLayout.OverUnder3D:
+					return new Vector3(1.0f,2.0f,thiz.ToAspect());
+			}
+			return new Vector3(1.0f,1.0f,-1.0f);
+		}
+
 		/// <summary>
 		/// <seealso href="https://docs.lookingglassfactory.com/software-tools/looking-glass-studio/quilt-photo-video"/>
 		/// </summary>
 		public static Vector3 ParseQuilt(this string thiz) {
 			if(!string.IsNullOrEmpty(thiz)) {
+				//
+				if(s_QuiltMap.TryGetValue(Path.GetFileNameWithoutExtension(thiz),out var v)) {return v;}
+				//
 				int i=thiz.LastIndexOf("_qs");
 				if(i>=0) {
 					string ext=Path.GetExtension(thiz);bool b=IsImage(ext)||IsVideo(ext);
@@ -231,13 +310,19 @@ namespace YouSingStudio.Holograms {
 			return s_DefaultQuilt;
 		}
 
+		public static void SetQuilt(this string thiz,Vector3 value) {
+			if(!string.IsNullOrEmpty(thiz)) {
+				s_QuiltMap[Path.GetFileNameWithoutExtension(thiz)]=value;
+			}
+		}
+
 		public static string ToQuilt(this Vector3 thiz) {
 			return $"{thiz.x}x{thiz.y}a{thiz.z}";
 		}
 
-		public static Rect ToPreviewRect(this Vector3 thiz) {
+		public static Rect ToPreview(this Vector3 thiz) {
 			float dw=1.0f/thiz.x,dh=1.0f/thiz.y;
-			int w=(int)thiz.x,i=Mathf.FloorToInt(thiz.x*thiz.y*0.5f);
+			int w=(int)thiz.x,i=Mathf.FloorToInt(thiz.x*thiz.y*0.5f)-1;// HalfLengthToIndex
 			return new Rect(new Vector2((i%w)*dw,(i/w)*dh),new Vector2(dw,dh));
 		}
 
@@ -363,6 +448,10 @@ namespace YouSingStudio.Holograms {
 			return true;
 		}
 
+		public static void Free(this RenderTexture thiz) {
+			if(thiz!=null) {RenderTexture.ReleaseTemporary(thiz);}
+		}
+
 		public static RenderTexture GetTexture(this VideoPlayer thiz,bool resize=false) {
 			RenderTexture rt=null;
 			if(thiz!=null) {
@@ -371,7 +460,7 @@ namespace YouSingStudio.Holograms {
 					rt=tex as RenderTexture;
 				}else if(tex!=null) {Vector2Int a=tex.GetSizeI(),b=rt.GetSizeI();if(a!=b){
 					if(resize) {
-						if(rt.IsTemporary()) {RenderTexture.ReleaseTemporary(rt);}
+						if(rt.IsTemporary()) {rt.Free();}
 						rt=RenderTexture.GetTemporary(a.x,a.y);rt.name=s_TempTag;
 						thiz.targetTexture=rt;
 					}else {
@@ -450,6 +539,24 @@ namespace YouSingStudio.Holograms {
 			return thiz;
 		}
 
+		public static float GetPlaneHeight(this Camera thiz,float depth) {
+			if(thiz!=null) {
+				if(thiz.orthographic) {
+					return thiz.orthographicSize*2.0f;
+				}else {
+					return (Mathf.Tan(thiz.fieldOfView*0.5f*Mathf.Deg2Rad)*depth)*2.0f;
+				}
+			}
+			return 0.0f;
+		}
+
+		public static float GetPlaneDepth(this Camera thiz,float height) {
+			if(thiz!=null&&!thiz.orthographic) {
+				return height*0.5f/(Mathf.Tan(thiz.fieldOfView*0.5f*Mathf.Deg2Rad));
+			}
+			return 0.0f;
+		}
+
 		  //
 
 		/// <summary>
@@ -519,7 +626,45 @@ namespace YouSingStudio.Holograms {
 			}
 			return s_GLRenderer;
 		}
+#if UNITY_EDITOR
+		// TODO: Copy from the private library.
+		public static void FillPlane(this Vector3[] thiz,Vector3 center,Quaternion rotation,Vector2 size,int offset=0) {
+			size*=0.5f;
+			thiz[offset]=center+rotation*new Vector3(-size.x,-size.y,0.0f);++offset;
+			thiz[offset]=center+rotation*new Vector3(-size.x, size.y,0.0f);++offset;
+			thiz[offset]=center+rotation*new Vector3( size.x, size.y,0.0f);++offset;
+			thiz[offset]=center+rotation*new Vector3( size.x,-size.y,0.0f);++offset;
+		}
 
+		/// <summary>
+		/// <seealso cref="Gizmos.DrawLineStrip"/>
+		/// </summary>
+		public static void DrawLines(Vector3[] points,int offset=0,int count=-1,bool loop=false) {
+			if(count<0) {count=(points?.Length??0)-offset;}
+			if(count<=0) {return;}
+			int start=offset;count=offset+count-1;for(;offset<count;++offset) {
+				Gizmos.DrawLine(points[offset],points[offset+1]);
+			}
+			if(loop) {Gizmos.DrawLine(points[offset],points[start]);}
+		}
+
+		/// <summary>
+		/// <seealso cref="Gizmos.DrawWireCube"/>
+		/// </summary>
+		public static void DrawWirePlane(Vector3 center,Quaternion rotation,Vector2 size) {
+			s_Vector3Helper.FillPlane(center,rotation,size,0);
+			DrawLines(s_Vector3Helper,0,4,true);
+		}
+
+		/// <summary>
+		/// <seealso cref="Gizmos.DrawFrustum"/>
+		/// </summary>
+		public static void DrawFrustum(Quaternion rotation,Vector3 nearCenter,Vector2 nearSize,Vector3 farCenter,Vector2 farSize) {
+			s_Vector3Helper.FillPlane(nearCenter,rotation,nearSize,0);DrawLines(s_Vector3Helper,0,4,true);
+			s_Vector3Helper.FillPlane(farCenter,rotation,farSize,4);DrawLines(s_Vector3Helper,4,4,true);
+			for(int i=0;i<4;++i) {Gizmos.DrawLine(s_Vector3Helper[i],s_Vector3Helper[4+i]);}
+		}
+#endif
 		#endregion Methods
 	}
 }

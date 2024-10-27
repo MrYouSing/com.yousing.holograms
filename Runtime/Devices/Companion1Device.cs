@@ -36,6 +36,7 @@ namespace YouSingStudio.Holograms {
 
 		#region Methods
 
+		public override bool IsPresent() {return FindDisplay(resolution)>=0;}
 		public override Vector3 ParseQuilt()=>quiltTexture!=null?base.ParseQuilt():new Vector3(8.0f,5.0f,0.5625f);
 		public override Vector4 PreferredSize()=>quiltTexture!=null?base.PreferredSize():new Vector4(4320.0f,4800.0f,8.0f,5.0f);
 

@@ -292,8 +292,17 @@ namespace YouSingStudio.Private {
 			Window it=null;
 			if(display>=0&&display<(s_Displays?.Length??0)) {it=s_Windows[display];}
 			//
-			if(it==null||it.index>=0){return;}it.StartAsDisplay();
+			if(it==null||it.index>=0){SetResolution(display,-1,-1,true);return;}it.StartAsDisplay();
 			if(it.index==1) {GetWindow(0).Start();}// Fix the rect.
+		}
+
+		public static void Deactivate(int display) {
+			if(!s_IsInited) {Init();}
+			//
+			if(display>=0&&display<(s_Displays?.Length??0)) {
+				var tmp=s_Displays[display];
+				if(tmp.active) {tmp.SetParams(s_HiddenSize,s_HiddenSize,0,0);}
+			}
 		}
 
 		public static string GetTitle(int display) {
@@ -337,7 +346,10 @@ namespace YouSingStudio.Private {
 			if(display>=0&&display<(s_Displays?.Length??0)) {it=s_Windows[display];}
 			if(it!=null) {if(it.index<0) {Activate(display);}}else return
 // Macro.Patch -->
-			;it.fullScreen=fullscreen;
+			;if(width<0) {width=it.display.systemWidth;}
+			if(height<0) {height=it.display.systemHeight;}
+			//
+			it.fullScreen=fullscreen;
 			it.width=width;it.height=height;
 			if(it.index==0) {PlayerPrefs.SetInt("Screenmanager Fullscreen mode",fullscreen?1:3);}
 			//

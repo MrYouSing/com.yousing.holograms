@@ -26,6 +26,7 @@ namespace YouSingStudio.Private {
 			,"Unity Denary Display"
 		};
 
+		internal static int s_HiddenSize=2;
 		internal static System.Type s_Type_Screen=null;
 
 		#endregion Fields
@@ -45,6 +46,9 @@ namespace YouSingStudio.Private {
 
 		public static void SetResolution(this Display thiz,int width,int height,bool fullscreen) {
 			if(thiz!=null) {
+				if(width<0) {width=thiz.systemWidth;}
+				if(height<0) {height=thiz.systemHeight;}
+				//
 				thiz.SetRenderingResolution(width,height);int x=0,y=0;
 				if(fullscreen) {
 					width=thiz.systemWidth;
@@ -155,7 +159,21 @@ namespace YouSingStudio.Private {
 		public static void Activate(int display) {
 			if(!s_IsInited) {Init();}
 			//
-			Display tmp=GetDisplay(display);if(tmp==null) {return;}
+			Display tmp=null;
+			if(display>=0&&display<(s_Displays?.Length??0)) {
+				tmp=s_Displays[display];
+			}
+			if(tmp!=null) {
+				if(tmp.active) {tmp.SetResolution(-1,-1,true);}
+				else {tmp.Activate();}
+			}
+		}
+
+		public static void Deactivate(int display) {
+			if(!s_IsInited) {Init();}
+			//
+			Display tmp=GetDisplay(display);if(tmp==null||!tmp.active) {return;}
+			tmp.SetParams(s_HiddenSize,s_HiddenSize,0,0);
 		}
 
 		public static string GetTitle(int display) {

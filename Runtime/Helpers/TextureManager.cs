@@ -45,6 +45,17 @@ namespace YouSingStudio.Holograms {
 			Set(path,tex);
 		}
 
+		public virtual void Clear() {
+			if(!m_IsInited) {return;}
+			//
+			foreach(var it in assets.Values) {
+				if(it==null) {}
+				else if(it is RenderTexture rt) {rt.Free();}
+				else {Texture.Destroy(it);}
+			}
+			assets.Clear();
+		}
+
 		#endregion Methods
 	}
 }

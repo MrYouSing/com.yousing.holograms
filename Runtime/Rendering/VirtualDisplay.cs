@@ -14,7 +14,8 @@ namespace YouSingStudio.Holograms {
 #if UNITY_EDITOR
 		public RectInt rect;
 #endif
-		protected bool m_IsCreated;
+		[System.NonSerialized]protected bool m_Active;
+		[System.NonSerialized]protected bool m_IsCreated;
 
 		#endregion Fields
 
@@ -38,6 +39,9 @@ namespace YouSingStudio.Holograms {
 			if(m_IsCreated) {return device!=null&&device.display>=0;}
 			m_IsCreated=true;
 			//
+#if !UNITY_EDITOR
+			if(!device.IsPresent()) {device=null;}
+#endif
 			if(device==null) {return false;}device.Init();
 			if(device.display<0) {
 				if(canvas!=null) {canvas.enabled=false;}return false;
@@ -61,7 +65,19 @@ namespace YouSingStudio.Holograms {
 			image.rectTransform.StretchParent(canvas.transform);
 			image.texture=device.canvas;
 			//
-			return true;
+			return m_Active=true;
+		}
+
+		public virtual bool isActive=>m_IsCreated?m_Active:false;
+
+		public virtual void SetActive(bool value) {
+			if(!m_IsCreated) {CreateUnityDisplay();}
+			if(device==null) {return;}
+			if(value==m_Active) {return;}
+			//
+			if(m_Active=value) {ScreenManager.Activate(device.display);}
+			else {ScreenManager.Deactivate(device.display);}
+			canvas.enabled=m_Active;
 		}
 
 		#endregion Methods

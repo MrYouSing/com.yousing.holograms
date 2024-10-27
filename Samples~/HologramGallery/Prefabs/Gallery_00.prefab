@@ -973,6 +973,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2179732307321863555}
+  - component: {fileID: 1538135294576013592}
   - component: {fileID: 85189482213774107}
   m_Layer: 5
   m_Name: Gallery_00
@@ -1003,6 +1004,21 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1538135294576013592
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9160827665497521575}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f8b9f62ec5eaf0468130c6b55c94803, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  display: {fileID: 0}
+  resolution: {x: 1280, y: 720, z: 1920, w: 1080}
+  keys: 1b000000720000002401000025010000
 --- !u!114 &85189482213774107
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1018,7 +1034,7 @@ MonoBehaviour:
   container: {fileID: 8021878057469536707}
   prefab: {fileID: 4583432770310144017, guid: 3f646f728260aa44cbf1740586780aca, type: 3}
   arrow: {fileID: 7702770675347967377}
-  resolution: {x: 1280, y: 720, z: 1920, w: 1080}
+  texture: 3
   preview: 256
   filters:
   - .jpg
@@ -1030,7 +1046,7 @@ MonoBehaviour:
   - $(StreamingAssets)/Holograms
   - ' $(AppData)/Roaming/3DGallery/downloads/'
   player: {fileID: 0}
-  keys: 1b000000240100001e0100000d0000006f00000014010000130100001101000012010000
+  keys: 1e0100000d0000006f00000014010000130100001101000012010000
 --- !u!1001 &1043740386498750835
 PrefabInstance:
   m_ObjectHideFlags: 0

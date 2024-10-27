@@ -189,6 +189,9 @@ namespace YouSingStudio.Holograms {
 				//
 				if(material==null) {material=UnityExtension.GetUnlit();}
 				material.mainTexture=source;
+				if(float.IsNaN(args.z)||(args.z<0.0f&&args.TwoPieces())) {
+					args.z=(source.width/args.x)/(source.height/args.y);
+				}
 				//
 				if(args!=m_Args) {
 					m_Args=args;

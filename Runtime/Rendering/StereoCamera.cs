@@ -25,10 +25,6 @@ namespace YouSingStudio.Holograms {
 		#region Methods
 
 		public override void SetupCamera() {
-			if(GraphicsSettings.renderPipelineAsset!=null) {
-				GraphicsSettings.renderPipelineAsset=null;
-				Debug.Log("Disable SRP for camera messages");
-			}
 			Shader.SetGlobalFloat(_StereoEyeIndex,0.0f);
 			texture.Clear();
 			for(int i=0,imax=cameras?.Length??0;i<imax;++i) {

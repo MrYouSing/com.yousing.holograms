@@ -1,6 +1,4 @@
 /* <!-- Macro.Table Shortcut
-Quit,
-FullScreen,
 Refresh,
 Play,
 Open,
@@ -34,7 +32,7 @@ namespace YouSingStudio.Holograms {
 		public Transform container;
 		public GameObject prefab;
 		public Transform arrow;
-		public Vector4 resolution=new Vector4(1280,720,1920,1080);
+		public TextureType texture=TextureType.Quilt;
 		public int preview;
 		public string[] filters=new string[]{
 			// Image
@@ -48,11 +46,10 @@ namespace YouSingStudio.Holograms {
 		public List<string> paths=new List<string>();
 		[Header("Controller")]
 		public MediaPlayer player;
-		public Key[] keys=new Key[9];
+		public Key[] keys=new Key[7];
 
 		[System.NonSerialized]protected int m_Index;
 		[System.NonSerialized]protected int m_Page;
-		[System.NonSerialized]protected int m_Display;
 		[System.NonSerialized]protected List<string> m_Paths;
 		[System.NonSerialized]protected List<GameObject> m_Views=new List<GameObject>();
 		[System.NonSerialized]protected ScrollRect m_Scroll;
@@ -66,8 +63,6 @@ namespace YouSingStudio.Holograms {
 			//
 			var sm=ShortcutManager.instance;int i=0;
 // <!-- Macro.Patch Start
-			sm.Add(name+".Quit",Quit,keys[i]);++i;
-			sm.Add(name+".FullScreen",FullScreen,keys[i]);++i;
 			sm.Add(name+".Refresh",Refresh,keys[i]);++i;
 			sm.Add(name+".Play",Play,keys[i]);++i;
 			sm.Add(name+".Open",Open,keys[i]);++i;
@@ -80,15 +75,13 @@ namespace YouSingStudio.Holograms {
 			var g=container.GetComponent<GridLayoutGroup>();
 			if(g!=null) {m_Page=g.constraintCount;}
 			//
-			m_Display=ScreenManager.IndexOf(Display.main);
 			Refresh();
 			StartCoroutine(StartDelayed());
 		}
 
 		protected virtual IEnumerator StartDelayed() {
-			yield return new WaitForSeconds(2.5f);
+			yield return null;
 			//
-			FullScreen(ScreenManager.FullScreen(m_Display));
 			if(m_Index==0) {Set(0);}
 		}
 
@@ -97,34 +90,16 @@ namespace YouSingStudio.Holograms {
 		#region Methods
 
 		public virtual bool CanPlay(string path) {
-			if(!string.IsNullOrEmpty(path)) {for(int i=0,imax=filters?.Length??0;i<imax;++i) {
-				if(path.EndsWith(filters[i],System.StringComparison.OrdinalIgnoreCase)) {return true;}
-			}}
-			return false;
-		}
-
-		public virtual void Quit() {
-#if UNITY_EDITOR
-			UnityEditor.EditorApplication.isPlaying=false;
-#else
-			Application.Quit();
-#endif
-		}
-
-		public virtual void FullScreen(bool value) {
-			if(resolution.sqrMagnitude==0.0f) {return;}
-			if(!value) {
-				ScreenManager.SetResolution(m_Display,(int)resolution.x,(int)resolution.y,false);
-			}else {
-				ScreenManager.SetResolution(m_Display,(int)resolution.z,(int)resolution.w,true);
+			if(!string.IsNullOrEmpty(path)) {
+				//
+				string fn=Path.GetFileNameWithoutExtension(path);
+				if(fn.EndsWith("_depth",UnityExtension.k_Comparison)) {return false;}
+				//
+				for(int i=0,imax=filters?.Length??0;i<imax;++i) {
+					if(path.EndsWith(filters[i],System.StringComparison.OrdinalIgnoreCase)) {return true;}
+				}
 			}
-		}
-
-		public virtual void FullScreen()=>FullScreen(!ScreenManager.FullScreen(m_Display));
-
-		[System.Obsolete]
-		public virtual void Reload() {
-			Application.LoadLevel(Application.loadedLevel);
+			return false;
 		}
 
 		public virtual void Refresh() {
@@ -153,7 +128,7 @@ namespace YouSingStudio.Holograms {
 			//
 			var es=EventSystem.current;if(es!=null) {es.SetSelectedGameObject(null);}
 			if(arrow!=null) {arrow.SetParent(m_Views[index].transform,false);}
-			if(player!=null) {player.Play(m_Paths[index]);}
+			InternalPlay(m_Paths[m_Index]);
 			// TODO: Select in ScrollRect.
 		}
 
@@ -188,10 +163,38 @@ namespace YouSingStudio.Holograms {
 			Set(m_Index+m_Page);
 		}
 
+		protected virtual void InternalPlay(string path) {
+			TextureType type=path.ToTextureType(texture);
+			switch(type) {
+				case TextureType.Depth:
+				break;
+				case TextureType.Stereo:{
+					Vector3 count=path.ParseQuilt();
+					if(!count.TwoPieces()) {path.SetQuilt(path.ParseLayout());}
+					if(player!=null) {player.Play(path);}
+				}break;
+				case TextureType.Quilt:
+					if(player!=null) {player.Play(path);}
+				break;
+			}
+		}
+
 		protected virtual void LoadIcon(RawImage image,string path) {
 			TextureManager tm=TextureManager.instance;
 			Texture tex=null;float a=0.0f;
-			Vector3 count=path.ParseQuilt();
+			//
+			Vector3 count=new Vector3(1.0f,1.0f,float.NaN);
+			TextureType type=path.ToTextureType(texture);
+			switch(type) {
+				case TextureType.Stereo:
+				case TextureType.Depth:
+					count=path.ParseQuilt();
+					if(!count.TwoPieces()) {count=path.ParseLayout();}
+				break;
+				case TextureType.Quilt:
+					count=path.ParseQuilt();
+				break;
+			}
 			// TODO: Icons may be wrong because of caches.
 			bool b=tm.assets?.TryGetValue(UnityExtension.s_TempTag+path,out tex)??false;
 			if(!b||tex==null) {
@@ -208,20 +211,24 @@ namespace YouSingStudio.Holograms {
 			if(!b&&preview>0) {
 #if (UNITY_EDITOR_WIN||UNITY_STANDALONE_WIN)&&!NET_STANDARD
 				a=0.0f;int size=Mathf.ClosestPowerOfTwo((int)Mathf.Min(preview*count.x,preview*count.y));
-				Rect rect=count.ToPreviewRect();
+				Rect rect=count.ToPreview();
 				using(var bm=ShellThumbs.WindowsThumbnailProvider.GetThumbnail(
 					path,size,size,ShellThumbs.ThumbnailOptions.None
 				)) {
-					count.x=bm.Width;count.y=bm.Height;
+					int bw=bm.Width,bh=bm.Height;
 					var tmp=UnityExtension.NewTexture2D(1,1);
 					tmp.LoadBitmap(bm,new RectInt(
-						(int)(count.x*rect.x),
-						(int)(count.y*rect.y),
-						(int)(count.x*rect.width),
-						(int)(count.y*rect.height)
+						(int)(bw*rect.x),
+						(int)(bh*rect.y),
+						(int)(bw*rect.width),
+						(int)(bh*rect.height)
 					));
 					tmp.name=UnityExtension.s_TempTag+path;
 					tm.Set(tmp.name,tmp);tex=tmp;
+					if(float.IsNaN(count.z)) {
+						count.z=-(bw*rect.width)/(bh*rect.height);
+						path.SetQuilt(count);// Approximately
+					}
 				}
 #endif
 			}

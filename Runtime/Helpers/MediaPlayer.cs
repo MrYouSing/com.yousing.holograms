@@ -132,6 +132,9 @@ namespace YouSingStudio.Holograms {
 			Stop();m_Path=GetPath(path);
 			if(string.IsNullOrEmpty(m_Path)) {return;}
 			//
+			if(screen!=null) {
+				screen.SetDefaultIndex(path.ToTextureType()!=TextureType.Quilt?0:-1);
+			}
 			TextureManager tm=TextureManager.instance;
 			string ext=Path.GetExtension(m_Path);Texture tex=null;
 			if(UnityExtension.IsImage(ext)) {
@@ -164,6 +167,8 @@ namespace YouSingStudio.Holograms {
 			device.canvas.Clear();device.quiltTexture=m_RT;
 			quilt.enabled=false;
 			quilt.destination.Clear();
+			//
+			if(screen!=null) {screen.SetDefaultIndex(-1);}
 		}
 
 		// Events

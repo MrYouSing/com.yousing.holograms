@@ -12,6 +12,7 @@ namespace YouSingStudio.Holograms {
 		public HologramDevice device;
 		public QuiltTexture quilt;
 		public VirtualDisplay display;
+		public HologramDevice[] devices;
 
 		#endregion Fields
 
@@ -19,18 +20,49 @@ namespace YouSingStudio.Holograms {
 
 		protected virtual void Start() {
 			PrepareCamera();
-			if(device!=null&&display!=null) {SetupCamera();}
+			if(device!=null&&display!=null) {
+#if !UNITY_EDITOR
+				if(device.IsPresent())
+#endif
+				SetupCamera();
+			}
 		}
 
 		protected virtual void OnDestroy() {
 			DestroyCamera();
 		}
+#if UNITY_EDITOR
+		protected virtual void OnDrawGizmos()=>DrawGizmos(false);
+		protected virtual void OnDrawGizmosSelected()=>DrawGizmos(true);
 
+		protected virtual void DrawGizmos(bool selected) {
+			Color c=Gizmos.color;
+			Matrix4x4 m=Gizmos.matrix;
+				Gizmos.color=selected?Color.green:Color.gray;
+				InternalDrawGizmos(selected);
+			Gizmos.color=c;
+			Gizmos.matrix=m;
+		}
+
+		protected virtual void InternalDrawGizmos(bool selected) {}
+#endif
 		#endregion Unity Messages
 
 		#region Methods
 
 		public virtual void PrepareCamera() {
+			//
+			HologramDevice it;for(int i=0,imax=devices?.Length??0;i<imax;++i) {
+				it=devices[i];if(it!=null) {
+					if(it.IsPresent()) {
+						if(device!=null) {device.gameObject.SetActive(false);}
+						device=it;break;
+					}else {
+						it.gameObject.SetActive(false);
+					}
+				}
+			}
+			//
 			if(device==null) {device=FindAnyObjectByType<HologramDevice>();}
 			if(display==null) {
 				display=FindAnyObjectByType<VirtualDisplay>();
@@ -71,14 +103,14 @@ namespace YouSingStudio.Holograms {
 				quilt.SetDestination(device);
 				quilt.SetSource(texture,vector);
 			}else {
-				device.quiltTexture=texture;
+				if(texture!=null) {device.quiltTexture=texture;}
 				if(quilt!=null) {quilt.enabled=false;}
 			} 
 		}
 
 		public virtual void DestroyCamera() {
 			if(device!=null&&device.quiltTexture.IsTemporary()) {
-				RenderTexture.ReleaseTemporary(device.quiltTexture as RenderTexture);
+				(device.quiltTexture as RenderTexture).Free();
 				device.quiltTexture=null;
 			}
 		}

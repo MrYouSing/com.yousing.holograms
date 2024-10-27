@@ -61,11 +61,22 @@ namespace YouSingStudio.Holograms {
 			else {return (int)((a.y<<16)&0xFFFF0000)|(a.x&0xFFFF);}
 		}
 
+		public static string ToDepth(string path) {
+			string dir=Path.GetDirectoryName(path);
+			string ext=Path.GetExtension(path);
+			path=Path.GetFileNameWithoutExtension(path);
+			if(path.EndsWith("_rgbd",UnityExtension.k_Comparison)) {
+				return null;
+			}else if(path.EndsWith("_rgb",UnityExtension.k_Comparison)) {
+				path=path.Substring(0,path.Length-4);
+			}
+			return Path.Combine(dir,path+"_depth"+ext);
+		}
+
 		public virtual void Play(string path) {
 			TextureManager tm=TextureManager.instance;
 			Texture rgb=tm.Get(m_Path=path);if(rgb==null) {Stop();return;}
-			path=Path.Combine(Path.GetDirectoryName(m_Path),Path.
-				GetFileNameWithoutExtension(m_Path)+"_Depth"+Path.GetExtension(m_Path));
+			path=Path.Combine(ToDepth(path));
 			Texture d=tm.Get(path);Play(m_Path,rgb,d);
 		}
 

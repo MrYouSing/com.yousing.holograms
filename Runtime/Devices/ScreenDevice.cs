@@ -10,6 +10,9 @@ namespace YouSingStudio.Holograms {
 		public int quiltIndex=-1;
 		public int[] quiltIndexes;
 
+		public System.Action onDefaultChanged=null;
+		[System.NonSerialized]protected int m_DefaultIndex=-1;
+
 		#endregion Fields
 
 		#region Unity Messages
@@ -20,12 +23,24 @@ namespace YouSingStudio.Holograms {
 		public virtual int GetIndex() {
 			int i=quiltIndexes?.Length??0;
 			if(i<=0) {
-				i=quiltIndex>=0?quiltIndex:(quiltSize.x*quiltSize.y/2-1);
+				if(quiltIndex<0) {
+					if(m_DefaultIndex>=0) {i=m_DefaultIndex;}
+					else {i=quiltSize.x*quiltSize.y/2-1;}// HalfLengthToIndex
+				}else {
+					i=quiltIndex;
+				}
 			}else {
-				i=quiltIndex>=0?Mathf.Clamp(quiltIndex,0,i-1):(i/2-1);
+				i=quiltIndex>=0?Mathf.Clamp(quiltIndex,0,i-1):(i/2-1);// HalfLengthToIndex
 				i=quiltIndexes[i];
 			}
 			return i;
+		}
+
+		public virtual void SetDefaultIndex(int value) {
+			if(value==m_DefaultIndex) {return;}
+			//
+			m_DefaultIndex=value;
+			onDefaultChanged?.Invoke();
 		}
 
 		protected override void InternalRender() {
