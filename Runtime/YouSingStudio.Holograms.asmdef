@@ -1,7 +1,19 @@
 {
 	"name": "YouSingStudio.Holograms",
 	"references": [
+		"Siccity.GLTFUtility",
+		"glTFast",
 		"LookingGlass"
 	],
-	"allowUnsafeCode": true
+	"allowUnsafeCode": true,
+	"versionDefines": [
+		{
+			"name": "com.siccity.gltfutility",
+			"define": "ENABLE_GLTF_UTILITY"
+		},
+		{
+			"name": "com.unity.cloud.gltfast",
+			"define": "ENABLE_GLTFAST"
+		}
+	]
 }

@@ -25,12 +25,12 @@ namespace YouSingStudio.Holograms {
 			if(i<=0) {
 				if(quiltIndex<0) {
 					if(m_DefaultIndex>=0) {i=m_DefaultIndex;}
-					else {i=quiltSize.x*quiltSize.y/2-1;}// HalfLengthToIndex
+					else {i=(quiltSize.x*quiltSize.y).GetMiddle();}
 				}else {
 					i=quiltIndex;
 				}
 			}else {
-				i=quiltIndex>=0?Mathf.Clamp(quiltIndex,0,i-1):(i/2-1);// HalfLengthToIndex
+				i=quiltIndex>=0?Mathf.Clamp(quiltIndex,0,i-1):(i.GetMiddle());
 				i=quiltIndexes[i];
 			}
 			return i;

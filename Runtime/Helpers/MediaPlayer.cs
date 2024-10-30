@@ -74,7 +74,6 @@ namespace YouSingStudio.Holograms {
 			m_Wait=new WaitForSeconds(1.0f/refresh.x);
 			//
 			if(video!=null) {
-				video.isLooping=false;
 				video.waitForFirstFrame=true;
 				video.timeUpdateMode=VideoTimeUpdateMode.GameTime;
 				//
@@ -146,6 +145,7 @@ namespace YouSingStudio.Holograms {
 				Quilt(tex,m_Path);
 			}else if(UnityExtension.IsVideo(ext)) {
 				video.url=m_Path;
+				video.isLooping=false;// For shared VideoPlayer.
 				video.skipOnDrop=false;
 				video.Play();
 			}
@@ -174,6 +174,7 @@ namespace YouSingStudio.Holograms {
 		// Events
 
 		protected virtual void OnVideoPrepared(VideoPlayer _) {
+			if(!isActiveAndEnabled) {return;}// For shared VideoPlayer.
 			Log("Prepare for playing "+m_Path);
 			Quilt(video.GetTexture(),m_Path);
 			//
@@ -197,6 +198,7 @@ namespace YouSingStudio.Holograms {
 		}
 
 		protected virtual void OnVideoLooped(VideoPlayer _) {
+			if(!isActiveAndEnabled) {return;}// For shared VideoPlayer.
 			if(!m_Loop) {return;}
 			//
 			Log("Replay "+m_Path);

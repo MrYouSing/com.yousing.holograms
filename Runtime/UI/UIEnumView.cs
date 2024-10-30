@@ -32,7 +32,7 @@ namespace YouSingStudio.Holograms {
 			if(op!=null) {op.Clear();}
 			for(int i=0,imax=keys?.Length??0,icnt=m_Toggles?.Length??0;i<imax;++i) {
 				int n=i;T v=values[i];string s=v.ToString();
-				sm.Add(name+"."+s,()=>OnValueChanged(v),GetKeys(keys[i]));
+				sm.Add(name+"."+s,()=>OnValueChanged(v),ShortcutManager.GetKeys(keys[i],modifiers));
 				if(string.IsNullOrEmpty(GetString(i))) {s=s.Tr();}else {s=GetString(i);}
 				SetText(i,s);BindToggle(i,(x)=>OnToggleChanged(n,x));
 				//
@@ -59,13 +59,6 @@ namespace YouSingStudio.Holograms {
 		#endregion Unity Messages
 
 		#region Methods
-
-		protected virtual Key[] GetKeys(Key key) {
-			if(key!=Key.None) {
-				int i=0,imax=modifiers?.Length??0;Key[] tmp=new Key[imax+1];
-				for(;i<imax;++i) {tmp[i]=modifiers[i];}tmp[i]=key;return tmp;
-			}else {return null;}
-		}
 
 		protected virtual void OnToggleChanged(int i,bool b) {
 			if(isActiveAndEnabled) {

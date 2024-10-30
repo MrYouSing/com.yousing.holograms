@@ -31,5 +31,17 @@ namespace YouSingStudio.Holograms {
 		/// <seealso href="https://docs.lookingglassfactory.com/software-tools/looking-glass-studio/quilt-photo-video"/>
 		/// </summary>
 		Quilt,
+		/// <summary>
+		/// <seealso cref="GameObject"/>
+		/// </summary>
+		Model,
+	}
+
+	/// <summary>
+	/// <seealso cref="UnityEngine.UI.Slider"/>
+	/// </summary>
+	public interface ISlider {
+		Vector2 Range{get;}
+		float Value{get;set;}
 	}
 }

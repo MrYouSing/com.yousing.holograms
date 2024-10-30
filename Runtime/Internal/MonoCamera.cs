@@ -9,6 +9,8 @@ namespace YouSingStudio.Holograms {
 	{
 		#region Fields
 
+		public static bool s_AllowDummy=false;
+
 		public HologramDevice device;
 		public QuiltTexture quilt;
 		public VirtualDisplay display;
@@ -22,7 +24,7 @@ namespace YouSingStudio.Holograms {
 			PrepareCamera();
 			if(device!=null&&display!=null) {
 #if !UNITY_EDITOR
-				if(device.IsPresent())
+				if(s_AllowDummy||device.IsPresent())
 #endif
 				SetupCamera();
 			}
@@ -30,6 +32,14 @@ namespace YouSingStudio.Holograms {
 
 		protected virtual void OnDestroy() {
 			DestroyCamera();
+		}
+
+		protected virtual void OnEnable (){
+			if(device!=null) {device.enabled=true;}
+		}
+
+		protected virtual void OnDisable (){
+			if(device!=null) {device.enabled=false;}
 		}
 #if UNITY_EDITOR
 		protected virtual void OnDrawGizmos()=>DrawGizmos(false);

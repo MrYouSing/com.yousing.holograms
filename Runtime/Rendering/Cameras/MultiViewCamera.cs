@@ -46,11 +46,11 @@ namespace YouSingStudio.Holograms {
 			Bounds b=GetBounds(t.position);Vector3 c=b.center,e=b.extents;
 			float z=camera.GetPlaneDepth(e.y*2.0f);Quaternion q=Quaternion.identity;
 			float a=camera.GetPlaneHeight(z-e.z);z=camera.GetPlaneHeight(z+e.z);
-			UnityExtension.DrawFrustum(q,
+			UnityExtension.DrawWireBox(q,
 				new Vector3(0.0f,0.0f,c.z-e.z),new Vector2(a*k,a),// Near
 				new Vector3(0.0f,0.0f,c.z+e.z),new Vector2(z*k,z));// Far
 			if(selected) {Gizmos.color=Color.blue;}
-			UnityExtension.DrawWirePlane(Vector3.zero,q,new Vector2(e.x*2.0f,e.y*2.0f));// Focus
+			UnityExtension.DrawWireQuad(Vector3.zero,q,new Vector2(e.x*2.0f,e.y*2.0f));// Focus
 			//
 			if(d) {UnityEditor.EditorUtility.SetDirty(this);}
 			t=camera.transform;t.hasChanged=false;
@@ -64,7 +64,7 @@ namespace YouSingStudio.Holograms {
 			f=f*f/(9*9+16*16);
 			f=0.06f/(16*Mathf.Sqrt(f));
 			depth=new Vector3(0.5f,f,0.0f);
-			cone=54;
+			cone=40;
 			if(camera!=null) {
 				Transform t=camera.transform;
 				camera.fieldOfView=14.0f;
@@ -80,9 +80,13 @@ namespace YouSingStudio.Holograms {
 			if(device==null||camera==null) {return;}
 			if(focus==null) {focus=transform;}
 			m_Viewer=camera.transform;
+			m_RT0=device.quiltTexture as RenderTexture;
 			//
 			Vector4 w=device.PreferredSize();int d=0;
-			m_RT0=RenderTexture.GetTemporary((int)w.x,(int)w.y,d,HologramDevice.s_GraphicsFormat);
+			if(m_RT0==null) {
+				m_RT0=RenderTexture.GetTemporary((int)w.x,(int)w.y,d,HologramDevice.s_GraphicsFormat);
+				m_RT0.name=UnityExtension.s_TempTag;
+			}
 			m_RT1=RenderTexture.GetTemporary((int)(w.x/w.z),(int)(w.y/w.w),d,HologramDevice.s_GraphicsFormat);
 			m_Preview=!preview;
 			device.onPreRender+=Render;
@@ -96,8 +100,8 @@ namespace YouSingStudio.Holograms {
 		public override void DestroyCamera() {
 			//base.DestroyCamera();
 			//
-			m_RT0.Free();m_RT1.Free();
-			m_RT0=m_RT1=null;
+			if(m_RT0.IsTemporary()) {m_RT0.Free();}
+			m_RT1.Free();m_RT0=m_RT1=null;
 		}
 
 		protected virtual Rect ScreenRect(int x,int y,float w,float h) {
@@ -112,8 +116,7 @@ namespace YouSingStudio.Holograms {
 		}
 
 		public virtual Bounds GetBounds(Vector3 point) {
-			Transform t=m_Viewer!=null?m_Viewer:camera.transform;
-			float h=camera.GetPlaneHeight(t.InverseTransformPoint(point).z),d=h*depth.y+depth.z;
+			float h=camera.GetPlaneHeight(camera.WorldToDepth(point)),d=h*depth.y+depth.z;
 			point=new Vector3(0.0f,0.0f,d*(0.5f-depth.x));
 			return new Bounds(point,new Vector3(h*GetAspect(),h,d));
 		}
@@ -133,11 +136,21 @@ namespace YouSingStudio.Holograms {
 			InternalRender();
 		}
 
+		protected virtual void ClearBackground() {
+			bool b=false;
+			switch(camera.clearFlags) {
+				case CameraClearFlags.Skybox:b=RenderSettings.skybox==null;break;
+				case CameraClearFlags.Color:b=true;break;
+			}
+			if(b) {GL.Clear(true,true,camera.backgroundColor);}
+		}
+
 		protected virtual void InternalRender() {
 			m_View=camera.worldToCameraMatrix;m_Proj=camera.projectionMatrix;
 			Vector3 v=m_Viewer.position;Quaternion q=m_Viewer.rotation;
 			RenderTexture tmp=m_RT0.Begin();
 			GL.PushMatrix();
+				ClearBackground();
 				Vector3 arm=Quaternion.Inverse(focus.rotation)*(v-focus.position);
 				m_Size=m_RT0.GetSizeI();
 				m_Sweep=arm.z*Mathf.Tan(cone*0.5f*Mathf.Deg2Rad)*2;

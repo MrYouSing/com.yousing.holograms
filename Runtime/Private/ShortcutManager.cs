@@ -153,6 +153,13 @@ namespace YouSingStudio.Private {
 			return key>=Key.RightShift&&key<=Key.AltGr;
 		}
 
+		public static Key[] GetKeys(Key key,params Key[] modifiers) {
+			if(key!=Key.None) {
+				int i=0,imax=modifiers?.Length??0;Key[] tmp=new Key[imax+1];
+				for(;i<imax;++i) {tmp[i]=modifiers[i];}tmp[i]=key;return tmp;
+			}else {return null;}
+		}
+
 		protected virtual void Add(Shortcut shortcut) {
 			if(shortcut!=null&&shortcuts.IndexOf(shortcut)<0) {
 				if(mappings!=null&&mappings.TryGetValue(shortcut.name,out var tmp)) {

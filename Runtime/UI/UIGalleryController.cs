@@ -28,11 +28,19 @@ namespace YouSingStudio.Holograms {
 	{
 		#region Fields
 
+		public static List<string> s_Whitelist=new List<string>{
+			// For General
+			"_preview",
+			// For RGB-D
+			"_depth",
+		};
+
 		[Header("Gallery")]
 		public Transform container;
 		public GameObject prefab;
 		public Transform arrow;
 		public TextureType texture=TextureType.Quilt;
+		public UnityEngine.Video.Video3DLayout layout=UnityEngine.Video.Video3DLayout.SideBySide3D;
 		public int preview;
 		public string[] filters=new string[]{
 			// Image
@@ -42,10 +50,18 @@ namespace YouSingStudio.Holograms {
 			// Video https://docs.lookingglassfactory.com/keyconcepts/quilts/quilt-video-encoding
 			".mp4",
 			".webm",
+			// Model
+			".unity",
+			".ab",// AssetBundle
+			".gltf",
+			".glb",
+			".obj",
+			".fbx",
 		};
 		public List<string> paths=new List<string>();
 		[Header("Controller")]
 		public MediaPlayer player;
+		public StageDirector director;
 		public Key[] keys=new Key[7];
 
 		[System.NonSerialized]protected int m_Index;
@@ -61,6 +77,7 @@ namespace YouSingStudio.Holograms {
 		protected virtual void Start() {
 			this.LoadSettings(name+".json");
 			//
+			MonoCamera.s_AllowDummy=true;
 			var sm=ShortcutManager.instance;int i=0;
 // <!-- Macro.Patch Start
 			sm.Add(name+".Refresh",Refresh,keys[i]);++i;
@@ -93,7 +110,9 @@ namespace YouSingStudio.Holograms {
 			if(!string.IsNullOrEmpty(path)) {
 				//
 				string fn=Path.GetFileNameWithoutExtension(path);
-				if(fn.EndsWith("_depth",UnityExtension.k_Comparison)) {return false;}
+				for(int i=0,imax=s_Whitelist.Count;i<imax;++i) {
+					if(fn.EndsWith(s_Whitelist[i],UnityExtension.k_Comparison)) {return false;}
+				}
 				//
 				for(int i=0,imax=filters?.Length??0;i<imax;++i) {
 					if(path.EndsWith(filters[i],System.StringComparison.OrdinalIgnoreCase)) {return true;}
@@ -167,14 +186,22 @@ namespace YouSingStudio.Holograms {
 			TextureType type=path.ToTextureType(texture);
 			switch(type) {
 				case TextureType.Depth:
+					if(player!=null) {player.Stop();}// Stop the other.
+					if(director!=null) {director.Open("Open RGB-D",path);}
 				break;
 				case TextureType.Stereo:{
 					Vector3 count=path.ParseQuilt();
 					if(!count.TwoPieces()) {path.SetQuilt(path.ParseLayout());}
+					if(director!=null) {director.Set(-1);}// Stop the other.
 					if(player!=null) {player.Play(path);}
 				}break;
 				case TextureType.Quilt:
+					if(director!=null) {director.Set(-1);}// Stop the other.
 					if(player!=null) {player.Play(path);}
+				break;
+				case TextureType.Model:
+					if(player!=null) {player.Stop();}// Stop the other.
+					if(director!=null) {director.Open("Open Model "+Path.GetExtension(path),path);}
 				break;
 			}
 		}
@@ -189,7 +216,7 @@ namespace YouSingStudio.Holograms {
 				case TextureType.Stereo:
 				case TextureType.Depth:
 					count=path.ParseQuilt();
-					if(!count.TwoPieces()) {count=path.ParseLayout();}
+					if(!count.TwoPieces()) {count=path.ParseLayout(layout);}
 				break;
 				case TextureType.Quilt:
 					count=path.ParseQuilt();
@@ -198,12 +225,12 @@ namespace YouSingStudio.Holograms {
 			// TODO: Icons may be wrong because of caches.
 			bool b=tm.assets?.TryGetValue(UnityExtension.s_TempTag+path,out tex)??false;
 			if(!b||tex==null) {
-				b=false;string ext=Path.GetExtension(path);
-				if(UnityExtension.IsImage(ext)) {ext="image_00";}
-				else if(UnityExtension.IsVideo(ext)) {ext="movie_00";}
-				else {ext="Icon_"+ext.Substring(1);}
+				b=false;string icon=Path.GetExtension(path);
+				string pv=Path.Combine(Path.GetDirectoryName(path),Path.GetFileNameWithoutExtension(path)+"_preview.png");
+				if(File.Exists(pv)) {icon=pv;b=true;}// Highest priority.
+				else {icon=tm.ToIconKey(icon);}
 				//
-				tex=tm.Get(ext);if(tex!=null) {
+				tex=tm.Get(icon);if(tex!=null) {
 					a=(float)tex.width/tex.height;
 				}
 			}

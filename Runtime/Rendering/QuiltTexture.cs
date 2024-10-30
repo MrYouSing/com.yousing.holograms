@@ -5,6 +5,7 @@ using UnityEngine.Video;
 namespace YouSingStudio.Holograms {
 	public class QuiltTexture
 		:MonoBehaviour
+		,ISlider
 	{
 		#region Fields
 
@@ -18,6 +19,8 @@ namespace YouSingStudio.Holograms {
 		public VideoAspectRatio aspect;
 
 		[System.NonSerialized]protected int m_Id;
+		[System.NonSerialized]protected float m_Value;
+		[System.NonSerialized]protected Vector2 m_Vector;
 		[System.NonSerialized]protected Vector3 m_Args;
 		[System.NonSerialized]protected Dictionary<string,Mesh> m_Meshes=new Dictionary<string,Mesh>();
 
@@ -77,11 +80,14 @@ namespace YouSingStudio.Holograms {
 		}
 
 		public virtual void SetAspect(VideoAspectRatio value) {
+			if(!isActiveAndEnabled) {aspect=value;return;}
+			//
 			if(value!=aspect) {
 				aspect=value;
 				//
-				if(m_Args.sqrMagnitude!=0.0f) {RefreshMesh();}
+				if(m_Args.sqrMagnitude!=0.0f) {RefreshMesh();return;}
 			}
+			UpdateSlider();
 		}
 
 		public virtual Vector4 GetQuad(
@@ -161,15 +167,19 @@ namespace YouSingStudio.Holograms {
 			m_Id=0;aspect=GetAspect(m_Args.z,size.z);
 			string key=GetName(m_Args,size);
 			if(!m_Meshes.TryGetValue(key,out mesh)||mesh==null) {
-				int[] ids=null;Vector3 u=m_Args,v=size;
-				u.z=System.MathF.Sign(u.z);v.z=System.MathF.Sign(v.z);
+				int[] ids=null;int x=(int)(m_Args.x*m_Args.y),y=(int)(size.x*size.y);
+				Vector3 u=new Vector3(x,1.0f,System.MathF.Sign(m_Args.z));
+				Vector3 v=new Vector3(y,1.0f,System.MathF.Sign(size.z));
 				TextAsset ta=Resources.Load<TextAsset>($"Settings/{name}_{u.ToQuilt()}"+
 					(u!=v?("_To_"+v.ToQuilt()):null));
 				if(ta!=null) {
 					ids=Newtonsoft.Json.JsonConvert.DeserializeObject<int[]>(ta.text);
 				}else {
-					float x=m_Args.x*m_Args.y,y=size.x*size.y;
-					if(!Mathf.Approximately(x,y)) {
+					if(x==y) {
+					}else if((float)x/y>=1.7f) {// (11*6)/(8*5)=1.65
+						ids=new int[y];float p=0.0f,d=1.0f/x;
+						for(x=0;x<y;++x) {ids[x]=(int)p;p+=d;}
+					}else {
 						m_Id=Mathf.FloorToInt((x-y)*0.5f);
 						Debug.Log("Offset:"+m_Id);
 					}
@@ -181,6 +191,7 @@ namespace YouSingStudio.Holograms {
 			}
 			//
 			size.z=z;aspect=a;
+			UpdateSlider();
 		}
 
 		public virtual void SetSource(Texture texture,Vector3 args) {
@@ -227,6 +238,28 @@ namespace YouSingStudio.Holograms {
 				gl.material=material;
 				gl.Render(destination);
 #endif
+			}
+		}
+
+		public virtual void UpdateSlider() {
+			m_Vector=mesh!=null?mesh.uv[2]:Vector2.up;
+				m_Vector.y=1.0f-m_Vector.y;
+			m_Value=1.0f;Value=0.0f;
+		}
+
+		Vector2 ISlider.Range=>new Vector2(-1.0f,1.0f);
+
+		public virtual float Value {
+			get {
+				bool b=isActiveAndEnabled;
+				if(b) {b=!UnityExtension.Approximately(m_Vector.sqrMagnitude,0);}
+				return b?m_Value:float.NaN;
+			}
+			set {
+				if(value==m_Value) {return;}
+				m_Value=value;
+				//
+				if(material!=null) {material.mainTextureOffset=m_Vector*m_Value;}
 			}
 		}
 

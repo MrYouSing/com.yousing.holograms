@@ -195,9 +195,10 @@ MonoBehaviour:
   device: {fileID: 3477143271935593989}
   quilt: {fileID: 0}
   display: {fileID: 0}
+  devices: []
   camera: {fileID: 9127592113707809575}
   focus: {fileID: 0}
   preview: 0
-  snap: 1
+  cone: 40
   plane: 2
   depth: {x: 0.5, y: 0.47548592, z: 0}

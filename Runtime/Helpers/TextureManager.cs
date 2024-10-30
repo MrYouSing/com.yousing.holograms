@@ -1,10 +1,9 @@
 using System.IO;
 using UnityEngine;
-using YouSingStudio.Private;
 
 namespace YouSingStudio.Holograms {
 	public class TextureManager
-		:AssetManager<Texture,TextureManager>
+		:Private.AssetManager<Texture,TextureManager>
 	{
 		#region Fields
 		#endregion Fields
@@ -19,7 +18,7 @@ namespace YouSingStudio.Holograms {
 					tex.LoadImage(File.ReadAllBytes(path));
 					tex.name=path;return tex;
 				}else {
-					return AssetManager.Load<Texture>(path);
+					return Private.AssetManager.Load<Texture>(path);
 				}
 			}
 			return base.Load(path);
@@ -54,6 +53,15 @@ namespace YouSingStudio.Holograms {
 				else {Texture.Destroy(it);}
 			}
 			assets.Clear();
+		}
+
+		public virtual string ToIconKey(string ext) {
+			string key="Icon_"+ext.Substring(1);
+			if(assets?.ContainsKey(key)??false) {}
+			else if(UnityExtension.IsImage(ext)) {key="image_00";}
+			else if(UnityExtension.IsVideo(ext)) {key="movie_00";}
+			else if(UnityExtension.IsModel(ext)) {key="model_00";}
+			return key;
 		}
 
 		#endregion Methods

@@ -5,7 +5,8 @@ using UnityEngine.Video;
 
 namespace YouSingStudio.Holograms {
 	public class DepthRenderer
-		:MonoBehaviour
+		:TextureRenderer
+		,ISlider
 	{
 		#region Fields
 
@@ -16,38 +17,33 @@ namespace YouSingStudio.Holograms {
 		public static Dictionary<int,Mesh> s_Meshes=new Dictionary<int,Mesh>();
 
 		[Header("Arguments")]
-		[SerializeField]protected string m_Path;
-		public Vector2Int resolution=Vector2Int.zero;
-		public Video3DLayout layout;
 		public bool fixRange;
 		public bool saveVector;
 		[Header("Components")]
+		public new Camera camera;
 		public HologramDevice device;
-		public Transform root;
-		public new Renderer renderer;
 		[Header("Rendering")]
-		public Material material;
-		public Texture color;
 		public Texture depth;
 		public Vector2 range;
 		public Vector2 factor;
 
-		[System.NonSerialized]protected bool m_IsInited;
-		[System.NonSerialized]protected Transform m_Renderer;
+		[System.NonSerialized]protected float m_Value;
+		[System.NonSerialized]protected Vector3 m_Vector;
+		[System.NonSerialized]protected Vector2Int m_Size;
 
 		#endregion Fields
 
 		#region Unity Messages
 
-		protected virtual void Start() {
+		protected override void Start() {
 			if(!m_IsInited) {
 				//
 				bool b=saveVector;saveVector=true;
 					UpdateVector();// Write start vector.
 				saveVector=b;
 				//
-				if(color!=null) {Play(m_Path,color,depth);}
-				else if(!string.IsNullOrEmpty(m_Path)) {Play(m_Path);}
+				if(!string.IsNullOrEmpty(m_Path)) {Play(m_Path);}
+				else if(texture!=null) {Render(m_Path,texture,depth);}
 			}
 		}
 
@@ -73,14 +69,15 @@ namespace YouSingStudio.Holograms {
 			return Path.Combine(dir,path+"_depth"+ext);
 		}
 
-		public virtual void Play(string path) {
+		public override void PlayImage(string path) {
 			TextureManager tm=TextureManager.instance;
-			Texture rgb=tm.Get(m_Path=path);if(rgb==null) {Stop();return;}
-			path=Path.Combine(ToDepth(path));
-			Texture d=tm.Get(path);Play(m_Path,rgb,d);
+			Texture rgb=tm.Get(m_Path=path);if(rgb==null) {return;}
+			Texture d=tm.Get(ToDepth(m_Path));Render(m_Path,rgb,d);
 		}
 
-		protected virtual void Init() {
+		public override void Render(Texture value)=>Render(m_Path,value,null);
+
+		protected override void Init() {
 			if(m_IsInited) {return;}
 			m_IsInited=true;
 			//
@@ -128,44 +125,38 @@ namespace YouSingStudio.Holograms {
 			return m;
 		}
 
-		public virtual void Stop() {
-			if(!m_IsInited) {Init();}
-			//
-			if(renderer!=null) {renderer.enabled=false;}
+		public override void Stop() {
+			base.Stop();
 			range=factor=Vector2.zero;
 		}
 
-		public virtual void Play(string path,Texture rgb,Texture d) {
+		public virtual void Render(string path,Texture rgb,Texture d) {
 			if(!m_IsInited) {Init();}
-			m_Path=path;color=rgb;depth=d;
 			//
-			Vector2Int size=color.GetSizeI();
+			m_Path=path;texture=rgb;depth=d;m_Size=texture.GetSizeI();
+			if(!string.IsNullOrEmpty(m_Path))layout=m_Path.To3DLayout();
 			if(depth==null) {
-				depth=color;size.x/=2;
+				depth=texture;m_Size.x/=2;
+				if(layout==Video3DLayout.No3D) {layout=Video3DLayout.SideBySide3D;}
 				material.Set(_MainTex,layout.GetRect(0));
 				material.Set(_Depth,layout.GetRect(1));
 			}else {
 				material.Set(_MainTex,Vector2.zero,Vector2.one);
 				material.Set(_Depth,Vector2.zero,Vector2.one);
 			}
-			color.wrapMode=TextureWrapMode.Clamp;material.SetTexture(_MainTex,color);
+			texture.wrapMode=TextureWrapMode.Clamp;material.SetTexture(_MainTex,texture);
 			depth.wrapMode=TextureWrapMode.Clamp;material.SetTexture(_Depth,depth);
 			if(renderer!=null) {renderer.enabled=true;}
 			//
 			if(s_Vectors.TryGetValue(m_Path,out var v)) {
 				range.Set(v.x,v.y);factor.Set(v.z,v.w);
-				if(range.sqrMagnitude==0.0f) {range=GetRange(depth,depth==color);}
+				if(range.sqrMagnitude==0.0f) {range=GetRange(depth,depth==texture);}
 			}else {
-				range=GetRange(depth,depth==color);factor=Vector2.right;
+				range=GetRange(depth,depth==texture);factor=Vector2.right;
 			}
 			UpdateVector();
-			//
-			int r=GetResolution(resolution,size);
-			if(!s_Meshes.TryGetValue(r,out var m)) {
-				m=GetMesh(r);s_Meshes[r]=m;
-			}
-			renderer.Set(m);
-			m_Renderer.localScale=new Vector3((float)size.x/size.y,1.0f,1.0f);
+			UpdateMesh();
+			UpdateTransform();
 		}
 
 		public virtual void UpdateVector() {
@@ -175,6 +166,48 @@ namespace YouSingStudio.Holograms {
 			if(v.sqrMagnitude==0.0f) {return;}
 			if(material!=null) {material.SetVector(_Vector,v);}
 			if(saveVector&&m_Path!=null) {s_Vectors[m_Path]=v;}
+		}
+
+		public virtual void UpdateMesh() {
+			if(!m_IsInited) {Init();}
+			//
+			int r=GetResolution(resolution,m_Size);
+			if(!s_Meshes.TryGetValue(r,out var m)) {
+				m=GetMesh(r);s_Meshes[r]=m;
+			}
+			renderer.Set(m);
+		}
+
+		public override void UpdateTransform() {
+			if(!m_IsInited) {Init();}
+			//
+			float f;if(camera!=null) {
+				f=camera.WorldToDepth(root.position);
+				f=camera.GetPlaneHeight(f);
+				Transform p=root.parent;if(p!=null) {f/=p.lossyScale.x;}
+				root.localScale=new Vector3(f,f,root.localScale.z);
+			}
+			f=device!=null?Mathf.Abs(device.ParseQuilt().z):((float)Screen.width/Screen.height);
+			Vector2 v=UnityExtension.FitScale(new Vector2((float)m_Size.x/m_Size.y,1.0f),new Vector2(f,1.0f),aspect);
+			m_Renderer.localScale=new Vector3(v.x,v.y,1.0f);
+			m_Vector=new Vector3(v.x-f,v.y-1.0f,0.0f)*0.5f;
+			m_Value=-1.0f;Value=0.0f;
+		}
+
+		Vector2 ISlider.Range=>new Vector2(-1.0f,1.0f);
+
+		public virtual float Value {
+			get {
+				bool b=isActiveAndEnabled;
+				if(b) {b=!UnityExtension.Approximately(m_Vector.sqrMagnitude,0);}
+				return b?m_Value:float.NaN;
+			}
+			set {
+				if(value==m_Value) {return;}
+				m_Value=value;
+				//
+				if(m_Renderer!=null) {m_Renderer.localPosition=m_Vector*m_Value;}
+			}
 		}
 
 		#endregion Methods
