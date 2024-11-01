@@ -22,7 +22,7 @@ namespace YouSingStudio.Holograms {
 		#region Methods
 
 		protected override void Start() {
-			this.LoadSettings(name+".json");
+			this.LoadSettings(name);
 			base.Start();
 		}
 

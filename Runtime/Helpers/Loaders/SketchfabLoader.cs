@@ -16,7 +16,7 @@ namespace YouSingStudio.Holograms {
 		#region Unity Messages
 
 		protected override void Start() {
-			this.LoadSettings(name+".json");
+			this.LoadSettings(name);
 #if ENABLE_SKETCHFAB_API
 			if(SketchfabAPI.Authorized) {OnAccess(null);}
 			else {SketchfabAPI.GetAccessToken(email,password,OnAccess);}

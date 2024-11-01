@@ -1,3 +1,6 @@
+#if DEBUG
+#define _DEBUG
+#endif
 using System.Collections;
 using System.IO;
 using UnityEngine;
@@ -35,7 +38,7 @@ namespace YouSingStudio.Holograms {
 		[System.NonSerialized]protected string m_Path;
 		[System.NonSerialized]protected RenderTexture m_RT;
 		[System.NonSerialized]protected YieldInstruction m_Wait;
-		[System.NonSerialized]protected System.IDisposable m_FFmpeg;
+		[System.NonSerialized]protected Private.AsyncTask m_FFmpeg;
 
 		#endregion Fields
 
@@ -50,12 +53,13 @@ namespace YouSingStudio.Holograms {
 		#region Methods
 
 		public virtual void Log(string msg) {
+#if _DEBUG
 			Debug.Log(msg);
+#endif
 			if(text!=null) {text.text=msg;}
 		}
 
 		public virtual string GetPath(string path) {
-			// TODO: For Mp4ToPng.exe
 			return path;
 		}
 
@@ -68,7 +72,7 @@ namespace YouSingStudio.Holograms {
 			if(m_IsInited) {return;}
 			m_IsInited=true;
 			//
-			this.LoadSettings(name+".json");
+			this.LoadSettings(name);
 			if(device==null) {device=GetComponent<HologramDevice>();}
 			if(video==null) {video=FindAnyObjectByType<VideoPlayer>();}
 			m_Wait=new WaitForSeconds(1.0f/refresh.x);
@@ -159,7 +163,7 @@ namespace YouSingStudio.Holograms {
 			if(!m_IsInited) {Init();}
 			//
 			StopCoroutine("OnVideoTicked");m_Retry=0;
-			m_FFmpeg?.Dispose();m_FFmpeg=null;
+			m_FFmpeg?.Kill();m_FFmpeg=null;
 			m_Loop=false;video.url=m_Path=null;
 			video.GetTexture().Clear();
 			//
@@ -238,7 +242,7 @@ namespace YouSingStudio.Holograms {
 		}
 
 		protected virtual void OnVideoConverted() {
-			m_FFmpeg?.Dispose();m_FFmpeg=null;// Stop other.
+			m_FFmpeg?.Kill();m_FFmpeg=null;// Stop other.
 			//
 			if(m_Retry>0) {Log("Retry "+m_Retry+"/"+refresh.w);}
 			Log("VideoPlayer load a picture at "+m_Path);

@@ -53,7 +53,7 @@ namespace YouSingStudio.Holograms {
 		#region Unity Messages
 
 		protected virtual void Start() {
-			this.LoadSettings(name+".json");
+			this.LoadSettings(name);
 // <!-- Macro.Patch Start
 			BindSlider(k_Scale,SetScale);
 			BindSlider(k_Offset,SetOffset);

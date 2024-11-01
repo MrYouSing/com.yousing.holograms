@@ -75,7 +75,7 @@ namespace YouSingStudio.Holograms {
 		#region Unity Messages
 
 		protected virtual void Start() {
-			this.LoadSettings(name+".json");
+			this.LoadSettings(name);
 			//
 			MonoCamera.s_AllowDummy=true;
 			var sm=ShortcutManager.instance;int i=0;

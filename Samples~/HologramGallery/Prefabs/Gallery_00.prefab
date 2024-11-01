@@ -286,7 +286,7 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3954787689342202147}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -1042,9 +1042,15 @@ MonoBehaviour:
   - .png
   - .mp4
   - .webm
+  - .ab
+  - .unity
+  - .obj
+  - .gltf
+  - .glb
   paths:
+  - Holograms
   - $(StreamingAssets)/Holograms
-  - ' $(AppData)/Roaming/3DGallery/downloads/'
+  - $(AppData)/Roaming/3DGallery/downloads/
   player: {fileID: 0}
   keys: 1e0100000d0000006f00000014010000130100001101000012010000
 --- !u!1001 &1043740386498750835

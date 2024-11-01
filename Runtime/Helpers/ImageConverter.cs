@@ -74,7 +74,7 @@ namespace YouSingStudio.Holograms {
 			public string path;
 			public System.Action<string,string> action;
 
-			public override void OnComplete() {
+			protected override void OnComplete() {
 				int i=id;string t=Path.Combine(settings.temporary,(i%settings.maxTasks).ToString("0000")+".png");
 				//if(File.Exists(t)) {File.Delete(t);}
 				int tc=System.Environment.TickCount;
@@ -95,10 +95,6 @@ namespace YouSingStudio.Holograms {
 					OnFFmpegConvert(path);base.OnComplete();
 				}
 			}
-
-			public override void OnKill() {
-				base.OnKill();
-			}
 		}
 
 		#endregion Nested Types
@@ -116,7 +112,7 @@ namespace YouSingStudio.Holograms {
 			if(s_IsInited) {return;}
 			s_IsInited=true;
 			//
-			settings.LoadSettings(nameof(ImageConverter)+".json");
+			settings.LoadSettings(nameof(ImageConverter));
 			s_VideoPlayer=s_FFmpeg=0;
 			// Create a temporary path.
 			if(string.IsNullOrEmpty(settings.temporary)) {
@@ -151,7 +147,7 @@ namespace YouSingStudio.Holograms {
 			return !string.IsNullOrEmpty(settings.ffmpeg);
 		}
 
-		public static System.IDisposable VideoToImage(string path,System.Action<string,string> action) {
+		public static AsyncTask VideoToImage(string path,System.Action<string,string> action) {
 			if(!s_IsInited) {Init();}
 			//
 			if(File.Exists(path)) {return FFmpeg.Obtain(path,action);}

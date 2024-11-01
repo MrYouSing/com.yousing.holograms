@@ -77,7 +77,7 @@ namespace YouSingStudio.Holograms {
 			if(m_IsInited) {return;}
 			m_IsInited=true;
 			//
-			this.LoadSettings(name+".json");
+			this.LoadSettings(name);
 			//
 			if(resolution.sqrMagnitude==0) {
 				resolution.Set(Screen.width,Screen.height);

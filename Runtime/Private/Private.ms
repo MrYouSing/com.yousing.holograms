@@ -1,9 +1,13 @@
+/* <!-- Macro.Define bFixPatch=
+true
+ Macro.End --> */
 /* <!-- Macro.Table Replace
 .IO {,$(Namespace)
 .InputExtensions {,$(Namespace)
 .UI {,$(Namespace)
 $(Namespace),.Private {
 using UnityEngine;,using UnityEngine;using YouSingStudio.Holograms;
+using YouSingStudio.Events;,
  Macro.End --> */
 
 //<!-- Macro.File ScriptableView.cs
@@ -77,6 +81,38 @@ else if(asset is,if(asset is
 //<!-- Macro.File ScreenManager.Windows.cs
 /* <!-- Macro.Copy File
 :Packages/com.yousing.io/Runtime/Modules/DeviceModule/$(GeneratedFileName).cs
+ Macro.End --> */
+/* <!-- Macro.Replace Replace
+ Macro.End --> */
+// Macro.End -->
+
+//<!-- Macro.File MonoSingleton.cs
+/* <!-- Macro.Copy File
+:Packages/com.yousing.io/Runtime/Internal/$(GeneratedFileName).cs
+ Macro.End --> */
+/* <!-- Macro.Replace Replace
+ Macro.End --> */
+// Macro.End -->
+
+//<!-- Macro.File OAuthBehaviour.cs
+/* <!-- Macro.Copy File
+:Packages/com.yousing.io/Runtime/OS/$(GeneratedFileName).cs
+ Macro.End --> */
+/* <!-- Macro.Replace Replace
+ Macro.End --> */
+/* <!-- Macro.Replace 
+&#44;OAuthAPI.API,
+OAuthAPI.Se,//
+OAuthAPI.k_Type_Register,0
+OAuthAPI.k_Type_Verify,1
+OAuthAPI.k_Type_Login,2
+OAuthAPI.k_Type_Logout,3
+ Macro.End --> */
+// Macro.End -->
+
+//<!-- Macro.File CursorManager.cs
+/* <!-- Macro.Copy File
+:Packages/com.yousing.ui/Runtime/Managers/$(GeneratedFileName).cs
  Macro.End --> */
 /* <!-- Macro.Replace Replace
  Macro.End --> */

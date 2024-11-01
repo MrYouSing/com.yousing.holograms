@@ -1,4 +1,3 @@
-using System.IO;
 using Newtonsoft.Json;
 using UnityEngine;
 
@@ -20,7 +19,8 @@ namespace YouSingStudio.Holograms {
 		[JsonProperty("deviation")]
 		public float x0;
 		[Header("Others")]
-		[SerializeField]protected GameObject m_Actor;
+		public string deviceId;
+		public string deviceNumber;
 
 		#endregion Fields
 
@@ -32,13 +32,25 @@ namespace YouSingStudio.Holograms {
 			quiltSize=new Vector2Int((int)v.z,(int)v.w);
 		}
 
+		protected override void OnDestroy() {
+			base.OnDestroy();
+			//
+			var sdk=OpenStageAiSdk.s_Instance;
+			if(sdk!=null) {sdk.onDeviceUpdated-=OnDeviceUpdated;}
+		}
+
 		#endregion Unity Messages
 
 		#region Methods
 
-		public override bool IsPresent() {return FindDisplay(resolution)>=0;}
 		public override Vector3 ParseQuilt()=>quiltTexture!=null?base.ParseQuilt():new Vector3(8.0f,5.0f,0.5625f);
 		public override Vector4 PreferredSize()=>quiltTexture!=null?base.PreferredSize():new Vector4(4320.0f,4800.0f,8.0f,5.0f);
+
+		public override bool IsPresent() {
+			var sdk=OpenStageAiSdk.instance;
+			if(sdk!=null) {return !string.IsNullOrEmpty(sdk.hardwareSN);}
+			return FindDisplay(resolution)>=0;
+		}
 
 		protected override void InternalRender() {
 			if(material!=null) {
@@ -53,14 +65,17 @@ namespace YouSingStudio.Holograms {
 			if(m_IsInited) {return;}
 			base.Init();
 			//
+			var sdk=OpenStageAiSdk.instance;
+			if(sdk!=null) {sdk.onDeviceUpdated+=OnDeviceUpdated;}
 			if(material==null) {
 				material=new Material(Shader.Find("Hidden/C1_Blit"));
 			}
-			string fn="$(AppData)/Roaming/realplayplatform/deviceConfig.json".GetFullPath();
-			if(File.Exists(fn)) {
-				JsonConvert.PopulateObject(File.ReadAllText(fn),this);
-				Debug.Log("Load official settings at "+fn);
-				if(m_Actor!=null) {m_Actor.SetActive(true);}
+		}
+
+		protected virtual void OnDeviceUpdated(string text) {
+			if(!string.IsNullOrEmpty(text)) {
+				JsonConvert.PopulateObject(text,this);
+				Debug.Log("Load official settings : "+text);
 			}
 		}
 

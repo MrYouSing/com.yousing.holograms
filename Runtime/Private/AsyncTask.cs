@@ -1,6 +1,7 @@
 // Generated automatically by MacroCodeGenerator (from "Packages/com.yousing.holograms/Runtime/Private/Private.ms")
 
 /* <!-- Macro.Table Events
+Execute,
 Complete,
 Kill,
  Macro.End --> */
@@ -14,33 +15,34 @@ Kill,
  
 /* <!-- Macro.Call  Events
 		public System.Action on{0};
-		public override void On{0}() {{base.On{0}();on{0}?.Invoke();}}
+		protected override void On{0}() {{on{0}?.Invoke();base.On{0}();}}
 
  Macro.End --> */
 /* <!-- Macro.Copy
-		public override void Dispose() {
-			if(id>=0) {
-				base.Dispose();
+		protected override void Reset() {
+			base.Reset();
  Macro.End --> */
 /* <!-- Macro.Call  Events
-				on{0}=null;
+			on{0}=null;
  Macro.End --> */
 /* <!-- Macro.Copy
-				GenericPool<_AsyncTask>.Release(this);
-			}else {
-				base.Dispose();
-			}
 		}
 
  Macro.End --> */
 /* <!-- Macro.Patch
 ,_AsyncTask
  Macro.End --> */
+#if DEBUG
+#define _DEBUG
+#endif
 using System.Threading;
 using UnityEngine;using YouSingStudio.Holograms;
 using UnityEngine.Pool;
 
 namespace YouSingStudio.Private {
+	/// <summary>
+	/// <seealso href="https://developer.android.google.cn/reference/android/os/AsyncTask"/>
+	/// </summary>
 	public class AsyncTask
 		:System.IDisposable
 	{
@@ -58,12 +60,11 @@ namespace YouSingStudio.Private {
 		#region Fields
 
 		public static Behaviour s_Behaviour=null;
-		public static int s_ID=-1;
+		public static int s_ID=0;
 
-		public int id;
+		public int id=-1;
 		public float delay;
 		public Thread thread;
-		public bool unity;
 
 		#endregion Fields
 
@@ -82,51 +83,76 @@ namespace YouSingStudio.Private {
 			else {action?.Invoke();}
 		}
 
-		public static AsyncTask Obtain(float delay,System.Action onComplete,System.Action onKill) {
+		public static AsyncTask Obtain(float delay,System.Action onExecute=null,System.Action onComplete=null,System.Action onKill=null) {
 			var tmp=GenericPool<_AsyncTask>.Get();
-				++s_ID;tmp.id=s_ID;
 				tmp.delay=delay;
 // <!-- Macro.Patch Obtain
+				tmp.onExecute=onExecute;
 				tmp.onComplete=onComplete;
 				tmp.onKill=onKill;
 // Macro.Patch -->
 			return tmp;
 		}
 
-		public virtual void Reset() {
+		public AsyncTask() {
+			++s_ID;id=s_ID;// TODO: <0:Disposed,0:Ready to be killed,[1,id]:Valid instance.
+		}
+
+		protected virtual void Reset() {
 			id=-(id+1);delay=0.0f;
 			/*thread?.Abort();*/thread=null;
 		}
 
+		protected virtual void Recycle() {
+		}
+
+		/// <summary>
+		/// Stop the task hardly.
+		/// </summary>
 		public virtual void Dispose() {
-			if(id>=0) {
-				Reset();
+			if(id>=0) {// TODO: Valid instance.
+				Reset();Recycle();
 			}else {
 				Debug.LogWarning("It is disposed.");
 			}
 		}
 
-		public virtual void OnComplete() {
+		protected virtual void OnExecute() {
 #if _DEBUG
-			Debug.Log("Complete the AsyncTask@"+id);
+			Debug.Log("Execute the AsyncTask@"+id);
 #endif
 		}
 
-		public virtual void OnKill() {
+		protected virtual void OnComplete() {
+#if _DEBUG
+			Debug.Log("Complete the AsyncTask@"+id);
+#endif
+			Dispose();
+		}
+
+		protected virtual void OnKill() {
 #if _DEBUG
 			Debug.Log("Kill the AsyncTask@"+(id<0?(-id-1):id));
 #endif
+			Dispose();
 		}
 
 		public virtual System.Collections.IEnumerator Run() {
 			int i=id;float t=Time.time+delay;
 			while(Time.time<t) {yield return null;}
 			//
-			if(id==i) {OnComplete();}
-			else {OnKill();}
+			if(id==i) {OnExecute();}
+			//
+			if(id<0) {}// TODO: Disposed.
+			else if(id==i) {OnComplete();}
+			else if(id<i) {OnKill();}
+			// TODO: else if(i<id) New Instance.
 		}
 
 		public virtual Coroutine StartAsCoroutine() {
+			if(id<0) {// TODO: Disposed.
+				throw new System.ObjectDisposedException(nameof(AsyncTask));
+			}
 			return GetBehaviour().StartCoroutine(Run());
 		}
 
@@ -134,12 +160,26 @@ namespace YouSingStudio.Private {
 			int i=id;int t=(int)(System.Environment.TickCount+delay*1000);
 			while(System.Environment.TickCount<t) {}
 			//
-			if(id==i) {OnEvent(OnComplete,b);}
-			else {OnEvent(OnKill,b);}
+			if(id==i) {OnExecute();}
+			//
+			if(id<0) {}// TODO: Disposed.
+			else if(id==i) {OnEvent(OnComplete,b);}
+			else if(id<i) {OnEvent(OnKill,b);}
+			// TODO: else if(i<id) New Instance.
 		}
 
 		public virtual Thread StartAsThread(bool main=true) {
+			if(id<0) {// TODO: Disposed.
+				throw new System.ObjectDisposedException(nameof(AsyncTask));
+			}
 			thread=new Thread(Run);thread.Start(main);return thread;
+		}
+
+		/// <summary>
+		/// Stop the task softly.
+		/// </summary>
+		public virtual void Kill() {
+			if(id>0) {--id;}// TODO: <0:Disposed,==0:Ready to be killed.
 		}
 
 		#endregion Methods
@@ -150,27 +190,8 @@ namespace YouSingStudio.Private {
 	{
 		#region Methods
 
-		public static AsyncTask<T> Obtain() {
-			AsyncTask<T> tmp=GenericPool<T>.Get();
-			++s_ID;tmp.id=s_ID;return tmp;
-		}
-
-		public override void Dispose() {
-			if(id>=0) {
-				base.Dispose();
-				GenericPool<AsyncTask<T>>.Release(this);
-			}else {
-				base.Dispose();
-			}
-		}
-
-		public override void OnComplete() {
-			base.OnComplete();Dispose();
-		}
-
-		public override void OnKill() {
-			base.OnKill();Dispose();
-		}
+		public static AsyncTask<T> Obtain()=>GenericPool<T>.Get();
+		protected override void Recycle()=>GenericPool<AsyncTask<T>>.Release(this);
 
 		#endregion Methods
 	}
@@ -179,23 +200,25 @@ namespace YouSingStudio.Private {
 		:AsyncTask
 	{
 // <!-- Macro.Patch _AsyncTask
+		public System.Action onExecute;
+		protected override void OnExecute() {onExecute?.Invoke();base.OnExecute();}
+
 		public System.Action onComplete;
-		public override void OnComplete() {base.OnComplete();onComplete?.Invoke();}
+		protected override void OnComplete() {onComplete?.Invoke();base.OnComplete();}
 
 		public System.Action onKill;
-		public override void OnKill() {base.OnKill();onKill?.Invoke();}
+		protected override void OnKill() {onKill?.Invoke();base.OnKill();}
 
-		public override void Dispose() {
-			if(id>=0) {
-				base.Dispose();
-				onComplete=null;
-				onKill=null;
-				GenericPool<_AsyncTask>.Release(this);
-			}else {
-				base.Dispose();
-			}
+		protected override void Reset() {
+			base.Reset();
+			onExecute=null;
+			onComplete=null;
+			onKill=null;
 		}
 
 // Macro.Patch -->
+		protected override void Recycle() {
+			GenericPool<_AsyncTask>.Release(this);
+		}
 	}
 }

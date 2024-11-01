@@ -20,6 +20,11 @@ namespace YouSingStudio.Holograms {
 		public Transform target;
 		[Tooltip("x:T\ny:R\nz:S\nw:Wheel")]
 		public Vector4 sensitivity=Vector4.one;
+		public int[] buttons=new int[]{0,1,2};
+		public KeyCode[] modifiers=new KeyCode[]{
+			KeyCode.RightShift+0,KeyCode.RightShift+1,KeyCode.RightShift+2,
+			KeyCode.RightShift+3,KeyCode.RightShift+4,KeyCode.RightShift+5,
+		};
 		[Header("Misc")]// For resolving target role.
 		public Transform stage;
 		public Transform viewer;
@@ -63,7 +68,7 @@ namespace YouSingStudio.Holograms {
 		}
 
 		public virtual void OnPointerDown(PointerEventData e) {
-			SetAction((m_Action&0xFF00)|(1+(int)e.button));
+			SetAction((m_Action&0xFF00)|(1+buttons[(int)e.button]));
 		}
 
 		public virtual void OnPointerUp(PointerEventData e) {
@@ -74,12 +79,10 @@ namespace YouSingStudio.Holograms {
 
 		#region Methods
 
-		public static int GetModifiers() {
-			int m=0;KeyCode e=KeyCode.RightShift;
-			for(int i=0;i<3;++i,e+=2) {
-				if(Input.GetKey(e)||Input.GetKey(e+1)) {m|=1<<i;}
-			}
-			return m;
+		public static int GetModifiers(KeyCode[] keys) {
+			int m=0;for(int i=0,imax=keys?.Length??0;i<imax;++i) {
+				if(Input.GetKey(keys[2*i])||Input.GetKey(keys[2*i+1])) {m|=1<<i;}
+			}return m;
 		}
 
 		public static float ToScale(float value) {
@@ -121,7 +124,7 @@ namespace YouSingStudio.Holograms {
 
 		protected virtual void OnInput() {
 			m_Mouse.z-=Input.GetAxisRaw("Mouse ScrollWheel")*sensitivity.w;
-			SetAction((GetModifiers()<<8)|(m_Action&0xFF));
+			SetAction((GetModifiers(modifiers)<<8)|(m_Action&0xFF));
 			if(viewer!=null) {s_PlaneScale=GetPlane(target.position)/m_Start.y;}
 		}
 

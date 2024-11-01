@@ -33,7 +33,7 @@ namespace YouSingStudio.Holograms {
 		#region Unity Messages
 
 		protected virtual void Start() {
-			this.LoadSettings(name+".json");
+			this.LoadSettings(name);
 			//
 			var sm=ShortcutManager.instance;int i=0;
 // <!-- Macro.Patch Start

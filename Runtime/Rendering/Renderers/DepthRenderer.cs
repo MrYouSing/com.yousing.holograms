@@ -81,7 +81,7 @@ namespace YouSingStudio.Holograms {
 			if(m_IsInited) {return;}
 			m_IsInited=true;
 			//
-			this.LoadSettings(name+".json");
+			this.LoadSettings(name);
 			if(material==null) {material=new Material(Shader.Find("Unlit/Offset By Depth"));}
 			if(renderer==null) {renderer=GetComponentInChildren<Renderer>();}
 			renderer.sharedMaterial=material;m_Renderer=renderer.transform;

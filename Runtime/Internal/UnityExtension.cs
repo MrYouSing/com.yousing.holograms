@@ -1,6 +1,7 @@
 /* <!-- Macro.Copy File
 :Packages/com.yousing.io/Runtime/Modules/MediaModule/Core/MediaExtension.cs,81~95,229,240~271,278
 :Packages/com.yousing.io/Runtime/APIs/TextureAPI.cs,169,345~354,359~374,479~503,516~529
+:Packages/com.yousing.io/Runtime/Internal/UnityExtension.cs,25~32,11,73~90
 :Packages/com.yousing.input-extensions/Runtime/Internal/LangExtension.cs,15~25
 :Packages/com.yousing.ui/Runtime/Internal/LangExtension.cs,238~243,320~331
 :Packages/com.yousing.ui/Runtime/Internal/UnityExtension.cs,302~324
@@ -25,6 +26,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using UnityEngine;
 using UnityEngine.Video;
 #if DOTNET_GDI_PLUS
@@ -150,6 +152,33 @@ namespace YouSingStudio.Holograms {
 				thiz.End(rt);
 			}
 			return texture;
+		}
+
+		public static void SetRealName(this Object thiz) {// TODO: Fix the "(Clone)".
+			if(thiz!=null) {
+				string key=thiz.name;if(key.EndsWith("(Clone)")) {
+					thiz.name=key.Substring(0,key.Length-"(Clone)".Length).Trim();
+				}
+			}
+		}
+
+		public static IDictionary<string,Object> s_ResourceInstances=null;
+		/// <summary>
+		/// <seealso cref="Object.FindAnyObjectByType{T}()"/><br/>
+		/// <seealso cref="Resources.FindObjectsOfTypeAll{T}()"/>
+		/// </summary>
+		public static T GetResourceInstance<T>(string path) where T:Object {
+			// Find Instance.
+			Object obj=null;bool found;
+			if(s_ResourceInstances!=null) {found=s_ResourceInstances.TryGetValue(path,out obj)&&obj!=null;}
+			else {found=false;s_ResourceInstances=new Dictionary<string,Object>();}
+			// New Instance.
+			if(!found) {T tmp=Resources.Load<T>(path);if(tmp!=null) {
+				string key=tmp.name;// TODO: Fix the "(Clone)".
+					tmp=Object.Instantiate(tmp);Object.DontDestroyOnLoad(tmp);
+				tmp.name=key;s_ResourceInstances[path]=tmp;return tmp;
+			}}
+			return (T)obj;
 		}
 
 		public static T FromJson<T>(string json) {
@@ -281,16 +310,17 @@ namespace YouSingStudio.Holograms {
 #else
 			"";
 #endif
-		public static string[] s_Settings=new string[]{
-			"",
-			"Settings/",
-			"$(StreamingAssets)/Settings/"
+		public static string[] s_SettingPaths=new string[]{
+			"{0}.json",
+			"Settings/{0}.json",
+			"$(StreamingAssets)/Settings/{0}.json"
 		};
 
 		public static Texture2D s_Temp2D;
 		public static Material s_Unlit;
 		public static Camera s_CameraHelper;
 		public static GLRenderer s_GLRenderer;
+		public static JObject s_Settings;
 		public static Dictionary<string,Vector3> s_QuiltMap=new Dictionary<string,Vector3>();
 
 		#endregion Fields
@@ -526,9 +556,14 @@ namespace YouSingStudio.Holograms {
 
 		public static void LoadSettings(this object thiz,string path) {
 			if(thiz!=null) {
-				string it;for(int i=0,imax=s_Settings?.Length??0;i<imax;++i) {
-					it=(s_Settings[i]+path).GetFullPath();
+				string it;for(int i=0,imax=s_SettingPaths?.Length??0;i<imax;++i) {
+					it=string.Format(s_SettingPaths[i],path).GetFullPath();
 					if(File.Exists(it)) {JsonConvert.PopulateObject(File.ReadAllText(it),thiz);return;}
+				}
+				JObject jo=GetSettings();if(jo!=null)  {
+					path=path.Replace(' ','_');JToken jt=jo.SelectToken(path);
+					if(jt==null) {jo.SelectToken(thiz.GetType().Name);}
+					if(jt!=null) {JsonConvert.PopulateObject(jt.ToString(),thiz);}
 				}
 			}
 		}
@@ -728,6 +763,15 @@ namespace YouSingStudio.Holograms {
 				s_GLRenderer.enabled=false;
 			}
 			return s_GLRenderer;
+		}
+
+		public static JObject GetSettings() {
+			if(s_Settings==null) {
+				string fn="settings.json";
+				if(File.Exists(fn)) {s_Settings=JObject.Parse(File.ReadAllText(fn));}
+				else {s_Settings=new JObject();}
+			}
+			return s_Settings;
 		}
 
 		#endregion Methods
