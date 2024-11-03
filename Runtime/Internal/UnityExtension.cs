@@ -6,7 +6,9 @@
 :Packages/com.yousing.ui/Runtime/Internal/LangExtension.cs,238~243,320~331
 :Packages/com.yousing.ui/Runtime/Internal/UnityExtension.cs,302~324
 :Packages/com.yousing.rendering/Runtime/Internal/CameraExtension.cs,81~84,97~114
-:Packages/com.yousing.rendering/Runtime/Internal/GizmoUtility.cs,54,127~137,171~180,186~190,210~218
+:Packages/com.yousing.rendering/Runtime/Internal/GizmoUtility.cs,54,131~141,175~184,190~194,219~226
+:Packages/com.yousing.rendering/Runtime/Geometry/Bounds/GenericBounds.cs,8~21
+:Packages/com.yousing.rendering/Runtime/Geometry/Bounds/UnityBounds.cs,89~100
  Macro.End --> */
 /* <!-- Macro.Replace
 MediaExtension,UnityExtension
@@ -28,6 +30,7 @@ using System.Runtime.InteropServices;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
+using UnityEngine.Pool;
 using UnityEngine.Video;
 #if DOTNET_GDI_PLUS
 using System.Drawing;
@@ -290,6 +293,31 @@ namespace YouSingStudio.Holograms {
 				Gizmos.DrawLine(s_Vector3Array[i],s_Vector3Array[4+i]);
 			}
 		}
+		public static Bounds GetBounds<T>(this IList<T> thiz,System.Func<T,Bounds> func) {
+			Bounds b=new Bounds();
+			if(thiz!=null&&func!=null) {bool f=false;
+				T it;for(int i=0,imax=thiz.Count;i<imax;++i) {
+					it=thiz[i];if(it!=null) {Bounds a=func(it);
+					if(a.size.sqrMagnitude>0.0f) {
+						if(!f) {f=true;b=a;}// First
+						else {b.Encapsulate(a);}// More
+					}}
+				}
+			}
+			return b;
+		}
+
+		public static Bounds GetBounds(this GameObject thiz,bool includeInactive=false) {
+			if(thiz!=null&&(includeInactive||thiz.activeInHierarchy)) {
+			using(ListPool<Collider>.Get(out var c)) {
+			using(ListPool<Renderer>.Get(out var r)) {
+				thiz.GetComponentsInChildren(includeInactive:includeInactive,c);
+				thiz.GetComponentsInChildren(includeInactive:includeInactive,r);
+				Bounds b=c.GetBounds(x=>x.bounds);b.Encapsulate(r.GetBounds(x=>x.bounds));
+				return b;
+			}}}
+			return new Bounds();
+		}
 
 // Macro.Patch -->
 		#region Fields
@@ -519,6 +547,18 @@ namespace YouSingStudio.Holograms {
 			return thiz;
 		}
 
+		internal static void UnpackPath(this string thiz,System.Func<string,bool> func,List<string> paths) {
+			bool b=false;
+			foreach(string fn in Directory.GetFiles(thiz,"*.*",SearchOption.TopDirectoryOnly)) {
+				if(func?.Invoke(fn)??true){paths.Add(fn);
+					if(!b) {b=IsModel(Path.GetExtension(fn));}// Model as bundle.
+				}
+			}
+			if(!b) {foreach(string dn in Directory.GetDirectories(thiz)) {
+				dn.UnpackPath(func,paths);
+			}}
+		}
+
 		public static List<string> UnpackPaths(this List<string> thiz,System.Func<string,bool> func=null,List<string> paths=null) {
 			int i=0,imax=thiz?.Count??0;
 			paths?.Clear();
@@ -527,9 +567,9 @@ namespace YouSingStudio.Holograms {
 				string it;for(;i<imax;++i) {
 					it=thiz[i].GetFullPath();if(File.Exists(it)) {
 						if(func?.Invoke(it)??true){paths.Add(it);}
-					}else if(Directory.Exists(it)) {foreach(string fn in Directory.GetFiles(it,"*.*",SearchOption.AllDirectories)) {
-						if(func?.Invoke(fn)??true){paths.Add(fn);}
-					}}
+					}else if(Directory.Exists(it)) {
+						it.UnpackPath(func,paths);
+					}
 				}
 			}
 			return paths;
@@ -572,6 +612,13 @@ namespace YouSingStudio.Holograms {
 			GameObject go=new GameObject(key);
 			if(thiz!=null) {go.transform.SetParent(thiz.transform,false);}
 			return go.AddComponent<T>();
+		}
+
+		public static void CheckInstance<T>(this Component thiz,string path,ref T value) where T:Object {
+			if(thiz!=null&&value==null) {
+				value=thiz.GetComponentInChildren<T>();
+				if(value==null) {value=GetResourceInstance<T>(path);}
+			}
 		}
 
 		  //

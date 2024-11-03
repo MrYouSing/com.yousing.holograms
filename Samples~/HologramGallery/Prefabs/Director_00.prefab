@@ -31,6 +31,9 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1228368333717050688}
+  - {fileID: 7491367887077729938}
+  - {fileID: 1761730784227433152}
+  - {fileID: 2383468488398959237}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &8458336726562584314
@@ -104,6 +107,161 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
+  - name: Open Model .obj
+    actors:
+    - {fileID: 0}
+    - {fileID: 6215117105822389243}
+    behaviours: []
+    onStart:
+      m_PersistentCalls:
+        m_Calls: []
+    onShow:
+      m_PersistentCalls:
+        m_Calls: []
+    onHide:
+      m_PersistentCalls:
+        m_Calls: []
+    onOpen:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 8062438116943323009}
+          m_TargetAssemblyTypeName: YouSingStudio.Holograms.ModelLoader, YouSingStudio.Holograms
+          m_MethodName: Load
+          m_Mode: 0
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+  - name: Open Model .ab;Open Model .unity
+    actors:
+    - {fileID: 0}
+    - {fileID: 3009754350609837993}
+    behaviours: []
+    onStart:
+      m_PersistentCalls:
+        m_Calls: []
+    onShow:
+      m_PersistentCalls:
+        m_Calls: []
+    onHide:
+      m_PersistentCalls:
+        m_Calls: []
+    onOpen:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 1182137138084291539}
+          m_TargetAssemblyTypeName: YouSingStudio.Holograms.ModelLoader, YouSingStudio.Holograms
+          m_MethodName: Load
+          m_Mode: 0
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+  - name: Open Model .gltf;Open Model .glb
+    actors:
+    - {fileID: 0}
+    - {fileID: 7502198169500674435}
+    behaviours: []
+    onStart:
+      m_PersistentCalls:
+        m_Calls: []
+    onShow:
+      m_PersistentCalls:
+        m_Calls: []
+    onHide:
+      m_PersistentCalls:
+        m_Calls: []
+    onOpen:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 6806787544164837657}
+          m_TargetAssemblyTypeName: YouSingStudio.Holograms.GltfLoader, YouSingStudio.Holograms
+          m_MethodName: Load
+          m_Mode: 0
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+--- !u!1001 &1775243922886953193
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 7239061710852563801}
+    m_Modifications: []
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 4213651f6bdeaa14bb1432376b15a0c5, type: 3}
+--- !u!4 &2383468488398959237 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4157149043178502764, guid: 4213651f6bdeaa14bb1432376b15a0c5, type: 3}
+  m_PrefabInstance: {fileID: 1775243922886953193}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6806787544164837657 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5103844758215107056, guid: 4213651f6bdeaa14bb1432376b15a0c5, type: 3}
+  m_PrefabInstance: {fileID: 1775243922886953193}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7502198169500674435}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e31fc3f461f4d394a962e7054d1990d8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!1 &7502198169500674435 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8124431664072188266, guid: 4213651f6bdeaa14bb1432376b15a0c5, type: 3}
+  m_PrefabInstance: {fileID: 1775243922886953193}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &2724627172656401215
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 7239061710852563801}
+    m_Modifications: []
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: a1b32ad8ddc5c0041b8c8efbcc69d854, type: 3}
+--- !u!1 &6215117105822389243 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8326973116688406724, guid: a1b32ad8ddc5c0041b8c8efbcc69d854, type: 3}
+  m_PrefabInstance: {fileID: 2724627172656401215}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &7491367887077729938 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4771984491550256557, guid: a1b32ad8ddc5c0041b8c8efbcc69d854, type: 3}
+  m_PrefabInstance: {fileID: 2724627172656401215}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8062438116943323009 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5344744965513024702, guid: a1b32ad8ddc5c0041b8c8efbcc69d854, type: 3}
+  m_PrefabInstance: {fileID: 2724627172656401215}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6215117105822389243}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d953f8dce808ef4c87d2d4a0e4a57d3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &3827640249720685191
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -141,4 +299,38 @@ MonoBehaviour:
 Transform:
   m_CorrespondingSourceObject: {fileID: 2599290545693906887, guid: 91c13627d47f23747aa423bdd27c923e, type: 3}
   m_PrefabInstance: {fileID: 3827640249720685191}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &6506454945057322861
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 7239061710852563801}
+    m_Modifications: []
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 633c33acc3535cb41a2033fb2981cb79, type: 3}
+--- !u!114 &1182137138084291539 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5344744965513024702, guid: 633c33acc3535cb41a2033fb2981cb79, type: 3}
+  m_PrefabInstance: {fileID: 6506454945057322861}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3009754350609837993}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d953f8dce808ef4c87d2d4a0e4a57d3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &1761730784227433152 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4771984491550256557, guid: 633c33acc3535cb41a2033fb2981cb79, type: 3}
+  m_PrefabInstance: {fileID: 6506454945057322861}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &3009754350609837993 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8326973116688406724, guid: 633c33acc3535cb41a2033fb2981cb79, type: 3}
+  m_PrefabInstance: {fileID: 6506454945057322861}
   m_PrefabAsset: {fileID: 0}

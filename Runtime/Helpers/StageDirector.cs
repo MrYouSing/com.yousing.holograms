@@ -83,7 +83,7 @@ namespace YouSingStudio.Holograms {
 			//
 			int i=0,imax=stages?.Count??0;if(m_Key2Index==null) {
 				m_Key2Index=new Dictionary<string,int>(imax);
-				for(;i<imax;++i) {m_Key2Index.AddRange(stages[i].name,stages.Count);}
+				for(;i<imax;++i) {m_Key2Index.AddRange(stages[i].name,i);}
 			}
 			//
 			if(m_Key2Index.TryGetValue(key,out i)&&i>=0) {return i;}

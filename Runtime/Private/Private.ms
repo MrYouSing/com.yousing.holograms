@@ -104,9 +104,12 @@ else if(asset is,if(asset is
 &#44;OAuthAPI.API,
 OAuthAPI.Se,//
 OAuthAPI.k_Type_Register,0
-OAuthAPI.k_Type_Verify,1
-OAuthAPI.k_Type_Login,2
-OAuthAPI.k_Type_Logout,3
+OAuthAPI.k_Type_Login,1
+OAuthAPI.k_Type_Logout,2
+OAuthAPI.k_Type_Verify,3
+OAuthAPI.k_Type_Forget,4
+TextureAPI.,UnityExtension.
+icon.SaveFile(fn),File.WriteAllBytes(fn&#44;icon.EncodeToPNG())
  Macro.End --> */
 // Macro.End -->
 

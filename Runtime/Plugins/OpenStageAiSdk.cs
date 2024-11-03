@@ -30,6 +30,7 @@ public class OpenStageAiSdk
 
 	[HideInInspector]public string phone;
 	[HideInInspector]public string password;
+	[HideInInspector]public int save;
 	public string hardwareSN;
 
 	[System.NonSerialized]public string deviceConfig;
@@ -41,11 +42,13 @@ public class OpenStageAiSdk
 	#region Unity Messages
 
 	protected virtual void Reset() {
+		expiration=60*60*24*30;// One month.
 		url="https://app.realplaybox.cn/{0}";
 		urls=new string[]{
 			"",
-			"",
 			"jeecg-boot/user/auth/login",
+			"",
+			"",
 			"",
 			"jeecg-boot/openStage/device/queryScreenParam?hardwareSN="
 		};
@@ -184,7 +187,8 @@ public class OpenStageAiSdk
 	}
 #else
 	public static string FindSerialPort(int vid,int pid) {
-		return null;
+		string[] ports=SerialPort.GetPortNames();
+		int len=ports?.Length??0;return len>0?ports[len-1]:null;
 	}
 #endif
 	public static OpenStageAiSdk instance {
@@ -234,13 +238,13 @@ public class OpenStageAiSdk
 		if(File.Exists(fn)) {deviceConfig=File.ReadAllText(fn);}
 	}
 
-	protected void OnDeviceUpdated() {
+	protected virtual void OnDeviceUpdated() {
 		if(!string.IsNullOrEmpty(deviceConfig)) {
 			if(m_OnDeviceUpdated==null) {Log(deviceConfig);}
 			else {m_OnDeviceUpdated.Invoke(deviceConfig);}
 			//
-			File.WriteAllText("deviceConfig.json",deviceConfig);
-			// TODO: QrCode for mobile????
+			if((save&0x1)!=0) {File.WriteAllText("deviceConfig.json",deviceConfig);}
+			if((save&0x2)!=0) {}// TODO: QRCode for mobile????
 		}
 	}
 
@@ -297,15 +301,14 @@ public class OpenStageAiSdk
 	}
 
 	public override void Logout() {
-		base.Logout();Log("Logout.");
-		Login();// Delayed????
+		Log("Logout.");base.Logout();
 	}
 
 	public virtual void Query() {
 		if(authorized&&!string.IsNullOrEmpty(hardwareSN)) {
 			Log("Query the device(SN:"+hardwareSN+")");
 			//
-			var www=UnityWebRequest.Get(GetUrl(4)+hardwareSN);
+			var www=UnityWebRequest.Get(GetUrl(5)+hardwareSN);
 			www.SetRequestHeader("X-Access-Token",m_Token);
 			www.SetRequestHeader("X-Sign",m_Token);
 			SendRequest(www,OnQuery);
@@ -322,6 +325,7 @@ public class OpenStageAiSdk
 				OnDeviceUpdated();
 			}else {
 				Debug.LogError(text);
+				//if(expired) {Logout();}
 			}
 		}
 	}

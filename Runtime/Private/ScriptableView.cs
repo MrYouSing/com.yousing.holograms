@@ -30,6 +30,12 @@ DeclareKeys_3,
 /* <!-- Macro.Define BindSet
 			Bind$(Table.Name)(k_{0},Set{0});
  Macro.End --> */
+/* <!-- Macro.Define Unbind
+			Unbind$(Table.Name)(k_{0},{0});
+ Macro.End --> */
+/* <!-- Macro.Define UnbindSet
+			Unbind$(Table.Name)(k_{0},Set{0});
+ Macro.End --> */
 
 /* <!-- Macro.Define GetSet
 
@@ -59,12 +65,19 @@ DeclareKeys_3,
 				var tmp=m_{0}s[index];if(tmp!=null) {{tmp.onValueChanged.AddListener(action);}}//{0}
 			}}
 		}}
+
+		public virtual void Unbind{0}(int index,UnityAction<{1}> action) {{
+			if($(InRange.Begin)m_{0}s$(InRange.End)) {{
+				var tmp=m_{0}s[index];if(tmp!=null) {{tmp.onValueChanged.RemoveListener(action);}}//{0}
+			}}
+		}}
  Macro.End --> */
 
 /* <!-- Macro.Table Get
 string,
 Sprite,
 Texture,
+CanvasGroup,
  Macro.End --> */
 /* <!-- Macro.Table GetSet
 Text,string,text,//,,
@@ -91,7 +104,7 @@ Button
 
 		public virtual {0} Get{0}(int index) {{
 			if($(InRange.Begin)m_{0}s$(InRange.End)) return m_{0}s[index];
-			else return default;//{0}
+			return default;//{0}
 		}}
  Macro.End --> */
 /* <!-- Macro.Call GetSet GetSet
@@ -110,6 +123,9 @@ strings,Strings
 etstring,etString
 <>,
 onValueChanged.AddListener(action);}//Button,onClick.AddListener(action);}
+onValueChanged.RemoveListener(action);}//Button,onClick.RemoveListener(action);}
+ CanvasGroup Get, bool Get
+return m_CanvasGroups[index];,{var tmp=m_CanvasGroups[index];if(tmp!=null) return tmp.alpha>=0.5f;}
  Macro.End --> */
 
 /* <!-- Macro.Patch
@@ -131,6 +147,7 @@ namespace YouSingStudio.Private {
 		[SerializeField,ArrayElement(names="GetStrings")]public string[] m_Strings;
 		[SerializeField,ArrayElement(names="GetSprites")]public Sprite[] m_Sprites;
 		[SerializeField,ArrayElement(names="GetTextures")]public Texture[] m_Textures;
+		[SerializeField,ArrayElement(names="GetCanvasGroups")]public CanvasGroup[] m_CanvasGroups;
 		[SerializeField,ArrayElement(names="GetTexts")]public Text[] m_Texts;
 		[SerializeField,ArrayElement(names="GetImages")]public Image[] m_Images;
 		[SerializeField,ArrayElement(names="GetRawImages")]public RawImage[] m_RawImages;
@@ -142,17 +159,22 @@ namespace YouSingStudio.Private {
 
 		public virtual string GetString(int index) {
 			if(index>=0&&index<(m_Strings?.Length??0)) return m_Strings[index];
-			else return default;//string
+			return default;//string
 		}
 
 		public virtual Sprite GetSprite(int index) {
 			if(index>=0&&index<(m_Sprites?.Length??0)) return m_Sprites[index];
-			else return default;//Sprite
+			return default;//Sprite
 		}
 
 		public virtual Texture GetTexture(int index) {
 			if(index>=0&&index<(m_Textures?.Length??0)) return m_Textures[index];
-			else return default;//Texture
+			return default;//Texture
+		}
+
+		public virtual bool GetCanvasGroup(int index) {
+			if(index>=0&&index<(m_CanvasGroups?.Length??0)) {var tmp=m_CanvasGroups[index];if(tmp!=null) return tmp.alpha>=0.5f;}
+			return default;//CanvasGroup
 		}
 
 		public virtual string GetText(int index) {
@@ -215,6 +237,12 @@ namespace YouSingStudio.Private {
 		public virtual void BindButton(int index,UnityAction action) {
 			if(index>=0&&index<(m_Buttons?.Length??0)) {
 				var tmp=m_Buttons[index];if(tmp!=null) {tmp.onClick.AddListener(action);}
+			}
+		}
+
+		public virtual void UnbindButton(int index,UnityAction action) {
+			if(index>=0&&index<(m_Buttons?.Length??0)) {
+				var tmp=m_Buttons[index];if(tmp!=null) {tmp.onClick.RemoveListener(action);}
 			}
 		}
 
@@ -300,9 +328,21 @@ namespace YouSingStudio.Private {
 			}
 		}
 
+		public virtual void UnbindToggle(int index,UnityAction<bool> action) {
+			if(index>=0&&index<(m_Toggles?.Length??0)) {
+				var tmp=m_Toggles[index];if(tmp!=null) {tmp.onValueChanged.RemoveListener(action);}//Toggle
+			}
+		}
+
 		public virtual void BindSlider(int index,UnityAction<float> action) {
 			if(index>=0&&index<(m_Sliders?.Length??0)) {
 				var tmp=m_Sliders[index];if(tmp!=null) {tmp.onValueChanged.AddListener(action);}//Slider
+			}
+		}
+
+		public virtual void UnbindSlider(int index,UnityAction<float> action) {
+			if(index>=0&&index<(m_Sliders?.Length??0)) {
+				var tmp=m_Sliders[index];if(tmp!=null) {tmp.onValueChanged.RemoveListener(action);}//Slider
 			}
 		}
 
@@ -312,13 +352,34 @@ namespace YouSingStudio.Private {
 			}
 		}
 
+		public virtual void UnbindDropdown(int index,UnityAction<int> action) {
+			if(index>=0&&index<(m_Dropdowns?.Length??0)) {
+				var tmp=m_Dropdowns[index];if(tmp!=null) {tmp.onValueChanged.RemoveListener(action);}//Dropdown
+			}
+		}
+
 		public virtual void BindInputField(int index,UnityAction<string> action) {
 			if(index>=0&&index<(m_InputFields?.Length??0)) {
 				var tmp=m_InputFields[index];if(tmp!=null) {tmp.onValueChanged.AddListener(action);}//InputField
 			}
 		}
+
+		public virtual void UnbindInputField(int index,UnityAction<string> action) {
+			if(index>=0&&index<(m_InputFields?.Length??0)) {
+				var tmp=m_InputFields[index];if(tmp!=null) {tmp.onValueChanged.RemoveListener(action);}//InputField
+			}
+		}
 // Macro.Patch -->
 		#region Methods
+
+		public virtual void SetCanvasGroup(int index,bool value) {
+			if(index>=0&&index<(m_CanvasGroups?.Length??0)) {
+				var tmp=m_CanvasGroups[index];if(tmp!=null) {
+					tmp.alpha=value?1.0f:0.0f;
+					tmp.blocksRaycasts=value;
+				}
+			}
+		}
 
 		public virtual void SetSlider(int index,Vector3 value) {
 			if(index>=0&&index<(m_Sliders?.Length??0)) {
@@ -332,6 +393,12 @@ namespace YouSingStudio.Private {
 		public virtual void BindSubmit(int index,UnityAction<string> action) {
 			if(index>=0&&index<(m_InputFields?.Length??0)) {
 				var tmp=m_InputFields[index];if(tmp!=null) {tmp.onSubmit.AddListener(action);}//InputField
+			}
+		}
+
+		public virtual void UnbindSubmit(int index,UnityAction<string> action) {
+			if(index>=0&&index<(m_InputFields?.Length??0)) {
+				var tmp=m_InputFields[index];if(tmp!=null) {tmp.onSubmit.RemoveListener(action);}//InputField
 			}
 		}
 

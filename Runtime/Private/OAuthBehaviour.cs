@@ -10,13 +10,15 @@
  Macro.End --> */
 /* <!-- Macro.Call OpenURL
 Register,
-Verify
+Verify,
+Forget,
  Macro.End --> */
 /* <!-- Macro.Patch
 ,AutoGen
  Macro.End --> */
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;using YouSingStudio.Holograms;
 using UnityEngine.Networking;
 
@@ -36,9 +38,15 @@ namespace YouSingStudio.Private {
 		}
 
 		public virtual void Verify() {
-			string url=GetUrl(1);
+			string url=GetUrl(3);
 			if(!string.IsNullOrEmpty(url)) {UnityEngine.Application.OpenURL(url);}
-			InvokeEvent(1);
+			InvokeEvent(3);
+		}
+
+		public virtual void Forget() {
+			string url=GetUrl(4);
+			if(!string.IsNullOrEmpty(url)) {UnityEngine.Application.OpenURL(url);}
+			InvokeEvent(4);
 		}
 
 // Macro.Patch -->
@@ -69,7 +77,7 @@ namespace YouSingStudio.Private {
 
 		protected virtual void Awake() {
 			this.SetRealName();
-			if(m_Actions==null) {m_Actions=new System.Action[4];}
+			if(m_Actions==null) {m_Actions=new System.Action[4+1];}
 			m_Token=GetString(".Token",null);
 		}
 
@@ -101,11 +109,18 @@ namespace YouSingStudio.Private {
 		public static void LoadTexture(string url,System.Action<Texture2D> action) {
 			if(string.IsNullOrEmpty(url)||action==null) {return;}
 			//
-			UnityWebRequest www=UnityWebRequestTexture.GetTexture(url);
-			var ao=www.SendWebRequest();
-			ao.completed+=(x)=>{
-				action.Invoke(DownloadHandlerTexture.GetContent(www));
-			};
+			if(url.StartsWith("http")||url.StartsWith("www")) {// Web
+				UnityWebRequest www=UnityWebRequestTexture.GetTexture(url);
+				var ao=www.SendWebRequest();
+				ao.completed+=(x)=>{
+					action.Invoke(DownloadHandlerTexture.GetContent(www));
+				};
+			}else if(File.Exists(url)) {// File
+				Texture2D tex=UnityExtension.NewTexture2D(1,1);
+				tex.LoadImage(File.ReadAllBytes(url));
+			}else {
+				action.Invoke(null);
+			}
 		}
 
 		public static void SendRequest(UnityWebRequest www,System.Action<string> action) {
@@ -158,15 +173,25 @@ namespace YouSingStudio.Private {
 				displayName=GetString(".Name",m_DisplayName);
 				string img=GetString(".Icon",null);
 				if(string.IsNullOrEmpty(img)) {
-					avatarIcon=m_AvatarIcon;InvokeEvent(2);
+					avatarIcon=m_AvatarIcon;InvokeEvent(1);
 				}else {
-					LoadTexture(img,(x)=>{// TODO: Base64
-						avatarIcon=x;InvokeEvent(2);
-					});
+					LoadTexture(img,OnIcon);
 				}
 			}else {
 				Logout();
 			}
+		}
+
+		protected virtual void OnIcon(Texture2D icon) {
+			// Create cache.
+			try {
+				string fn=Path.Combine(UnityEngine.Application.persistentDataPath,name+"_Icon.png");
+				File.WriteAllBytes(fn,icon.EncodeToPNG());SetString(".Icon",fn);
+			}catch(System.Exception e) {
+				Debug.LogException(e);
+			}
+			//
+			avatarIcon=icon;InvokeEvent(1);
 		}
 
 		/// <summary>
@@ -198,7 +223,7 @@ namespace YouSingStudio.Private {
 
 		public virtual int GetForm(int type,string[] table) {
 			switch(type) {
-				case 2:
+				case 1:
 					if(table!=null) {System.Array.Copy(texts,0,table,0,3);}
 				return 2;
 			}
@@ -207,7 +232,7 @@ namespace YouSingStudio.Private {
 
 		public virtual void SetForm(int type,string[] table) {
 			switch(type) {
-				case 2:
+				case 1:
 					if(table!=null) {System.Array.Copy(table,0,texts,0,3);}
 				break;
 			}
@@ -236,7 +261,7 @@ namespace YouSingStudio.Private {
 			//
 			int offset=k_Offset_DoLogin;
 			string str=string.Format(texts[offset+1],texts[0],texts[1]);
-			var www=UnityWebRequest.Post(GetUrl(2),str,texts[offset+0]);
+			var www=UnityWebRequest.Post(GetUrl(1),str,texts[offset+0]);
 			SendRequest(www,OnLogin);
 		}
 
@@ -244,7 +269,7 @@ namespace YouSingStudio.Private {
 			m_Token=null;
 			displayName=m_DisplayName;
 			avatarIcon=m_AvatarIcon;
-			InvokeEvent(3);
+			InvokeEvent(2);
 		}
 
 		#endregion Methods

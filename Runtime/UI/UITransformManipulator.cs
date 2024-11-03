@@ -28,6 +28,7 @@ namespace YouSingStudio.Holograms {
 		[Header("Misc")]// For resolving target role.
 		public Transform stage;
 		public Transform viewer;
+		public new Collider collider;
 
 		[System.NonSerialized]protected int m_Action=-1;
 		[System.NonSerialized]protected Vector3 m_Start;
@@ -112,6 +113,23 @@ namespace YouSingStudio.Holograms {
 				viewer.localPosition=new Vector3(0.0f,0.0f,m_Start.z);
 			}
 			int a=m_Action;m_Action=-1;SetAction(a);
+		}
+
+		public virtual void FitTarget() {
+			if(target!=null&&collider!=null) {
+				Bounds a=target.gameObject.GetBounds();
+				Bounds b=collider.bounds;int n=0;Vector3 s=a.size;
+				Vector3 p=target.InverseTransformPoint(a.center);
+				if(collider.isTrigger) {// Clamp : Inside
+					if(s.y>s.x) {n=1;}
+					if(s.z>s.y) {n=2;}
+				}else {// Free : Outside
+					if(s.y<s.x) {n=1;}
+					if(s.z<s.y) {n=2;}
+				}
+				target.localScale=Vector3.one*(b.size[n]/s[n]);
+				target.position+=b.center-target.TransformPoint(p);
+			}
 		}
 
 		protected virtual void SetAction(int action) {
@@ -211,7 +229,7 @@ namespace YouSingStudio.Holograms {
 				switch(m_Action&0xFF) {
 					case 1:SetPosition(mouse.y);break;
 					case 2:SetRotation(mouse.y);break;// Clockwise TODO: Two Parts????
-					case 3:ResetTarget();break;
+					case 3:FitTarget();break;
 				}
 				break;
 				default:return;

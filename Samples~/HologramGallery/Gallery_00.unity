@@ -648,7 +648,7 @@ PrefabInstance:
     - target: {fileID: 4871715829485908187, guid: f56f62b940b7ff847b4caf19d7fb79a9, type: 3}
       propertyPath: device
       value: 
-      objectReference: {fileID: 256326718}
+      objectReference: {fileID: 1284967905}
     - target: {fileID: 7278368657187936219, guid: f56f62b940b7ff847b4caf19d7fb79a9, type: 3}
       propertyPath: m_IsActive
       value: 0
@@ -911,6 +911,17 @@ RectTransform:
   m_AnchoredPosition: {x: -128, y: 0}
   m_SizeDelta: {x: 240, y: 80}
   m_Pivot: {x: 0.5, y: 0}
+--- !u!114 &1284967905 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5308754379123977005, guid: ebfdd9f0b00d0a042966c384c9d05c00, type: 3}
+  m_PrefabInstance: {fileID: 256326716}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4cee0cf4651ac94eab7865b8164ed02, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &1476873887
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -926,7 +937,7 @@ PrefabInstance:
     - target: {fileID: 685019868040253149, guid: 701fbf362907b864cab84d0d8f254d09, type: 3}
       propertyPath: device
       value: 
-      objectReference: {fileID: 256326718}
+      objectReference: {fileID: 1284967905}
     - target: {fileID: 1228368333717050688, guid: 701fbf362907b864cab84d0d8f254d09, type: 3}
       propertyPath: m_LocalScale.x
       value: 2
@@ -945,6 +956,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8458336726562584314, guid: 701fbf362907b864cab84d0d8f254d09, type: 3}
       propertyPath: 'stages.Array.data[1].actors.Array.data[0]'
+      value: 
+      objectReference: {fileID: 873960009}
+    - target: {fileID: 8458336726562584314, guid: 701fbf362907b864cab84d0d8f254d09, type: 3}
+      propertyPath: 'stages.Array.data[2].actors.Array.data[0]'
+      value: 
+      objectReference: {fileID: 873960009}
+    - target: {fileID: 8458336726562584314, guid: 701fbf362907b864cab84d0d8f254d09, type: 3}
+      propertyPath: 'stages.Array.data[3].actors.Array.data[0]'
+      value: 
+      objectReference: {fileID: 873960009}
+    - target: {fileID: 8458336726562584314, guid: 701fbf362907b864cab84d0d8f254d09, type: 3}
+      propertyPath: 'stages.Array.data[4].actors.Array.data[0]'
       value: 
       objectReference: {fileID: 873960009}
     m_RemovedComponents: []
