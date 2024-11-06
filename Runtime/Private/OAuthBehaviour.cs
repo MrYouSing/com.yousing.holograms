@@ -2,9 +2,9 @@
 
 /* <!-- Macro.Define OpenURL
 		public virtual void {0}() {{
-			string url=GetUrl(OAuthAPI.k_Type_{0});
+			string url=GetUrl(UnityExtension.k_OAuth_{0});
 			if(!string.IsNullOrEmpty(url)) {{UnityEngine.Application.OpenURL(url);}}
-			InvokeEvent(OAuthAPI.k_Type_{0});
+			InvokeEvent(UnityExtension.k_OAuth_{0});
 		}}
 
  Macro.End --> */
@@ -32,21 +32,21 @@ namespace YouSingStudio.Private {
 	{
 // <!-- Macro.Patch AutoGen
 		public virtual void Register() {
-			string url=GetUrl(0);
+			string url=GetUrl(UnityExtension.k_OAuth_Register);
 			if(!string.IsNullOrEmpty(url)) {UnityEngine.Application.OpenURL(url);}
-			InvokeEvent(0);
+			InvokeEvent(UnityExtension.k_OAuth_Register);
 		}
 
 		public virtual void Verify() {
-			string url=GetUrl(3);
+			string url=GetUrl(UnityExtension.k_OAuth_Verify);
 			if(!string.IsNullOrEmpty(url)) {UnityEngine.Application.OpenURL(url);}
-			InvokeEvent(3);
+			InvokeEvent(UnityExtension.k_OAuth_Verify);
 		}
 
 		public virtual void Forget() {
-			string url=GetUrl(4);
+			string url=GetUrl(UnityExtension.k_OAuth_Forget);
 			if(!string.IsNullOrEmpty(url)) {UnityEngine.Application.OpenURL(url);}
-			InvokeEvent(4);
+			InvokeEvent(UnityExtension.k_OAuth_Forget);
 		}
 
 // Macro.Patch -->
@@ -68,6 +68,7 @@ namespace YouSingStudio.Private {
 		public string[] urls;
 		public string[] texts;
 
+		[System.NonSerialized]protected string m_Message;
 		[System.NonSerialized]protected string m_Token;
 		[System.NonSerialized]protected System.Action[] m_Actions;
 
@@ -77,7 +78,7 @@ namespace YouSingStudio.Private {
 
 		protected virtual void Awake() {
 			this.SetRealName();
-			if(m_Actions==null) {m_Actions=new System.Action[4+1];}
+			if(m_Actions==null) {m_Actions=new System.Action[UnityExtension.k_OAuth_Error+1];}
 			m_Token=GetString(".Token",null);
 		}
 
@@ -118,6 +119,7 @@ namespace YouSingStudio.Private {
 			}else if(File.Exists(url)) {// File
 				Texture2D tex=UnityExtension.NewTexture2D(1,1);
 				tex.LoadImage(File.ReadAllBytes(url));
+				action.Invoke(tex);
 			}else {
 				action.Invoke(null);
 			}
@@ -139,7 +141,8 @@ namespace YouSingStudio.Private {
 		}
 
 		public virtual void SetString(string key,string value) {
-			PlayerPrefs.SetString(name+key,value);
+			if(string.IsNullOrEmpty(value)) {PlayerPrefs.DeleteKey(name+key);}
+			else {PlayerPrefs.SetString(name+key,value);}
 		}
 
 		public virtual string GetUrl(int index) {
@@ -148,18 +151,25 @@ namespace YouSingStudio.Private {
 			return tmp;
 		}
 
+		protected virtual void OnError(string msg) {
+			string tmp=m_Message;
+				m_Message=msg;InvokeEvent(UnityExtension.k_OAuth_Error);
+			m_Message=tmp;
+		}
+
 		protected virtual void OnLogin(string text) {
 			m_Token=null;
 			if(string.IsNullOrEmpty(text)) {return;}
 			//
 			int offset=k_Offset_OnLogin;JObject jo=JObject.Parse(text);
 			if(!IsSuccess(jo.SelectToken(texts[offset+0])?.Value<string>())) {
-				Debug.LogError(text);
+				Debug.LogError(text);OnError(jo.SelectToken(texts[offset+1])?.Value<string>());
 				return;
 			}
-			m_Token=jo.SelectToken(texts[offset+1])?.Value<string>();
-			string str=jo.SelectToken(texts[offset+2])?.Value<string>();
-			string img=jo.SelectToken(texts[offset+3])?.Value<string>();
+			m_Message=jo.SelectToken(texts[offset+1])?.Value<string>();
+			m_Token=jo.SelectToken(texts[offset+2])?.Value<string>();
+			string str=jo.SelectToken(texts[offset+3])?.Value<string>();
+			string img=jo.SelectToken(texts[offset+4])?.Value<string>();
 			//
 			if(!string.IsNullOrEmpty(m_Token)) {SetString(".Token",m_Token);}
 			if(!string.IsNullOrEmpty(str)) {SetString(".Name",str);}
@@ -173,12 +183,10 @@ namespace YouSingStudio.Private {
 				displayName=GetString(".Name",m_DisplayName);
 				string img=GetString(".Icon",null);
 				if(string.IsNullOrEmpty(img)) {
-					avatarIcon=m_AvatarIcon;InvokeEvent(1);
+					avatarIcon=m_AvatarIcon;InvokeEvent(UnityExtension.k_OAuth_Login);
 				}else {
 					LoadTexture(img,OnIcon);
 				}
-			}else {
-				Logout();
 			}
 		}
 
@@ -191,7 +199,7 @@ namespace YouSingStudio.Private {
 				Debug.LogException(e);
 			}
 			//
-			avatarIcon=icon;InvokeEvent(1);
+			avatarIcon=icon;InvokeEvent(UnityExtension.k_OAuth_Login);
 		}
 
 		/// <summary>
@@ -222,18 +230,31 @@ namespace YouSingStudio.Private {
 		public virtual Texture avatarIcon{get;set;}
 
 		public virtual int GetForm(int type,string[] table) {
+			int n=-1;
 			switch(type) {
-				case 1:
-					if(table!=null) {System.Array.Copy(texts,0,table,0,3);}
-				return 2;
+				case UnityExtension.k_OAuth_Login:
+					n=3;if(table!=null) {System.Array.Copy(texts,0,table,0,n);}
+				break;
+				case UnityExtension.k_OAuth_Verify:
+					n=2;if(table!=null) {table[0]=texts[0];table[1]=texts[2];}
+				break;
+				case UnityExtension.k_OAuth_Error:
+					n=1;if(table!=null) {table[0]=m_Message;}
+				break;
 			}
-			return -1;
+			return n;
 		}
 
 		public virtual void SetForm(int type,string[] table) {
 			switch(type) {
-				case 1:
+				case UnityExtension.k_OAuth_Login:
 					if(table!=null) {System.Array.Copy(table,0,texts,0,3);}
+				break;
+				case UnityExtension.k_OAuth_Verify:
+					if(table!=null) {texts[0]=table[0];texts[2]=table[1];}
+				break;
+				case UnityExtension.k_OAuth_Error:
+					if(table!=null) {m_Message=table[0];}
 				break;
 			}
 		}
@@ -257,19 +278,21 @@ namespace YouSingStudio.Private {
 		}
 
 		public virtual void Login() {
+			Logout();
 			if(string.IsNullOrEmpty(texts[0])||(string.IsNullOrEmpty(texts[1])&&string.IsNullOrEmpty(texts[2]))) {return;}
 			//
 			int offset=k_Offset_DoLogin;
 			string str=string.Format(texts[offset+1],texts[0],texts[1]);
-			var www=UnityWebRequest.Post(GetUrl(1),str,texts[offset+0]);
+			var www=UnityWebRequest.Post(GetUrl(UnityExtension.k_OAuth_Login),str,texts[offset+0]);
 			SendRequest(www,OnLogin);
 		}
 
 		public virtual void Logout() {
-			m_Token=null;
-			displayName=m_DisplayName;
-			avatarIcon=m_AvatarIcon;
-			InvokeEvent(2);
+			m_Message=null;
+			m_Token=null;SetString(".Token",null);
+			displayName=m_DisplayName;SetString(".Name",null);
+			avatarIcon=m_AvatarIcon;SetString(".Icon",null);
+			InvokeEvent(UnityExtension.k_OAuth_Logout);
 		}
 
 		#endregion Methods

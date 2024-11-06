@@ -161,6 +161,21 @@ namespace YouSingStudio.Holograms {
 			return m;
 		}
 
+		public virtual int[] CreateIndexes(Vector3 from,Vector3 to) {
+			int x=(int)(from.x*from.y),y=(int)(to.x*to.y);
+			int[] ids=new int[y];float p=0.0f,d=x/(y-1.0f);
+			if(from.z*to.z>=0.0f) {
+				for(x=0;x<y;++x) {ids[x]=(int)p;p+=d;}
+			}else {
+				int xmax=(int)to.x,ymax=(int)to.y;
+				for(y=ymax-1;y>=0;--y) {
+				for(x=0;x<xmax;++x) {
+					ids[y*xmax+x]=(int)p;p+=d;
+				}}
+			}
+			return ids;
+		}
+
 		public virtual void RefreshMesh() {
 			VideoAspectRatio a=aspect;float z=size.z;
 			//
@@ -177,8 +192,7 @@ namespace YouSingStudio.Holograms {
 				}else {
 					if(x==y) {
 					}else if((float)x/y>=1.7f) {// (11*6)/(8*5)=1.65
-						ids=new int[y];float p=0.0f,d=1.0f/x;
-						for(x=0;x<y;++x) {ids[x]=(int)p;p+=d;}
+						ids=CreateIndexes(m_Args,size);
 					}else {
 						m_Id=Mathf.FloorToInt((x-y)*0.5f);
 						Debug.Log("Offset:"+m_Id);

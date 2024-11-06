@@ -1,3 +1,7 @@
+/* TODO:
+1) Cursor.Icon
+2) UI.Scale
+ */
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -46,6 +50,7 @@ namespace YouSingStudio.Holograms {
 
 		protected virtual void Start() {
 			if(viewer!=null) {
+				s_Camera=viewer.GetComponent<Camera>();
 				m_Start=new Vector3(0.0f,GetPlane(target.position),viewer.localPosition.z);
 			}
 			SetTarget(target);
@@ -58,6 +63,10 @@ namespace YouSingStudio.Holograms {
 					OnUpdate();
 				s_PlaneScale=k;
 			}
+		}
+
+		protected virtual void OnDisable() {
+			if(didStart) {SetAction(-1);ResetTarget();}
 		}
 
 		public virtual void OnPointerEnter(PointerEventData e) {
@@ -81,7 +90,7 @@ namespace YouSingStudio.Holograms {
 		#region Methods
 
 		public static int GetModifiers(KeyCode[] keys) {
-			int m=0;for(int i=0,imax=keys?.Length??0;i<imax;++i) {
+			int m=0;for(int i=0,imax=(keys?.Length??0)/2;i<imax;++i) {
 				if(Input.GetKey(keys[2*i])||Input.GetKey(keys[2*i+1])) {m|=1<<i;}
 			}return m;
 		}
@@ -92,7 +101,7 @@ namespace YouSingStudio.Holograms {
 
 		public static float GetPlane(Vector3 point) {
 			if(s_Camera==null) {s_Camera=Camera.main;}
-			return s_Camera==null?0.0f:s_Camera.GetPlaneHeight
+			return s_Camera==null?1.0f:s_Camera.GetPlaneHeight
 				(s_Camera.worldToCameraMatrix.MultiplyPoint3x4(point).z);
 		}
 

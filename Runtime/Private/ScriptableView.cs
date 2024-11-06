@@ -25,16 +25,10 @@ DeclareKeys_2
 DeclareKeys_3,
  Macro.End --> */
 /* <!-- Macro.Define Bind
-			Bind$(Table.Name)(k_{0},{0});
+			Bind$(Table.Name)(k_{0},{0},$(Bind));
  Macro.End --> */
 /* <!-- Macro.Define BindSet
-			Bind$(Table.Name)(k_{0},Set{0});
- Macro.End --> */
-/* <!-- Macro.Define Unbind
-			Unbind$(Table.Name)(k_{0},{0});
- Macro.End --> */
-/* <!-- Macro.Define UnbindSet
-			Unbind$(Table.Name)(k_{0},Set{0});
+			Bind$(Table.Name)(k_{0},Set{0},$(Bind));
  Macro.End --> */
 
 /* <!-- Macro.Define GetSet
@@ -60,15 +54,12 @@ DeclareKeys_3,
  Macro.End --> */
 /* <!-- Macro.Define Event
 
-		public virtual void Bind{0}(int index,UnityAction<{1}> action) {{
+		public virtual void Bind{0}(int index,UnityAction<{1}> action,bool value=true) {{
 			if($(InRange.Begin)m_{0}s$(InRange.End)) {{
-				var tmp=m_{0}s[index];if(tmp!=null) {{tmp.onValueChanged.AddListener(action);}}//{0}
-			}}
-		}}
-
-		public virtual void Unbind{0}(int index,UnityAction<{1}> action) {{
-			if($(InRange.Begin)m_{0}s$(InRange.End)) {{
-				var tmp=m_{0}s[index];if(tmp!=null) {{tmp.onValueChanged.RemoveListener(action);}}//{0}
+				var tmp=m_{0}s[index];if(tmp!=null) {{
+					if(value) {{tmp.onValueChanged.AddListener(action);}}//{0}
+					else {{tmp.onValueChanged.RemoveListener(action);}}//{0}
+				}}
 			}}
 		}}
  Macro.End --> */
@@ -77,7 +68,7 @@ DeclareKeys_3,
 string,
 Sprite,
 Texture,
-CanvasGroup,
+GameObject,
  Macro.End --> */
 /* <!-- Macro.Table GetSet
 Text,string,text,//,,
@@ -124,8 +115,6 @@ etstring,etString
 <>,
 onValueChanged.AddListener(action);}//Button,onClick.AddListener(action);}
 onValueChanged.RemoveListener(action);}//Button,onClick.RemoveListener(action);}
- CanvasGroup Get, bool Get
-return m_CanvasGroups[index];,{var tmp=m_CanvasGroups[index];if(tmp!=null) return tmp.alpha>=0.5f;}
  Macro.End --> */
 
 /* <!-- Macro.Patch
@@ -147,7 +136,7 @@ namespace YouSingStudio.Private {
 		[SerializeField,ArrayElement(names="GetStrings")]public string[] m_Strings;
 		[SerializeField,ArrayElement(names="GetSprites")]public Sprite[] m_Sprites;
 		[SerializeField,ArrayElement(names="GetTextures")]public Texture[] m_Textures;
-		[SerializeField,ArrayElement(names="GetCanvasGroups")]public CanvasGroup[] m_CanvasGroups;
+		[SerializeField,ArrayElement(names="GetGameObjects")]public GameObject[] m_GameObjects;
 		[SerializeField,ArrayElement(names="GetTexts")]public Text[] m_Texts;
 		[SerializeField,ArrayElement(names="GetImages")]public Image[] m_Images;
 		[SerializeField,ArrayElement(names="GetRawImages")]public RawImage[] m_RawImages;
@@ -172,9 +161,9 @@ namespace YouSingStudio.Private {
 			return default;//Texture
 		}
 
-		public virtual bool GetCanvasGroup(int index) {
-			if(index>=0&&index<(m_CanvasGroups?.Length??0)) {var tmp=m_CanvasGroups[index];if(tmp!=null) return tmp.alpha>=0.5f;}
-			return default;//CanvasGroup
+		public virtual GameObject GetGameObject(int index) {
+			if(index>=0&&index<(m_GameObjects?.Length??0)) return m_GameObjects[index];
+			return default;//GameObject
 		}
 
 		public virtual string GetText(int index) {
@@ -234,15 +223,12 @@ namespace YouSingStudio.Private {
 		//	}
 		//}
 
-		public virtual void BindButton(int index,UnityAction action) {
+		public virtual void BindButton(int index,UnityAction action,bool value=true) {
 			if(index>=0&&index<(m_Buttons?.Length??0)) {
-				var tmp=m_Buttons[index];if(tmp!=null) {tmp.onClick.AddListener(action);}
-			}
-		}
-
-		public virtual void UnbindButton(int index,UnityAction action) {
-			if(index>=0&&index<(m_Buttons?.Length??0)) {
-				var tmp=m_Buttons[index];if(tmp!=null) {tmp.onClick.RemoveListener(action);}
+				var tmp=m_Buttons[index];if(tmp!=null) {
+					if(value) {tmp.onClick.AddListener(action);}
+					else {tmp.onClick.RemoveListener(action);}
+				}
 			}
 		}
 
@@ -322,62 +308,54 @@ namespace YouSingStudio.Private {
 			}
 		}
 
-		public virtual void BindToggle(int index,UnityAction<bool> action) {
+		public virtual void BindToggle(int index,UnityAction<bool> action,bool value=true) {
 			if(index>=0&&index<(m_Toggles?.Length??0)) {
-				var tmp=m_Toggles[index];if(tmp!=null) {tmp.onValueChanged.AddListener(action);}//Toggle
+				var tmp=m_Toggles[index];if(tmp!=null) {
+					if(value) {tmp.onValueChanged.AddListener(action);}//Toggle
+					else {tmp.onValueChanged.RemoveListener(action);}//Toggle
+				}
 			}
 		}
 
-		public virtual void UnbindToggle(int index,UnityAction<bool> action) {
-			if(index>=0&&index<(m_Toggles?.Length??0)) {
-				var tmp=m_Toggles[index];if(tmp!=null) {tmp.onValueChanged.RemoveListener(action);}//Toggle
-			}
-		}
-
-		public virtual void BindSlider(int index,UnityAction<float> action) {
+		public virtual void BindSlider(int index,UnityAction<float> action,bool value=true) {
 			if(index>=0&&index<(m_Sliders?.Length??0)) {
-				var tmp=m_Sliders[index];if(tmp!=null) {tmp.onValueChanged.AddListener(action);}//Slider
+				var tmp=m_Sliders[index];if(tmp!=null) {
+					if(value) {tmp.onValueChanged.AddListener(action);}//Slider
+					else {tmp.onValueChanged.RemoveListener(action);}//Slider
+				}
 			}
 		}
 
-		public virtual void UnbindSlider(int index,UnityAction<float> action) {
-			if(index>=0&&index<(m_Sliders?.Length??0)) {
-				var tmp=m_Sliders[index];if(tmp!=null) {tmp.onValueChanged.RemoveListener(action);}//Slider
-			}
-		}
-
-		public virtual void BindDropdown(int index,UnityAction<int> action) {
+		public virtual void BindDropdown(int index,UnityAction<int> action,bool value=true) {
 			if(index>=0&&index<(m_Dropdowns?.Length??0)) {
-				var tmp=m_Dropdowns[index];if(tmp!=null) {tmp.onValueChanged.AddListener(action);}//Dropdown
+				var tmp=m_Dropdowns[index];if(tmp!=null) {
+					if(value) {tmp.onValueChanged.AddListener(action);}//Dropdown
+					else {tmp.onValueChanged.RemoveListener(action);}//Dropdown
+				}
 			}
 		}
 
-		public virtual void UnbindDropdown(int index,UnityAction<int> action) {
-			if(index>=0&&index<(m_Dropdowns?.Length??0)) {
-				var tmp=m_Dropdowns[index];if(tmp!=null) {tmp.onValueChanged.RemoveListener(action);}//Dropdown
-			}
-		}
-
-		public virtual void BindInputField(int index,UnityAction<string> action) {
+		public virtual void BindInputField(int index,UnityAction<string> action,bool value=true) {
 			if(index>=0&&index<(m_InputFields?.Length??0)) {
-				var tmp=m_InputFields[index];if(tmp!=null) {tmp.onValueChanged.AddListener(action);}//InputField
-			}
-		}
-
-		public virtual void UnbindInputField(int index,UnityAction<string> action) {
-			if(index>=0&&index<(m_InputFields?.Length??0)) {
-				var tmp=m_InputFields[index];if(tmp!=null) {tmp.onValueChanged.RemoveListener(action);}//InputField
+				var tmp=m_InputFields[index];if(tmp!=null) {
+					if(value) {tmp.onValueChanged.AddListener(action);}//InputField
+					else {tmp.onValueChanged.RemoveListener(action);}//InputField
+				}
 			}
 		}
 // Macro.Patch -->
 		#region Methods
 
-		public virtual void SetCanvasGroup(int index,bool value) {
-			if(index>=0&&index<(m_CanvasGroups?.Length??0)) {
-				var tmp=m_CanvasGroups[index];if(tmp!=null) {
-					tmp.alpha=value?1.0f:0.0f;
-					tmp.blocksRaycasts=value;
-				}
+		public virtual bool GetActive(int index,bool value=false) {
+			if(index>=0&&index<(m_GameObjects?.Length??0)) {
+				var tmp=m_GameObjects[index];if(tmp!=null) {return tmp.activeSelf;}
+			}
+			return value;
+		}
+
+		public virtual void SetActive(int index,bool value) {
+			if(index>=0&&index<(m_GameObjects?.Length??0)) {
+				var tmp=m_GameObjects[index];if(tmp!=null) {tmp.SetActive(value);}
 			}
 		}
 
@@ -390,15 +368,12 @@ namespace YouSingStudio.Private {
 			}
 		}
 
-		public virtual void BindSubmit(int index,UnityAction<string> action) {
+		public virtual void BindSubmit(int index,UnityAction<string> action,bool value=true) {
 			if(index>=0&&index<(m_InputFields?.Length??0)) {
-				var tmp=m_InputFields[index];if(tmp!=null) {tmp.onSubmit.AddListener(action);}//InputField
-			}
-		}
-
-		public virtual void UnbindSubmit(int index,UnityAction<string> action) {
-			if(index>=0&&index<(m_InputFields?.Length??0)) {
-				var tmp=m_InputFields[index];if(tmp!=null) {tmp.onSubmit.RemoveListener(action);}//InputField
+				var tmp=m_InputFields[index];if(tmp!=null) {
+					if(value) {tmp.onSubmit.AddListener(action);}//InputField
+					else {tmp.onSubmit.RemoveListener(action);}//InputField
+				}
 			}
 		}
 

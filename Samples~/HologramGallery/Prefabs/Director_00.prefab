@@ -69,6 +69,7 @@ MonoBehaviour:
   - name: Open RGB-D
     actors:
     - {fileID: 0}
+    - {fileID: 0}
     - {fileID: 548572155245713808}
     behaviours: []
     onStart:
@@ -110,6 +111,7 @@ MonoBehaviour:
   - name: Open Model .obj
     actors:
     - {fileID: 0}
+    - {fileID: 0}
     - {fileID: 6215117105822389243}
     behaviours: []
     onStart:
@@ -139,6 +141,7 @@ MonoBehaviour:
   - name: Open Model .ab;Open Model .unity
     actors:
     - {fileID: 0}
+    - {fileID: 0}
     - {fileID: 3009754350609837993}
     behaviours: []
     onStart:
@@ -167,6 +170,7 @@ MonoBehaviour:
           m_CallState: 2
   - name: Open Model .gltf;Open Model .glb
     actors:
+    - {fileID: 0}
     - {fileID: 0}
     - {fileID: 7502198169500674435}
     behaviours: []

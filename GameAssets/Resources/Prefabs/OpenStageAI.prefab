@@ -45,14 +45,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_DisplayName: "\u672A\u767B\u5165OpenStageAI"
-  m_AvatarIcon: {fileID: 0}
+  m_AvatarIcon: {fileID: 2800000, guid: 22fba936497bb2a47bdb2515dfc1c3a9, type: 3}
   expiration: -1
   url: https://app.realplaybox.cn/{0}
   urls:
   - 
   - jeecg-boot/user/auth/login
-  - 
-  - 
+  - jeecg-boot/user/auth/logout
+  - jeecg-boot/user/auth/getVerifyCode
   - 
   - jeecg-boot/openStage/device/queryScreenParam?hardwareSN=
   texts:
@@ -60,12 +60,13 @@ MonoBehaviour:
   - 
   - 
   - application/json;charset=utf-8
-  - '{{"account":"{0}","password":"{1}","loginType":"password"}}'
+  - '{{"account":"{0}","password":"{1}","verifyCode":"{2}","loginType":"{3}","accountType":"phone"}}'
   - success
+  - message
   - result.token
   - result.userInfo.nickName
   - result.userInfo.photo
   phone: 
   password: 
-  save: 0
+  features: 7
   hardwareSN: 

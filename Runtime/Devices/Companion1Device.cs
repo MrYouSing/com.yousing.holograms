@@ -21,6 +21,7 @@ namespace YouSingStudio.Holograms {
 		[Header("Others")]
 		public string deviceId;
 		public string deviceNumber;
+		public string sdkType;
 
 		#endregion Fields
 
@@ -75,7 +76,7 @@ namespace YouSingStudio.Holograms {
 		protected virtual void OnDeviceUpdated(string text) {
 			if(!string.IsNullOrEmpty(text)) {
 				JsonConvert.PopulateObject(text,this);
-				Debug.Log("Load official settings : "+text);
+				Debug.Log($"Load {sdkType} settings : {text}");
 			}
 		}
 

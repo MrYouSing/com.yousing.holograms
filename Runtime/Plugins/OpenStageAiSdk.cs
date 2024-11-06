@@ -1,4 +1,4 @@
-/*
+/* Mini/Portable SDK:
 You can get the device config by three steps:
 	1) Read hardware SN by SerialPort.
 	2) Login the OpenStageAI account to get token.
@@ -24,13 +24,25 @@ using YouSingStudio.Private;
 public class OpenStageAiSdk
 	:OAuthBehaviour
 {
+	#region Nested Types
+
+	[System.Flags]
+	public enum Feature {
+		OfficialSDK     =0x01,
+		CustomSDK       =0x02,
+		SaveDeviceJson  =0x04,
+		SaveDeviceQR    =0x08,
+	}
+
+	#endregion Nested Types
+
 	#region Fields
 
 	public static OpenStageAiSdk s_Instance;
 
 	[HideInInspector]public string phone;
 	[HideInInspector]public string password;
-	[HideInInspector]public int save;
+	public Feature features;
 	public string hardwareSN;
 
 	[System.NonSerialized]public string deviceConfig;
@@ -42,13 +54,14 @@ public class OpenStageAiSdk
 	#region Unity Messages
 
 	protected virtual void Reset() {
+		features=Feature.OfficialSDK|Feature.CustomSDK|Feature.SaveDeviceJson;
 		expiration=60*60*24*30;// One month.
 		url="https://app.realplaybox.cn/{0}";
 		urls=new string[]{
 			"",
 			"jeecg-boot/user/auth/login",
-			"",
-			"",
+			"jeecg-boot/user/auth/logout",
+			"jeecg-boot/user/auth/getVerifyCode",
 			"",
 			"jeecg-boot/openStage/device/queryScreenParam?hardwareSN="
 		};
@@ -57,8 +70,9 @@ public class OpenStageAiSdk
 			"",// password
 			"",// verification code
 			"application/json;charset=utf-8",
-			"{{\"account\":\"{0}\",\"password\":\"{1}\",\"loginType\":\"password\"}}",
+			"{{\"account\":\"{0}\",\"password\":\"{1}\",\"verifyCode\":\"{2}\",\"loginType\":\"{3}\",\"accountType\":\"phone\"}}",
 			"success",
+			"message",
 			"result.token",
 			"result.userInfo.nickName",
 			"result.userInfo.photo",
@@ -74,6 +88,8 @@ public class OpenStageAiSdk
 		texts[0]=phone;
 		texts[1]=password;
 		//
+		InitSDK();
+		//
 		if(string.IsNullOrEmpty(hardwareSN)) {Find();}
 		base.Awake();
 	}
@@ -85,6 +101,10 @@ public class OpenStageAiSdk
 	}
 
 	protected virtual void OnDestroy() {
+		// Fix auto-login.
+		SetString(".Phone",texts[0]);
+		SetString(".Password",texts[1]);
+		//
 		m_Task?.Kill();m_Task=null;
 	}
 
@@ -205,7 +225,7 @@ public class OpenStageAiSdk
 #if UNITY_EDITOR_WIN||UNITY_STANDALONE_WIN
 			return Path.Combine(Path.GetDirectoryName(
 				System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData)),
-				"Roaming/realplayplatform"
+				"Roaming/OpenstageAI"
 			);
 #elif !UNITY_EDITOR&&(UNITY_ANDROID||UNITY_IOS)// Mobile
 			return Application.persistentDataPath;
@@ -219,6 +239,55 @@ public class OpenStageAiSdk
 #endif
 	}
 
+	// Official SDK
+
+	public virtual bool portable {
+		get {
+			return (features&Feature.OfficialSDK)==0&&(features&Feature.CustomSDK)!=0;
+		}
+	}
+
+	protected virtual void InitSDK() {
+		if(!Directory.Exists(settingsPath)
+#if !UNITY_EDITOR&&(UNITY_ANDROID||UNITY_IOS)
+			||true
+#endif
+		) {
+			if((features&Feature.CustomSDK)!=0) {features&=~Feature.OfficialSDK;}
+		}
+		if((features&Feature.OfficialSDK)!=0) {
+			// Cleanup
+			enabled=false;
+			hardwareSN="null";
+			displayName="已接入官方SDK";
+			avatarIcon=m_AvatarIcon;
+			//
+			var client=GetComponent<PipeClient>();
+			if(client==null) {gameObject.AddComponent<PipeClient>();}
+			PipeClient.eventObj.MyEvent+=OnDeviceUpdated;
+			OnDeviceUpdated(null,PipeClient.deviceConfig);
+		}
+	}
+
+	protected virtual void OnDeviceUpdated(object sender,DeviceConfig e) {
+		if(e!=null) {
+			JObject jo=JObject.FromObject(e.config);
+			jo["sdkType"]="OfficialSDK";
+			if(!string.IsNullOrEmpty(jo["deviceId"]?.Value<string>())) {
+				Log($"Load {e.type} config from official sdk.");
+				deviceConfig=jo.ToString();// TODO : 4th Priority.
+				SetString(".DeviceConfig",deviceConfig);
+				//
+				OnDeviceUpdated();
+				// Fire a fake event to update ui.
+				displayName=jo["deviceNumber"]?.Value<string>()??"已获取设备参数";
+				InvokeEvent(UnityExtension.k_OAuth_Login);
+			}else {
+				Log("Pass the invalid confg.");
+			}
+		}
+	}
+
 	// Device Methods
 
 	public virtual event System.Action<string> onDeviceUpdated {
@@ -230,6 +299,8 @@ public class OpenStageAiSdk
 	}
 
 	protected virtual void LoadDeviceConfig() {
+		if(!string.IsNullOrEmpty(deviceConfig)) {return;}
+		//
 		deviceConfig=GetString(".DeviceConfig",deviceConfig);// TODO : 3rd Priority.
 		string fn="deviceConfig.json";// TODO : 1st Priority.
 		if(!File.Exists(fn)) {
@@ -243,12 +314,20 @@ public class OpenStageAiSdk
 			if(m_OnDeviceUpdated==null) {Log(deviceConfig);}
 			else {m_OnDeviceUpdated.Invoke(deviceConfig);}
 			//
-			if((save&0x1)!=0) {File.WriteAllText("deviceConfig.json",deviceConfig);}
-			if((save&0x2)!=0) {}// TODO: QRCode for mobile????
+			if((features&Feature.SaveDeviceJson)!=0) {
+				string fn="deviceConfig.json";
+				JToken jt=JObject.Parse(deviceConfig).SelectToken("deviceId");
+				if(jt!=null) {fn=jt.Value<string>()+".json";}
+				File.WriteAllText(fn,deviceConfig);
+			}
+			if((features&Feature.SaveDeviceQR)!=0) {}// TODO: QRCode for mobile????
 		}
 	}
 
 	public virtual void Find() {
+#if true//HAS_OFFICIAL_SDK
+		if(!portable) {return;}
+#endif
 		string tmp=FindSerialPort(0x1A86,0xFE0C);
 		if(string.IsNullOrEmpty(tmp)) {return;}Log("Open SerialPort "+tmp);
 		byte[] buffer=new byte[40];
@@ -280,8 +359,29 @@ public class OpenStageAiSdk
 
 	// WebRequest Methods
 
+	public override void SetForm(int type,string[] table) {
+		switch(type) {
+			case UnityExtension.k_OAuth_Login:
+			case UnityExtension.k_OAuth_Verify:
+				SetString(".Phone",table[0]);
+			break;
+		}
+		base.SetForm(type,table);
+	}
+
 	public override void Login() {
-		Log($"Login account {texts[0]}.");base.Login();
+#if true//HAS_OFFICIAL_SDK
+		if(!portable) {return;}
+#endif
+		Logout();
+		if(string.IsNullOrEmpty(texts[0])||(string.IsNullOrEmpty(texts[1])&&string.IsNullOrEmpty(texts[2]))) {return;}
+		if(texts[0].Length!=11||!texts[0].IsSerialNumber()) {return;}// Phone
+		//
+		Log($"Login account {texts[0]}.");
+		int offset=k_Offset_DoLogin;
+		string str=string.Format(texts[offset+1],texts[0],texts[1],texts[2],string.IsNullOrEmpty(texts[2])?"password":"verifyCode");
+		var www=UnityWebRequest.Post(GetUrl(UnityExtension.k_OAuth_Login),str,texts[offset+0]);
+		SendRequest(www,OnLogin);
 	}
 
 	protected override void OnLogin(string text) {
@@ -295,16 +395,38 @@ public class OpenStageAiSdk
 			SetString(".Password",texts[1]);
 			//
 			Query();
-		}else { 
-			Logout();
 		}
 	}
 
 	public override void Logout() {
-		Log("Logout.");base.Logout();
+#if true//HAS_OFFICIAL_SDK
+		if(!portable) {return;}
+#endif
+		if(authorized) {Log("Logout.");}
+		base.Logout();
+	}
+
+	public override void Verify() {
+#if true//HAS_OFFICIAL_SDK
+		if(!portable) {return;}
+#endif
+		if(string.IsNullOrEmpty(texts[0])) {return;}
+		//
+		var www=UnityWebRequest.Get(GetUrl(UnityExtension.k_OAuth_Verify)+$"?account={texts[0]}&type={texts[2]}&accountType=phone");
+		SendRequest(www,OnVerify);
+	}
+
+	protected virtual void OnVerify(string text) {
+		Log("Verify :"+text);
+		JObject jo=JObject.Parse(text);
+		m_Message=jo?.SelectToken(texts[k_Offset_OnLogin+1])?.Value<string>();
+		InvokeEvent(UnityExtension.k_OAuth_Verify);
 	}
 
 	public virtual void Query() {
+#if true//HAS_OFFICIAL_SDK
+		if(!portable) {return;}
+#endif
 		if(authorized&&!string.IsNullOrEmpty(hardwareSN)) {
 			Log("Query the device(SN:"+hardwareSN+")");
 			//
@@ -319,7 +441,8 @@ public class OpenStageAiSdk
 		if(!string.IsNullOrEmpty(text)) {
 			JObject jo=JObject.Parse(text);
 			if(IsSuccess(jo.SelectToken(texts[k_Offset_OnLogin])?.Value<string>())) {
-				deviceConfig=jo.SelectToken("result").ToString();// TODO : 4th Priority.
+				JToken jt=jo.SelectToken("result");jt["sdkType"]="CustomSDK";
+				deviceConfig=jt.ToString();// TODO : 4th Priority.
 				SetString(".DeviceConfig",deviceConfig);
 				//
 				OnDeviceUpdated();

@@ -1,4 +1,10 @@
 /* <!-- Macro.Copy File
+:Packages/com.yousing.io/Runtime/APIs/OAuthAPI.cs,54~58,64
+ Macro.End --> */
+/* <!-- Macro.Replace
+k_Type_,k_OAuth_
+ Macro.End --> */
+/* <!-- Macro.Copy File
 :Packages/com.yousing.io/Runtime/Modules/MediaModule/Core/MediaExtension.cs,81~95,229,240~271,278
 :Packages/com.yousing.io/Runtime/APIs/TextureAPI.cs,169,345~354,359~374,479~503,516~529
 :Packages/com.yousing.io/Runtime/Internal/UnityExtension.cs,25~32,11,73~90
@@ -42,6 +48,12 @@ using Graphics=UnityEngine.Graphics;
 namespace YouSingStudio.Holograms {
 	public static partial class UnityExtension {
 // <!-- Macro.Patch AutoGen
+		public const int k_OAuth_Register=0;
+		public const int k_OAuth_Login=1;
+		public const int k_OAuth_Logout=2;
+		public const int k_OAuth_Verify=3;
+		public const int k_OAuth_Forget=4;
+		public const int k_OAuth_Error=k_OAuth_Forget+1;
 		public static HashSet<string> s_ImageExtensions=new HashSet<string>(System.StringComparer.OrdinalIgnoreCase);
 		public static bool IsImage(string ext) {
 			return s_ImageExtensions.Contains(ext);
@@ -417,7 +429,7 @@ namespace YouSingStudio.Holograms {
 
 		public static TextureType ToTextureType(this string thiz,TextureType type=TextureType.Default) {
 			if(!string.IsNullOrEmpty(thiz)) {
-				if(IsModel(thiz)) {return TextureType.Model;}
+				if(IsModel(Path.GetExtension(thiz))) {return TextureType.Model;}
 				//
 				bool b=thiz.IsSerialNumber();thiz=Path.GetFileNameWithoutExtension(thiz);
 				if(thiz.EndsWith("_sbs",k_Comparison)||thiz.EndsWith("_ou",k_Comparison)) {// Video3DLayout
@@ -549,10 +561,15 @@ namespace YouSingStudio.Holograms {
 
 		internal static void UnpackPath(this string thiz,System.Func<string,bool> func,List<string> paths) {
 			bool b=false;
-			foreach(string fn in Directory.GetFiles(thiz,"*.*",SearchOption.TopDirectoryOnly)) {
-				if(func?.Invoke(fn)??true){paths.Add(fn);
-					if(!b) {b=IsModel(Path.GetExtension(fn));}// Model as bundle.
+			using(ListPool<string>.Get(out var list)) {
+				foreach(string fn in Directory.GetFiles(thiz,"*.*",SearchOption.TopDirectoryOnly)) {
+					if(IsModel(Path.GetExtension(fn))) {// Model as bundle.
+						b=true;if(func?.Invoke(fn)??true){paths.Add(fn);}
+					}else {list.Add(fn);}
 				}
+				if(!b) {string it;for(int i=0,imax=list?.Count??0;i<imax;++i) {
+					it=list[i];if(func?.Invoke(it)??true){paths.Add(it);}
+				}}
 			}
 			if(!b) {foreach(string dn in Directory.GetDirectories(thiz)) {
 				dn.UnpackPath(func,paths);

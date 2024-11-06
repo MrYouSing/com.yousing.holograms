@@ -206,6 +206,14 @@ namespace YouSingStudio.Holograms {
 			}
 		}
 
+		protected virtual string GetPreview(string path) {
+			path=Path.Combine(Path.GetDirectoryName(path),Path.GetFileNameWithoutExtension(path)+"_preview");string
+			pv=path+".png";if(File.Exists(pv)) {return pv;}
+			pv=path+".jpg";if(File.Exists(pv)) {return pv;}
+			pv=path+".jpeg";if(File.Exists(pv)) {return pv;}
+			return null;
+		}
+
 		protected virtual void LoadIcon(RawImage image,string path) {
 			TextureManager tm=TextureManager.instance;
 			Texture tex=null;float a=0.0f;
@@ -226,8 +234,8 @@ namespace YouSingStudio.Holograms {
 			bool b=tm.assets?.TryGetValue(UnityExtension.s_TempTag+path,out tex)??false;
 			if(!b||tex==null) {
 				b=false;string icon=Path.GetExtension(path);
-				string pv=Path.Combine(Path.GetDirectoryName(path),Path.GetFileNameWithoutExtension(path)+"_preview.png");
-				if(File.Exists(pv)) {icon=pv;b=true;}// Highest priority.
+				string pv=GetPreview(path);
+				if(!string.IsNullOrEmpty(pv)) {icon=pv;b=true;}// Highest priority.
 				else {icon=tm.ToIconKey(icon);}
 				//
 				tex=tm.Get(icon);if(tex!=null) {
