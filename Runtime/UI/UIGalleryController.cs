@@ -192,11 +192,11 @@ namespace YouSingStudio.Holograms {
 				case TextureType.Stereo:{
 					Vector3 count=path.ParseQuilt();
 					if(!count.TwoPieces()) {path.SetQuilt(path.ParseLayout());}
-					if(director!=null) {director.Set(-1);}// Stop the other.
+					if(director!=null) {director.Set("Open Media");}// Stop the other.
 					if(player!=null) {player.Play(path);}
 				}break;
 				case TextureType.Quilt:
-					if(director!=null) {director.Set(-1);}// Stop the other.
+					if(director!=null) {director.Set("Open Media");}// Stop the other.
 					if(player!=null) {player.Play(path);}
 				break;
 				case TextureType.Model:

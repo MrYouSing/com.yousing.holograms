@@ -33,6 +33,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
+  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -93,6 +94,13 @@ MonoBehaviour:
   sensitivity: {x: -0.0025, y: 0.25, z: 1, w: -500}
   buttons: 000000000100000002000000
   modifiers: 2f0100003001000031010000320100003301000034010000
+  types: 02000000
+  cursors:
+  - 
+  - Camera.Move
+  - Camera.Rotate
+  - Camera.Zoom
+  - Camera.Reset
   stage: {fileID: 0}
   viewer: {fileID: 0}
   collider: {fileID: 0}
@@ -112,6 +120,16 @@ MonoBehaviour:
   sensitivity: {x: 0.0025, y: 0.25, z: 1, w: 1}
   buttons: 000000000100000002000000
   modifiers: 2f0100003001000031010000320100003301000034010000
+  types: 0000000001000000
+  cursors:
+  - 
+  - Model.Move
+  - Model.Rotate
+  - Model.Zoom
+  - Model.Reset
+  - Model.MoveZ
+  - Model.RotateZ
+  - Model.Fit
   stage: {fileID: 0}
   viewer: {fileID: 0}
   collider: {fileID: 0}

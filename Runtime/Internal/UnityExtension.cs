@@ -564,11 +564,11 @@ namespace YouSingStudio.Holograms {
 			using(ListPool<string>.Get(out var list)) {
 				foreach(string fn in Directory.GetFiles(thiz,"*.*",SearchOption.TopDirectoryOnly)) {
 					if(IsModel(Path.GetExtension(fn))) {// Model as bundle.
-						b=true;if(func?.Invoke(fn)??true){paths.Add(fn);}
+						b=true;if(func?.Invoke(fn)??true){paths.Add(Path.GetFullPath(fn).FixPath());}
 					}else {list.Add(fn);}
 				}
 				if(!b) {string it;for(int i=0,imax=list?.Count??0;i<imax;++i) {
-					it=list[i];if(func?.Invoke(it)??true){paths.Add(it);}
+					it=list[i];if(func?.Invoke(it)??true){paths.Add(Path.GetFullPath(it).FixPath());}
 				}}
 			}
 			if(!b) {foreach(string dn in Directory.GetDirectories(thiz)) {
@@ -583,7 +583,7 @@ namespace YouSingStudio.Holograms {
 				if(paths==null) {paths=new List<string>();}
 				string it;for(;i<imax;++i) {
 					it=thiz[i].GetFullPath();if(File.Exists(it)) {
-						if(func?.Invoke(it)??true){paths.Add(it);}
+						if(func?.Invoke(it)??true){paths.Add(Path.GetFullPath(it).FixPath());}
 					}else if(Directory.Exists(it)) {
 						it.UnpackPath(func,paths);
 					}

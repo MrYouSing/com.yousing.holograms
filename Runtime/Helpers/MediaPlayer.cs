@@ -156,7 +156,7 @@ namespace YouSingStudio.Holograms {
 		}
 
 		public virtual void Play() {
-			if(!quilt.enabled) {Play(m_Path);}
+			if(!quilt.enabled&&!string.IsNullOrEmpty(m_Path)) {Play(m_Path);}
 		}
 
 		public virtual void Stop() {

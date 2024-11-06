@@ -1,9 +1,7 @@
-/* TODO:
-1) Cursor.Icon
-2) UI.Scale
- */
+
 using UnityEngine;
 using UnityEngine.EventSystems;
+using YouSingStudio.Private;
 
 namespace YouSingStudio.Holograms {
 	/// <summary>
@@ -29,6 +27,8 @@ namespace YouSingStudio.Holograms {
 			KeyCode.RightShift+0,KeyCode.RightShift+1,KeyCode.RightShift+2,
 			KeyCode.RightShift+3,KeyCode.RightShift+4,KeyCode.RightShift+5,
 		};
+		public int[] types=new int[] {0,0};
+		public string[] cursors;
 		[Header("Misc")]// For resolving target role.
 		public Transform stage;
 		public Transform viewer;
@@ -39,6 +39,7 @@ namespace YouSingStudio.Holograms {
 		[System.NonSerialized]protected Pose m_Pose;
 		[System.NonSerialized]protected Vector3 m_Scale;
 		[System.NonSerialized]protected Vector3 m_Mouse;
+		[System.NonSerialized]protected float m_Scroll;
 		[System.NonSerialized]protected Vector3 m_V;
 		[System.NonSerialized]protected Vector3 m_T;
 		[System.NonSerialized]protected Quaternion m_R;
@@ -60,6 +61,7 @@ namespace YouSingStudio.Holograms {
 			if(m_Action>=0) {
 				OnInput();
 				float k=s_PlaneScale;
+					s_PlaneScale/=GetScreen();
 					OnUpdate();
 				s_PlaneScale=k;
 			}
@@ -74,7 +76,7 @@ namespace YouSingStudio.Holograms {
 		}
 
 		public virtual void OnPointerExit(PointerEventData e) {
-			SetAction(-1);
+			SetAction(-1);SetCursor(-1);
 		}
 
 		public virtual void OnPointerDown(PointerEventData e) {
@@ -103,6 +105,10 @@ namespace YouSingStudio.Holograms {
 			if(s_Camera==null) {s_Camera=Camera.main;}
 			return s_Camera==null?1.0f:s_Camera.GetPlaneHeight
 				(s_Camera.worldToCameraMatrix.MultiplyPoint3x4(point).z);
+		}
+
+		public static float GetScreen() {
+			return Mathf.Min(Screen.width,Screen.height)/1080.0f;
 		}
 
 		public virtual void SetTarget(Transform value) {
@@ -149,6 +155,22 @@ namespace YouSingStudio.Holograms {
 			}
 		}
 
+		protected virtual bool IsScrolling(float value) {
+			if(!Mathf.Approximately(value,m_Scroll)) {
+				m_Scroll=Mathf.Lerp(m_Scroll,value,0.75f);return true;
+			}else {
+				m_Scroll=value;return false;
+			}
+		}
+
+		protected virtual void SetCursor(int cursor) {
+			if(CursorManager.s_Instance!=null) {
+				CursorManager.s_Instance.cursor=
+					(cursor>=0&&cursor<(cursors?.Length??0))
+					?cursors[cursor]:null;
+			}
+		}
+
 		protected virtual void OnInput() {
 			m_Mouse.z-=Input.GetAxisRaw("Mouse ScrollWheel")*sensitivity.w;
 			SetAction((GetModifiers(modifiers)<<8)|(m_Action&0xFF));
@@ -156,7 +178,7 @@ namespace YouSingStudio.Holograms {
 		}
 
 		protected virtual void OnEnter() {
-			m_Mouse=Input.mousePosition;
+			m_Mouse=Input.mousePosition;m_Scroll=0.0f;
 			if(target==null) {return;}
 			//
 			m_T=target.position;
@@ -175,7 +197,7 @@ namespace YouSingStudio.Holograms {
 		}
 
 		protected virtual void OnExit() {
-			m_Mouse=Vector3.zero;
+			m_Mouse=Vector3.zero;m_Scroll=0.0f;
 			m_V=Vector3.zero;
 			m_T=Vector3.zero;
 			m_R=Quaternion.identity;
@@ -211,39 +233,45 @@ namespace YouSingStudio.Holograms {
 		}
 
 		protected virtual void UpdateCamera() {
-			if((m_Action&0xFF00)!=0) {return;}
-			//
 			Vector3 mouse=Input.mousePosition-m_Mouse;
-			switch(m_Action&0xFF) {
-				case 1:SetPosition(mouse.x,mouse.y);break;
-				case 2:SetRotation(-mouse.y,mouse.x);break;
-				case 3:ResetTarget();break;
+			int type=(m_Action>>8)&0xFF;if(type==types[0]) {
+				SetCursor(0);switch(m_Action&0xFF) {
+					case 1:SetPosition(mouse.x,mouse.y);SetCursor(1);break;
+					case 2:SetRotation(-mouse.y,mouse.x);SetCursor(2);break;
+					case 3:ResetTarget();SetCursor(4);break;
+				}
+			}else {
+				return;
 			}
-			mouse=new Vector3(0.0f,0.0f,sensitivity.x*mouse.z);
-			if(viewer!=null) {viewer.localPosition=m_V+mouse;}
-			else {target.position=m_T+mouse;}
+			if(IsScrolling(mouse.z)) {
+				mouse=new Vector3(0.0f,0.0f,sensitivity.x*mouse.z);
+				if(viewer!=null) {viewer.localPosition=m_V+mouse;}
+				else {target.position=m_T+mouse;}
+				SetCursor(3);
+			}
 		}
 
 		protected virtual void UpdateActor() {
 			Vector3 mouse=Input.mousePosition-m_Mouse;
-			switch(m_Action&0xFF00) {
-				case 0x0100:// Shift
-				switch(m_Action&0xFF) {
-					case 1:SetPosition(mouse.x,mouse.y);break;
-					case 2:SetRotation(mouse.y,-mouse.x);break;// Inverse
-					case 3:ResetTarget();break;
+			int type=(m_Action>>8)&0xFF;if(type==types[0]) {// Type A
+				SetCursor(0);switch(m_Action&0xFF) {
+					case 1:SetPosition(mouse.x,mouse.y);SetCursor(1);break;
+					case 2:SetRotation(mouse.y,-mouse.x);SetCursor(2);break;// Inverse
+					case 3:ResetTarget();SetCursor(4);break;
 				}
-				break;
-				case 0x0300:// Shift+Ctrl
-				switch(m_Action&0xFF) {
-					case 1:SetPosition(mouse.y);break;
-					case 2:SetRotation(mouse.y);break;// Clockwise TODO: Two Parts????
-					case 3:FitTarget();break;
+			}else if(type==types[1]) {// Type B
+				SetCursor(0);switch(m_Action&0xFF) {
+					case 1:SetPosition(mouse.y);SetCursor(5);break;
+					case 2:SetRotation(mouse.y);SetCursor(6);break;// Clockwise TODO: Two Parts????
+					case 3:FitTarget();SetCursor(7);break;
 				}
-				break;
-				default:return;
+			}else {
+				return;
 			}
-			target.localScale=m_S*ToScale(sensitivity.z*mouse.z);
+			if(IsScrolling(mouse.z)) {
+				target.localScale=m_S*ToScale(sensitivity.z*mouse.z);
+				SetCursor(3);
+			}
 		}
 
 		public virtual string Info(string fmt="0.000") {

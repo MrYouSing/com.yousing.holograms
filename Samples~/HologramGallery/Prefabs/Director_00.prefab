@@ -51,7 +51,7 @@ MonoBehaviour:
   modifiers: 
   keys: 
   stages:
-  - name: 
+  - name: Open Media
     actors: []
     behaviours: []
     onStart:
