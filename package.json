@@ -6,6 +6,10 @@
 		"com.unity.nuget.newtonsoft-json": "3.1.0"
 	},
 	"samples": [{
+		"displayName": "Hello World",
+		"description": "A hello-world demo for hologram rendering.",
+		"path": "Samples~/HelloWorld"
+	},{
 		"displayName": "Hologram Gallery",
 		"description": "Shows how to implement a custom hologram gallery.",
 		"path": "Samples~/HologramGallery"

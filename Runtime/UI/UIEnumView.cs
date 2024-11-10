@@ -69,6 +69,7 @@ namespace YouSingStudio.Holograms {
 		}
 
 		protected virtual void OnDropdownChanged(int i)=>OnValueChanged(values[i]);
+		public virtual T value=>index>=0?values[index]:default;
 
 		public override void OnValueChanged(T value) {
 			var tmp=current;current=this;
@@ -81,9 +82,9 @@ namespace YouSingStudio.Holograms {
 			bool b;for(int i=0,imax=keys?.Length??0;i<imax;++i) {
 				b=object.Equals(values[i],value);
 				SetToggleWithoutNotify(i,b);
-				if(b) {
-					SetDropdownWithoutNotify(0,i);
-					PlayerPrefs.SetInt(name,i);
+				if(b) {index=i;
+					SetDropdownWithoutNotify(0,index);
+					PlayerPrefs.SetInt(name,index);
 				}
 			}
 		}

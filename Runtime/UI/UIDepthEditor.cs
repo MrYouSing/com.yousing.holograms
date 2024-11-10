@@ -62,11 +62,28 @@ namespace YouSingStudio.Holograms {
 // Macro.Patch -->
 			SetSlider(k_Scale,scale);
 			SetSlider(k_Offset,offset);
+			SetActive(0,false);
+			UnityExtension.SetListener<TextureType>(OnTypeChanged,true);
+		}
+
+		protected virtual void OnDestroy() {
+			UnityExtension.SetListener<TextureType>(OnTypeChanged,false);
 		}
 
 		#endregion Unity Messages
 
 		#region Methods
+
+		protected virtual void OnTypeChanged(TextureType type) {
+			switch(type) {
+				case TextureType.Depth:
+					SetActive(0,true);
+				break;
+				default:
+					SetActive(0,false);
+				break;
+			}
+		}
 
 		protected virtual void SetScale(string value) {
 			if(float.TryParse(value,out var f)) {SetScale(f);}

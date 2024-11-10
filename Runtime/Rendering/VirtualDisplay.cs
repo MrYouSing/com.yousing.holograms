@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.UI;
 using YouSingStudio.Private;
 
@@ -9,6 +10,7 @@ namespace YouSingStudio.Holograms {
 		#region Fields
 
 		public HologramDevice device;
+		public new Camera camera;
 		public Canvas canvas;
 		public RawImage image;
 #if UNITY_EDITOR
@@ -16,6 +18,7 @@ namespace YouSingStudio.Holograms {
 #endif
 		[System.NonSerialized]protected bool m_Active;
 		[System.NonSerialized]protected bool m_IsCreated;
+		[System.NonSerialized]protected CommandBuffer m_Buffer;
 
 		#endregion Fields
 
@@ -43,6 +46,28 @@ namespace YouSingStudio.Holograms {
 			if(!device.IsPresent()) {device=null;}
 #endif
 			if(device==null) {return false;}device.Init();
+			return CreateCameraDisplay();//CreateCanvasDisplay();
+		}
+
+		protected virtual bool CreateCameraDisplay() {
+			if(device.display<0) {
+				if(camera!=null) {camera.enabled=false;}return false;
+			}
+			//
+			ScreenManager.Activate(device.display);
+			if(camera==null) {
+				GameObject go=new GameObject(nameof(VirtualDisplay)+"@"+device.display);
+				camera=go.AddComponent<Camera>();camera.cullingMask=0;
+				camera.clearFlags=CameraClearFlags.SolidColor;camera.backgroundColor=Color.clear;
+			}
+			camera.targetDisplay=device.display;
+			if(m_Buffer==null) {m_Buffer=new CommandBuffer();m_Buffer.Blit(device.canvas,BuiltinRenderTextureType.CameraTarget);}
+			camera.RemoveCommandBuffer(CameraEvent.BeforeImageEffects,m_Buffer);camera.AddCommandBuffer(CameraEvent.BeforeImageEffects,m_Buffer);
+			//
+			return m_Active=true;
+		}
+
+		protected virtual bool CreateCanvasDisplay() {
 			if(device.display<0) {
 				if(canvas!=null) {canvas.enabled=false;}return false;
 			}
@@ -77,7 +102,9 @@ namespace YouSingStudio.Holograms {
 			//
 			if(m_Active=value) {ScreenManager.Activate(device.display);}
 			else {ScreenManager.Deactivate(device.display);}
-			canvas.enabled=m_Active;
+			//
+			if(camera!=null) {camera.enabled=m_Active;}
+			if(canvas!=null) {canvas.enabled=m_Active;}
 		}
 
 		#endregion Methods

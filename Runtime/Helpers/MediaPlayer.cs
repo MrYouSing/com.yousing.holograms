@@ -226,12 +226,16 @@ namespace YouSingStudio.Holograms {
 					while(i-->0) {yield return m_Wait;}
 					//
 					if(id==m_Lock) {OnVideoRefreshed();}
-					else {Log("Skip "+m_Path);}
+					else {OnVideoSkipped();}
 				}
 			}else {
 				if(id==m_Lock) {OnVideoConverted();}
-				else {Log("Skip "+m_Path);}
+				else {OnVideoSkipped();}
 			}
+		}
+
+		protected virtual void OnVideoSkipped() {
+			video.url=null;Log("Skip "+m_Path);
 		}
 
 		protected virtual void OnVideoRefreshed() {

@@ -75,7 +75,9 @@ namespace YouSingStudio.Holograms {
 
 		protected virtual void OnDeviceUpdated(string text) {
 			if(!string.IsNullOrEmpty(text)) {
-				JsonConvert.PopulateObject(text,this);
+				string n=name;
+					JsonConvert.PopulateObject(text,this);
+				name=n;
 				Debug.Log($"Load {sdkType} settings : {text}");
 			}
 		}

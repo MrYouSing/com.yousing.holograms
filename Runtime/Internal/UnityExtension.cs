@@ -362,6 +362,7 @@ namespace YouSingStudio.Holograms {
 		public static GLRenderer s_GLRenderer;
 		public static JObject s_Settings;
 		public static Dictionary<string,Vector3> s_QuiltMap=new Dictionary<string,Vector3>();
+		public static Dictionary<System.Type,System.Delegate> s_Events=new Dictionary<System.Type,System.Delegate>();
 
 		#endregion Fields
 
@@ -635,6 +636,21 @@ namespace YouSingStudio.Holograms {
 			if(thiz!=null&&value==null) {
 				value=thiz.GetComponentInChildren<T>();
 				if(value==null) {value=GetResourceInstance<T>(path);}
+			}
+		}
+
+		public static void SetListener<T>(this System.Action<T> thiz,bool value) {
+			System.Type key=typeof(T);
+			if(!s_Events.TryGetValue(key,out var d)||d==null) {if(value) {d=thiz;}}
+			else {d=value?System.Delegate.Combine(d,thiz):System.Delegate.Remove(d,thiz);}
+			//
+			if(d==null) {s_Events.Remove(key);}
+			else {s_Events[key]=d;}
+		}
+
+		public static void InvokeEvent<T>(this T thiz) {
+			if(s_Events.TryGetValue(typeof(T),out var d)&&d!=null) {
+				((System.Action<T>)d)?.Invoke(thiz);
 			}
 		}
 

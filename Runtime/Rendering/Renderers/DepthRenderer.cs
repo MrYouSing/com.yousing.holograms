@@ -190,7 +190,10 @@ namespace YouSingStudio.Holograms {
 			f=device!=null?Mathf.Abs(device.ParseQuilt().z):((float)Screen.width/Screen.height);
 			Vector2 v=UnityExtension.FitScale(new Vector2((float)m_Size.x/m_Size.y,1.0f),new Vector2(f,1.0f),aspect);
 			m_Renderer.localScale=new Vector3(v.x,v.y,1.0f);
-			m_Vector=new Vector3(v.x-f,v.y-1.0f,0.0f)*0.5f;
+			m_Vector=new Vector3(v.x-f,1.0f-v.y,0.0f)*0.5f;
+			if(false||false) {// TODO: Inside????
+				m_Vector=Vector2.zero;
+			}
 			m_Value=-1.0f;Value=0.0f;
 		}
 
@@ -199,7 +202,7 @@ namespace YouSingStudio.Holograms {
 		public virtual float Value {
 			get {
 				bool b=isActiveAndEnabled;
-				if(b) {b=!UnityExtension.Approximately(m_Vector.sqrMagnitude,0);}
+				if(b) {b=!UnityExtension.Approximately(m_Vector.sqrMagnitude,0.0f);}
 				return b?m_Value:float.NaN;
 			}
 			set {

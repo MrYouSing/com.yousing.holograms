@@ -3,44 +3,41 @@ using UnityEngine.UI;
 
 namespace YouSingStudio.Holograms {
 	/// <summary>
-	/// A preview for non-hologram screen.
+	/// A preview on non-hologram screen.<br/>
+	/// Value:View index.
 	/// </summary>
 	public class UIHologramPreview
-		:MonoBehaviour
+		:UISliderView
 	{
 		#region Fields
 
+		[Header("Hologram")]
 		public ScreenDevice screen;
 		public WrapMode wrap;
 		public float duration=1.0f;
 		[Header("UI")]
-		public Slider slider;
-		public Text text;
-		public string format="({0}/{1})";
 		public CanvasGroup[] groups;
 		public RawImage[] images;
 		public GameObject durationUI;
 
 		[System.NonSerialized]protected float m_Time;
 		[System.NonSerialized]protected WrapMode m_Wrap;
-		[System.NonSerialized]protected GameObject m_SliderV;
 
 		#endregion Fields
 
 		#region Unity Messages
 
-		protected virtual void Start() {
-			if(screen==null) {screen=FindAnyObjectByType<ScreenDevice>();}
-			if(slider==null) {slider=GetComponentInChildren<Slider>();}
+		protected override void Start() {
+			base.Start();
 			//
-			if(screen!=null) {
-				screen.onDefaultChanged+=()=>SetWrap(wrap);
-			}
-			if(slider!=null) {
-				slider.onValueChanged.AddListener(OnSliderChanged);
-				m_SliderV=slider.gameObject;
-			}
+			if(screen==null) {screen=FindAnyObjectByType<ScreenDevice>();}
+			if(screen!=null) {screen.onDefaultChanged+=()=>SetWrap(wrap);}
+			m_Wrap=(WrapMode)PlayerPrefs.GetInt(name+".DefaultWrap");
 			SetWrap(wrap);
+		}
+
+		protected virtual void OnDestroy() {
+			PlayerPrefs.SetInt(name+".DefaultWrap",(int)m_Wrap);
 		}
 
 		protected virtual void Update() {
@@ -87,12 +84,12 @@ namespace YouSingStudio.Holograms {
 
 		protected virtual void SetSlider(bool value) {
 			m_SliderV.SetActive(value);
-			if(text!=null) {text.enabled=value;}
 			SetActive(0x2);
 		}
 
 		protected virtual void SetAnimation(bool value) {
 			if(durationUI!=null) {durationUI.SetActive(value);}
+			if(m_FieldV!=null) {m_FieldV.SetActive(!value);}
 			//
 			if(value) {Update();}
 			else {UpdateSlider();}
@@ -108,17 +105,16 @@ namespace YouSingStudio.Holograms {
 			//
 			m_Time=Time.time;
 			switch(wrap) {
-				case WrapMode.ClampForever:
+				case WrapMode.ClampForever:// Quilt views.
 					SetActive(0x1);
 				break;
-				case WrapMode.Once:
-					SetSlider(false);
+				case WrapMode.Once:// One view.
+					m_Wrap=wrap;SetSlider(false);
 					screen.quiltIndex=-1;SetAnimation(false);
+					if(m_FieldV!=null) {m_FieldV.SetActive(false);}
 				break;
-				default:
-					m_Wrap=wrap;
-					//
-					SetSlider(true);
+				default:// Change view automatically or manually.
+					m_Wrap=wrap;SetSlider(true);
 					SetAnimation(wrap!=WrapMode.Default);
 				break;
 			}
@@ -132,15 +128,24 @@ namespace YouSingStudio.Holograms {
 			if(slider!=null) {
 				slider.wholeNumbers=true;
 				if(screen!=null) {
+					string str=(idx+1).ToString();// C2H
 					slider.maxValue=cnt-1;slider.SetValueWithoutNotify(idx);// H2C
-					if(text!=null) {text.text=string.Format(format,idx+1,cnt);}// C2H
+					SetText(0,1);SetText(1,str);SetText(2,cnt);
+					if(field!=null) {field.SetTextWithoutNotify(str);}
 				}
 			}
 		}
 
-		protected virtual void OnSliderChanged(float f) {
-			screen.quiltIndex=(int)f;
+		protected override void OnSliderChanged(float value) {
+			screen.quiltIndex=(int)value;
 			UpdateSlider();
+		}
+
+		protected override void OnSliderChanged(string value) {
+			if(int.TryParse(value,out int idx)) {
+				screen.quiltIndex=idx;
+				UpdateSlider();
+			}
 		}
 
 		#endregion Methods

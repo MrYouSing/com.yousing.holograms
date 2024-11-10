@@ -98,7 +98,7 @@ namespace YouSingStudio.Holograms {
 
 		protected virtual IEnumerator StartDelayed() {
 			yield return null;
-			//
+			// After all started.
 			if(m_Index==0) {Set(0);}
 		}
 
@@ -204,6 +204,7 @@ namespace YouSingStudio.Holograms {
 					if(director!=null) {director.Open("Open Model "+Path.GetExtension(path),path);}
 				break;
 			}
+			type.InvokeEvent();
 		}
 
 		protected virtual string GetPreview(string path) {

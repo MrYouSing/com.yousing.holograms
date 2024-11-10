@@ -316,7 +316,7 @@ public class OpenStageAiSdk
 			//
 			if((features&Feature.SaveDeviceJson)!=0) {
 				string fn="deviceConfig.json";
-				JToken jt=JObject.Parse(deviceConfig).SelectToken("deviceId");
+				JToken jt=JObject.Parse(deviceConfig).SelectToken("deviceNumber");
 				if(jt!=null) {fn=jt.Value<string>()+".json";}
 				File.WriteAllText(fn,deviceConfig);
 			}

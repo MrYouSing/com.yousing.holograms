@@ -23,6 +23,7 @@ namespace YouSingStudio.Holograms {
 		[System.NonSerialized]protected Vector2 m_Vector;
 		[System.NonSerialized]protected Vector3 m_Args;
 		[System.NonSerialized]protected Dictionary<string,Mesh> m_Meshes=new Dictionary<string,Mesh>();
+		[System.NonSerialized]protected Dictionary<string,Vector2> m_Vectors=new Dictionary<string,Vector2>();
 
 		#endregion Fields
 
@@ -153,7 +154,9 @@ namespace YouSingStudio.Holograms {
 				t[j]=i+1;++j;
 			}}
 			//
-			m.name=GetName(from,to);
+			quad=GetUV(from,to,0);m_Vector=new Vector2(quad.z-quad.x,quad.w-quad.y);
+			m_Vector=m_Vector-new Vector2(1.0f/from.x,1.0f/from.y);m_Vector*=0.5f;
+			//
 			m.vertices=v;
 			m.uv=u;
 			m.triangles=t;
@@ -200,7 +203,8 @@ namespace YouSingStudio.Holograms {
 				}
 				if(mesh==null) {
 					if(ids!=null) {size.z=System.MathF.Sign(m_Args.z)*Mathf.Abs(z);}
-					mesh=CreateMesh(m_Args,size,ids);m_Meshes[key]=mesh;
+					mesh=CreateMesh(m_Args,size,ids);mesh.name=key;
+					m_Meshes[key]=mesh;m_Vectors[key]=m_Vector;
 				}
 			}
 			//
@@ -256,9 +260,10 @@ namespace YouSingStudio.Holograms {
 		}
 
 		public virtual void UpdateSlider() {
-			m_Vector=mesh!=null?mesh.uv[2]:Vector2.up;
-				m_Vector.y=1.0f-m_Vector.y;
-			m_Value=1.0f;Value=0.0f;
+			if(mesh==null||!m_Vectors.TryGetValue(mesh.name,out m_Vector)) {
+				m_Vector=Vector2.zero;
+			}
+			m_Value=-1.0f;Value=0.0f;
 		}
 
 		Vector2 ISlider.Range=>new Vector2(-1.0f,1.0f);
@@ -266,7 +271,7 @@ namespace YouSingStudio.Holograms {
 		public virtual float Value {
 			get {
 				bool b=isActiveAndEnabled;
-				if(b) {b=!UnityExtension.Approximately(m_Vector.sqrMagnitude,0);}
+				if(b) {b=!UnityExtension.Approximately(m_Vector.sqrMagnitude,0.0f);}
 				return b?m_Value:float.NaN;
 			}
 			set {
