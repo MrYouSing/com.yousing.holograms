@@ -2,7 +2,7 @@
 true
  Macro.End --> */
 /* <!-- Macro.Define SetText
-		protected virtual void SetText(int index,{0} value) {{
+		public virtual void SetText(int index,{0} value) {{
 			Text tmp=texts[index];if(tmp==null) {{return;}}
 			{1}
 		}}
@@ -21,21 +21,45 @@ using UnityEngine;
 using UnityEngine.UI;
 
 namespace YouSingStudio.Holograms {
+	public static partial class UIExtension {
+		#region Methods
+
+		public static float GetValue(this UISliderView thiz,float value) {
+			if(thiz!=null&&thiz.slider!=null) {
+				return thiz.slider.value;
+			}
+			return value;
+		}
+
+		public static void SetRange(this UISliderView thiz,Vector2 range) {
+			if(thiz!=null&&thiz.slider!=null) {
+				thiz.slider.minValue=range.x;
+				thiz.slider.maxValue=range.y;
+			}
+		}
+
+		public static void SetValueWithoutNotify(this UISliderView thiz,float value) {
+			if(thiz!=null) {thiz.UpdateSlider(value);}
+		}
+
+		#endregion Methods
+	}
+
 	public class UISliderView
 		:MonoBehaviour
 	{
 // <!-- Macro.Patch AutoGen
-		protected virtual void SetText(int index,string value) {
+		public virtual void SetText(int index,string value) {
 			Text tmp=texts[index];if(tmp==null) {return;}
 			bool b=string.IsNullOrEmpty(value);tmp.enabled=b;if(b) {tmp.text=value;}
 		}
 
-		protected virtual void SetText(int index,float value) {
+		public virtual void SetText(int index,float value) {
 			Text tmp=texts[index];if(tmp==null) {return;}
-			tmp.text=string.Format(format,value);
+			tmp.text=value.ToString(format);
 		}
 
-		protected virtual void SetText(int index,int value) {
+		public virtual void SetText(int index,int value) {
 			Text tmp=texts[index];if(tmp==null) {return;}
 			tmp.text=value.ToString();
 		}
@@ -45,10 +69,12 @@ namespace YouSingStudio.Holograms {
 
 		[Header("Slider")]
 		public Slider slider;
+		public bool soft;
 		public InputField field;
 		public string format="0.00";
 		public Text[] texts=new Text[3];
 
+		[System.NonSerialized]public System.Action onSliderChanged=null;
 		[System.NonSerialized]protected GameObject m_SelfV;
 		[System.NonSerialized]protected GameObject m_SliderV;
 		[System.NonSerialized]protected GameObject m_FieldV;
@@ -76,9 +102,13 @@ namespace YouSingStudio.Holograms {
 
 		#region Methods
 
-		protected virtual void UpdateSlider(float value) {
+		internal virtual void UpdateSlider(float value) {
 			string s=value.ToString(format);
 			if(slider!=null) {
+				if(soft) {
+					if(value<slider.minValue) {slider.minValue=value;}
+					if(value>slider.maxValue) {slider.maxValue=value;}
+				}
 				SetText(0,slider.minValue);
 				SetText(1,s);
 				SetText(2,slider.maxValue);
@@ -97,11 +127,13 @@ namespace YouSingStudio.Holograms {
 		}
 
 		protected virtual void OnSliderChanged(float value) {
-			UpdateSlider(value);
+			UpdateSlider(value);onSliderChanged?.Invoke();
 		}
 
 		protected virtual void OnSliderChanged(string value) {
-			if(float.TryParse(value,out float f)){UpdateSlider(f);}
+			if(float.TryParse(value,out float f)){
+				UpdateSlider(f);onSliderChanged?.Invoke();
+			}
 		}
 
 		#endregion Methods

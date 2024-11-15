@@ -21,16 +21,25 @@ namespace YouSingStudio.Holograms {
 	{
 		#region Fields
 
+		public static MonoApplication s_Instance;
+
 		public VirtualDisplay display;
 		public int fullscreen=-1;
 		public Vector4 resolution=new Vector4(1280,720,1920,1080);
 		public Key[] keys=new Key[4];
 
+		[System.NonSerialized]public new MonoCamera camera;
+		[System.NonSerialized]public HologramDevice device;
+		[System.NonSerialized]public int dirty;
 		[System.NonSerialized]protected int m_Display;
 
 		#endregion Fields
 
 		#region Unity Messages
+
+		protected virtual void Awake() {
+			s_Instance=this;
+		}
 
 		protected virtual void Start() {
 			this.LoadSettings(name);
@@ -59,6 +68,15 @@ namespace YouSingStudio.Holograms {
 		#endregion Unity Messages
 
 		#region Methods
+
+		public static MonoApplication instance {
+			get {
+				if(s_Instance==null) {
+					Debug.LogWarning("Add MonoApplication manually for better performance.");
+				}
+				return s_Instance;
+			}
+		}
 
 		public virtual void Quit() {
 #if UNITY_EDITOR
@@ -94,6 +112,15 @@ namespace YouSingStudio.Holograms {
 
 		public virtual void SubScreen() {
 			if(display!=null) {SubScreen(!display.isActive);}
+		}
+
+		// Misc
+
+		public virtual void SetupCamera(MonoCamera value) {
+			if(value!=null) {
+				camera=value;device=camera.device;
+				Debug.Log($"{Application.productName} uses {camera.GetFriendlyName()} to render {device.GetFriendlyName()}.");
+			}
 		}
 
 		#endregion Methods

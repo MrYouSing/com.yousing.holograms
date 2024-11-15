@@ -16,7 +16,7 @@ namespace YouSingStudio.Holograms {
 		public VideoAspectRatio aspect;
 		[Header("Video")]
 		public VideoPlayer video;
-		public bool loopVideo=true;
+		public bool loop=true;
 		[Header("Components")]
 		public Transform root;
 		public new Renderer renderer;
@@ -60,7 +60,7 @@ namespace YouSingStudio.Holograms {
 			if(video!=null) {
 				video.prepareCompleted-=OnVideoPrepared;
 				video.prepareCompleted+=OnVideoPrepared;
-				video.isLooping=loopVideo;
+				video.isLooping=loop;
 				video.url=m_Path=path;video.Play();
 			}
 		}

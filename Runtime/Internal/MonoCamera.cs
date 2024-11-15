@@ -12,7 +12,7 @@ namespace YouSingStudio.Holograms {
 		public static bool s_AllowDummy=false;
 
 		public HologramDevice device;
-		public QuiltTexture quilt;
+		public QuiltRenderer quilt;
 		public VirtualDisplay display;
 		public HologramDevice[] devices;
 
@@ -96,7 +96,7 @@ namespace YouSingStudio.Holograms {
 			//
 			Vector3 v=device.ParseQuilt();if(vector!=v) {
 				if(quilt==null) {
-					quilt=this.NewActor<QuiltTexture>("Quilt");
+					quilt=this.NewActor<QuiltRenderer>("Quilt");
 					//quilt.aspect=UnityEngine.Video.VideoAspectRatio.FitOutside;
 				}
 				//
@@ -115,7 +115,10 @@ namespace YouSingStudio.Holograms {
 			}else {
 				if(texture!=null) {device.quiltTexture=texture;}
 				if(quilt!=null) {quilt.enabled=false;}
-			} 
+			}
+			if(MonoApplication.s_Instance!=null) {
+				MonoApplication.s_Instance.SetupCamera(this);
+			}
 		}
 
 		public virtual void DestroyCamera() {

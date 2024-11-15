@@ -29,6 +29,8 @@ namespace YouSingStudio.Holograms {
 
 		protected virtual void Reset() {
 			resolution=new Vector2Int(1440,2560);
+			float f=5.7f*0.0254f;f=f*f/(9*9+16*16);f=Mathf.Sqrt(f);
+			size=new Vector4(9.0f*f,16.0f*f,.03f,-.03f);
 			Vector4 v=PreferredSize();
 			quiltSize=new Vector2Int((int)v.z,(int)v.w);
 		}

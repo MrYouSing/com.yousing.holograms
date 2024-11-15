@@ -89,7 +89,7 @@ namespace YouSingStudio.Holograms {
 			}
 		}
 
-		protected override void UpdateSlider(float value) {
+		internal override void UpdateSlider(float value) {
 			if(current!=null) {
 				current.Value=value;Vector2 v=current.Range;
 				if(slider!=null) {

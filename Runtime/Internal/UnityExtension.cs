@@ -10,7 +10,7 @@ k_Type_,k_OAuth_
 :Packages/com.yousing.io/Runtime/Internal/UnityExtension.cs,25~32,11,73~90
 :Packages/com.yousing.input-extensions/Runtime/Internal/LangExtension.cs,15~25
 :Packages/com.yousing.ui/Runtime/Internal/LangExtension.cs,238~243,320~331
-:Packages/com.yousing.ui/Runtime/Internal/UnityExtension.cs,302~324
+:Packages/com.yousing.ui/Runtime/Internal/UnityExtension.cs,302~324,366~375,424~462
 :Packages/com.yousing.rendering/Runtime/Internal/CameraExtension.cs,81~84,97~114
 :Packages/com.yousing.rendering/Runtime/Internal/GizmoUtility.cs,54,131~141,175~184,190~194,219~226
 :Packages/com.yousing.rendering/Runtime/Geometry/Bounds/GenericBounds.cs,8~21
@@ -37,6 +37,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
 using UnityEngine.Pool;
+using UnityEngine.UI;
 using UnityEngine.Video;
 #if DOTNET_GDI_PLUS
 using System.Drawing;
@@ -246,6 +247,55 @@ namespace YouSingStudio.Holograms {
 				case UnityEngine.Video.VideoAspectRatio.Stretch:break;
 			}
 			return to;
+		}
+
+		public static Vector3 GetWorldPoint(this RectTransform thiz,Vector3 pivot,Vector3 offset) {
+			if(thiz!=null) {
+				Rect r=thiz.rect;return thiz.TransformPoint(new Vector3(
+					Mathf.Lerp(r.xMin,r.xMax,pivot.x)+offset.x,
+					Mathf.Lerp(r.yMin,r.yMax,pivot.y)+offset.y,
+				offset.z));
+			}
+			return Vector3.zero;
+		}
+
+		/// <summary>
+		/// <seealso cref="Camera.WorldToViewportPoint(Vector3)"/>
+		/// </summary>
+		public static Vector2 WorldToNormalizedPoint(this ScrollRect thiz,Vector3 point) {
+			Vector2 v=Vector2.up;// Default.
+			if(thiz!=null) {RectTransform 
+				rt=thiz.content;if(rt==null) {return v;}Rect a=rt.rect;
+				rt=thiz.viewport;if(rt==null) {return v;}Rect b=rt.rect;
+				v=(Vector2)rt.InverseTransformPoint(point)-b.min;
+				v.x/=(a.width-b.width);v.y/=(a.height-b.height);
+				v+=thiz.normalizedPosition;
+			}
+			return v;
+		}
+
+		/// <summary>
+		/// <seealso cref="LayoutGroup"/>
+		/// </summary>
+		public static Vector2 GetNormalizedPoint(this ScrollRect thiz,RectTransform rect,Vector2 padding,Vector2 spacing) {
+			if(thiz!=null) {Vector2 v=thiz.normalizedPosition;
+				if(rect!=null) {
+					RectTransform rt=thiz.viewport;Rect a=rt.rect;Rect b=rect.rect;
+					Vector3 o=rt.InverseTransformPoint(rect.TransformPoint(b.center))-(Vector3)a.center;
+					float f;int x=0,y=0;Vector2 s=a.size;
+					f=s.x*0.5f-padding.x;if(o.x*o.x>f*f) {x=System.MathF.Sign(o.x);}
+					f=s.y*0.5f-padding.y;if(o.y*o.y>f*f) {y=System.MathF.Sign(o.y);}
+					//
+					if(x!=0||y!=0) {
+						spacing.x*=x;spacing.y*=y;
+						o.x=x*0.5f+0.5f;o.y=y*0.5f+0.5f;
+						v=thiz.WorldToNormalizedPoint(rect.GetWorldPoint(
+							new Vector2(o.x,o.y),new Vector3(-s.x*o.x+spacing.x,-s.y*o.y+spacing.y,0.0f)
+						));
+					}
+				}
+				return v;
+			}else {return Vector2.up;}// Default.
 		}
 
 		public static float WorldToDepth(this Camera thiz,Vector3 point) {// OpenGL to Unity.
@@ -610,6 +660,11 @@ namespace YouSingStudio.Holograms {
 				return tmp?.StartsWith(s_TempTag)??false;
 			}
 			return false;
+		}
+
+		public static string GetFriendlyName(this Object thiz) {
+			if(thiz!=null) {return thiz.GetType().Name+"@"+thiz.name;}
+			else {return "null";}
 		}
 
 		public static void LoadSettings(this object thiz,string path) {

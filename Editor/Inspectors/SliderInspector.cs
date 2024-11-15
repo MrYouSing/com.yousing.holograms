@@ -14,8 +14,8 @@ namespace YouSingStudio.Holograms.Editor {
 		}
 	}
 
-	[CustomEditor(typeof(QuiltTexture),true)]
-	public partial class QuiltTextureInspector
+	[CustomEditor(typeof(QuiltRenderer),true)]
+	public partial class QuiltRendererInspector
 		:SliderInspector
 	{
 	}

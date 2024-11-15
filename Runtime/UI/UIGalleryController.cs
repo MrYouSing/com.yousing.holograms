@@ -69,6 +69,7 @@ namespace YouSingStudio.Holograms {
 		[System.NonSerialized]protected List<string> m_Paths;
 		[System.NonSerialized]protected List<GameObject> m_Views=new List<GameObject>();
 		[System.NonSerialized]protected ScrollRect m_Scroll;
+		[System.NonSerialized]protected GridLayoutGroup m_Layout;
 
 		#endregion Fields
 
@@ -89,8 +90,8 @@ namespace YouSingStudio.Holograms {
 			sm.Add(name+".PageDown",PageDown,keys[i]);++i;
 // Macro.Patch -->
 			m_Scroll=container.GetComponentInParent<ScrollRect>();
-			var g=container.GetComponent<GridLayoutGroup>();
-			if(g!=null) {m_Page=g.constraintCount;}
+			m_Layout=container.GetComponent<GridLayoutGroup>();
+			if(m_Layout!=null) {m_Page=m_Layout.constraintCount;}
 			//
 			Refresh();
 			StartCoroutine(StartDelayed());
@@ -146,9 +147,18 @@ namespace YouSingStudio.Holograms {
 			m_Index=(index+len)%len;
 			//
 			var es=EventSystem.current;if(es!=null) {es.SetSelectedGameObject(null);}
-			if(arrow!=null) {arrow.SetParent(m_Views[index].transform,false);}
+			if(arrow!=null) {arrow.SetParent(m_Views[m_Index].transform,false);}
+			if(m_Scroll!=null) {
+				RectTransform rt=m_Views[m_Index].transform as RectTransform;
+				Vector2 u,v;if(m_Layout==null) {
+					u=0.5f*rt.sizeDelta;v=Vector2.zero;
+				}else {
+					u=0.5f*m_Layout.cellSize;v=m_Layout.spacing;
+				}
+				m_Scroll.normalizedPosition=m_Scroll.GetNormalizedPoint(rt,u,v);
+			}
+			//
 			InternalPlay(m_Paths[m_Index]);
-			// TODO: Select in ScrollRect.
 		}
 
 		public virtual void Set(string path) {

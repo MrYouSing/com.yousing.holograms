@@ -29,11 +29,6 @@ namespace YouSingStudio.Holograms {
 
 		#region Methods
 #if UNITY_EDITOR
-		protected virtual Vector3 GetCameraPoint() {
-			Vector3 v=new Vector3(0.0f,0.0f,-camera.GetPlaneDepth(plane));
-			Transform t=focus!=null?focus:transform;
-			return t.TransformPoint(v);
-		}
 
 		protected override void InternalDrawGizmos(bool selected) {
 			bool d=false;
@@ -99,6 +94,7 @@ namespace YouSingStudio.Holograms {
 
 		public override void DestroyCamera() {
 			//base.DestroyCamera();
+			if(device!=null) {device.onPreRender-=Render;}
 			//
 			if(m_RT0.IsTemporary()) {m_RT0.Free();}
 			m_RT1.Free();m_RT0=m_RT1=null;
@@ -125,6 +121,12 @@ namespace YouSingStudio.Holograms {
 		/// The bounds on focus space.
 		/// </summary>
 		public virtual Bounds GetBounds()=>GetBounds(focus!=null?focus.position:transform.position);
+
+		public virtual Vector3 GetCameraPoint() {
+			Vector3 v=new Vector3(0.0f,0.0f,-camera.GetPlaneDepth(plane));
+			Transform t=focus!=null?focus:transform;
+			return t.TransformPoint(v);
+		}
 
 		public virtual void Render() {
 			if(!isActiveAndEnabled||device==null||camera==null) {return;}

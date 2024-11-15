@@ -26,7 +26,7 @@ namespace YouSingStudio.Holograms {
 		public Text text;
 		public RawImage[] images=new RawImage[2];
 		[Header("Media")]
-		public QuiltTexture quilt;
+		public QuiltRenderer quilt;
 		public VideoPlayer video;
 		public ScreenDevice screen;
 		public HologramDevice device;
@@ -85,7 +85,7 @@ namespace YouSingStudio.Holograms {
 				video.loopPointReached+=OnVideoLooped;
 				//
 				video.SetResolution(resolution);
-				if(quilt==null) {quilt=video.GetComponent<QuiltTexture>();}
+				if(quilt==null) {quilt=video.GetComponent<QuiltRenderer>();}
 			}
 			if(quilt!=null) {
 				m_RT=quilt.destination;
@@ -162,7 +162,7 @@ namespace YouSingStudio.Holograms {
 		public virtual void Stop() {
 			if(!m_IsInited) {Init();}
 			//
-			StopCoroutine("OnVideoTicked");m_Retry=0;
+			StopCoroutine("OnVideoTicked");++m_Lock;m_Retry=0;
 			m_FFmpeg?.Kill();m_FFmpeg=null;
 			m_Loop=false;video.url=m_Path=null;
 			video.GetTexture().Clear();
@@ -185,7 +185,6 @@ namespace YouSingStudio.Holograms {
 			double num=video.length*video.frameRate;// Fixed a picture.
 			if(num<=s_PictureFrames) {
 				m_Loop=false;
-				video.skipOnDrop=false;
 				//
 				if(true) {StartCoroutine(OnVideoTicked());}
 				else {video.Stop();}
@@ -196,7 +195,7 @@ namespace YouSingStudio.Holograms {
 				}
 			}else {
 				m_Loop=true;
-				video.skipOnDrop=false;
+				video.isLooping=true;
 				Log("Play "+m_Path);
 			}
 		}
@@ -206,7 +205,6 @@ namespace YouSingStudio.Holograms {
 			if(!m_Loop) {return;}
 			//
 			Log("Replay "+m_Path);
-			video.Stop();video.Play();
 		}
 
 		protected virtual IEnumerator OnVideoTicked() {

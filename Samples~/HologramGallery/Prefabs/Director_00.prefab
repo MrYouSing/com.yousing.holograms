@@ -278,6 +278,18 @@ PrefabInstance:
       propertyPath: m_Name
       value: DepthRenderer
       objectReference: {fileID: 0}
+    - target: {fileID: 4368262355176983642, guid: 91c13627d47f23747aa423bdd27c923e, type: 3}
+      propertyPath: saveVector
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4368262355176983642, guid: 91c13627d47f23747aa423bdd27c923e, type: 3}
+      propertyPath: factor.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4368262355176983642, guid: 91c13627d47f23747aa423bdd27c923e, type: 3}
+      propertyPath: factor.y
+      value: 0.25
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

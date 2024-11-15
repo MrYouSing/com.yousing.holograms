@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Video;
 
 namespace YouSingStudio.Holograms {
-	public class QuiltTexture
+	public class QuiltRenderer
 		:MonoBehaviour
 		,ISlider
 	{
@@ -263,7 +263,7 @@ namespace YouSingStudio.Holograms {
 			if(mesh==null||!m_Vectors.TryGetValue(mesh.name,out m_Vector)) {
 				m_Vector=Vector2.zero;
 			}
-			m_Value=-1.0f;Value=0.0f;
+			m_Value=-1024.0f;Value=0.0f;
 		}
 
 		Vector2 ISlider.Range=>new Vector2(-1.0f,1.0f);

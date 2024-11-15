@@ -11,6 +11,8 @@ namespace YouSingStudio.Holograms {
 
 		public int display=-1;
 		public Vector2Int resolution;
+		[Tooltip("The size in real world.\nxy:Screen\nz:In Depth\nw:Out Depth")]
+		public Vector4 size;
 		public RenderTexture canvas;
 		public Material material;
 		[Header("Quilt")]

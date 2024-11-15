@@ -138,6 +138,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   display: -1
   resolution: {x: 1440, y: 2560}
+  size: {x: 0.07098002, y: 0.1261867, z: 0.03, w: -0.03}
   canvas: {fileID: 0}
   material: {fileID: 0}
   quiltTexture: {fileID: 0}
