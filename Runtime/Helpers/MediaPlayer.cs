@@ -189,7 +189,7 @@ namespace YouSingStudio.Holograms {
 				if(true) {StartCoroutine(OnVideoTicked());}
 				else {video.Stop();}
 				//
-				if(ImageConverter.IsSupported()) {
+				if(ImageConverter.FFmpegSupported()) {
 					//ImageConverter.settings.taskWait=refresh.x+refresh.y;
 					m_FFmpeg=ImageConverter.VideoToImage(m_Path,OnVideoConverted);
 				}

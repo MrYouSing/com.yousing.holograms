@@ -405,6 +405,8 @@ namespace YouSingStudio.Holograms {
 			"Settings/{0}.json",
 			"$(StreamingAssets)/Settings/{0}.json"
 		};
+		public static char[] s_InvalidPathChars=Path.GetInvalidPathChars();
+		public static string[] s_ByteSizes={"Byte","KB","MB","GB","TB"};
 
 		public static Texture2D s_Temp2D;
 		public static Material s_Unlit;
@@ -435,6 +437,12 @@ namespace YouSingStudio.Holograms {
 				}
 			}
 			return false;
+		}
+
+		public static bool IsWebsite(this string thiz) {
+			if(string.IsNullOrEmpty(thiz)) {return false;}
+			if(!thiz.StartsWith("http",k_Comparison)) {return false;}
+			return true;
 		}
 
 		public static bool TwoPieces(this Vector3 thiz) {
@@ -565,6 +573,16 @@ namespace YouSingStudio.Holograms {
 			return thiz;
 		}
 
+		// Taken from https://blog.csdn.net/u013354943/article/details/86674509
+		public static string ToByteSize(this ulong thiz) {
+			int i=0;double d=thiz;
+			if(thiz>1024) {
+			for(i=0;(thiz/1024)>0;i++,thiz/=1024) {
+				d=thiz/1024.0;
+			}}
+			return string.Format("{0:0.##}{1}",d,s_ByteSizes[i]);
+		}
+
 		/// <summary>
 		/// <seealso cref="Path.Combine(string,string)"/>
 		/// </summary>
@@ -576,7 +594,7 @@ namespace YouSingStudio.Holograms {
 			}else {
 				x+=y;
 			}
-			return x.Replace(k_Split_Dir[0],k_Split_Dir[1]);
+			return x.FixPath();
 		}
 
 		/// <summary>
@@ -606,6 +624,15 @@ namespace YouSingStudio.Holograms {
 			if(cnt>0) {fixed(char* pch=thiz) {
 			for(int i=0;i<cnt;++i) {
 				if(pch[i]==k_Split_Dir[0]) {pch[i]=k_Split_Dir[1];}
+			}}}
+			return thiz;
+		}
+
+		public unsafe static string ValidatePath(this string thiz) {
+			int cnt=thiz?.Length??0;
+			if(cnt>0) {fixed(char* pch=thiz) {
+			for(int i=0;i<cnt;++i) {
+				if(System.Array.IndexOf(s_InvalidPathChars,pch[i])>=0) {pch[i]='_';}
 			}}}
 			return thiz;
 		}
@@ -859,6 +886,7 @@ namespace YouSingStudio.Holograms {
 		public static Texture2D GetTemp2D() {
 			if(s_Temp2D==null) {
 				s_Temp2D=NewTexture2D(1,1);
+				s_Temp2D.name=s_TempTag;
 			}
 			return s_Temp2D;
 		}

@@ -1055,7 +1055,7 @@ MonoBehaviour:
   - $(AppData)/Roaming/3DGallery/downloads/
   player: {fileID: 0}
   director: {fileID: 0}
-  keys: 1e0100000d0000006f00000014010000130100001101000012010000
+  keys: 1e0100000d0000006f0000007000000014010000130100001101000012010000
 --- !u!1001 &1043740386498750835
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1070,7 +1070,7 @@ PrefabInstance:
       objectReference: {fileID: 21300000, guid: ce766b1f2b33e1c4ca02a8aaf4e5119f, type: 3}
     - target: {fileID: 4583432770310144017, guid: e0fb3ec190613ca459d8db2dcbede742, type: 3}
       propertyPath: m_Name
-      value: Open
+      value: Load
       objectReference: {fileID: 0}
     - target: {fileID: 5257991466627389295, guid: e0fb3ec190613ca459d8db2dcbede742, type: 3}
       propertyPath: m_AnchorMax.x
@@ -1114,7 +1114,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8089268641973746530, guid: e0fb3ec190613ca459d8db2dcbede742, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: Open
+      value: Load
       objectReference: {fileID: 0}
     - target: {fileID: 8089268641973746530, guid: e0fb3ec190613ca459d8db2dcbede742, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
@@ -1126,7 +1126,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8185427915659375184, guid: e0fb3ec190613ca459d8db2dcbede742, type: 3}
       propertyPath: m_Text
-      value: 
+      value: "\u52A0\u8F7D"
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1257,14 +1257,42 @@ PrefabInstance:
     - target: {fileID: 485237476849731266, guid: e0fb3ec190613ca459d8db2dcbede742, type: 3}
       propertyPath: m_Sprite
       value: 
-      objectReference: {fileID: 21300000, guid: c80d0f96e6288b842834ebc0f27d2beb, type: 3}
+      objectReference: {fileID: 21300000, guid: 0d6c4ab30e4d3f34eb1c2c7f006b17b2, type: 3}
     - target: {fileID: 4583432770310144017, guid: e0fb3ec190613ca459d8db2dcbede742, type: 3}
       propertyPath: m_Name
-      value: Info
+      value: Save
+      objectReference: {fileID: 0}
+    - target: {fileID: 8089268641973746530, guid: e0fb3ec190613ca459d8db2dcbede742, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8089268641973746530, guid: e0fb3ec190613ca459d8db2dcbede742, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8089268641973746530, guid: e0fb3ec190613ca459d8db2dcbede742, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 85189482213774107}
+    - target: {fileID: 8089268641973746530, guid: e0fb3ec190613ca459d8db2dcbede742, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8089268641973746530, guid: e0fb3ec190613ca459d8db2dcbede742, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: Save
+      objectReference: {fileID: 0}
+    - target: {fileID: 8089268641973746530, guid: e0fb3ec190613ca459d8db2dcbede742, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: YouSingStudio.Holograms.UIGalleryController, YouSingStudio.Holograms
+      objectReference: {fileID: 0}
+    - target: {fileID: 8089268641973746530, guid: e0fb3ec190613ca459d8db2dcbede742, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
     - target: {fileID: 8185427915659375184, guid: e0fb3ec190613ca459d8db2dcbede742, type: 3}
       propertyPath: m_Text
-      value: 
+      value: "\u4FDD\u5B58"
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

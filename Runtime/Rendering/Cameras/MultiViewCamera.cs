@@ -148,6 +148,7 @@ namespace YouSingStudio.Holograms {
 		}
 
 		protected virtual void InternalRender() {
+			m_Viewer.position=GetCameraPoint();
 			m_View=camera.worldToCameraMatrix;m_Proj=camera.projectionMatrix;
 			Vector3 v=m_Viewer.position;Quaternion q=m_Viewer.rotation;
 			RenderTexture tmp=m_RT0.Begin();

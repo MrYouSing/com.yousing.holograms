@@ -200,8 +200,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2a02a7963d8fd014fae1b40c3a81db5f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  slider: {fileID: 0}
-  field: {fileID: 0}
+  slider: {fileID: 5308175869839723878}
+  field: {fileID: 5836983631903131935}
   format: ({0}/{1})
   texts:
   - {fileID: 0}
@@ -2632,6 +2632,28 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 8818928235339388070, guid: 8e22d9908e516c8489be99010cd171ad, type: 3}
   m_PrefabInstance: {fileID: 6140291154968501377}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &5308175869839723878 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2061768546283033063, guid: 8e22d9908e516c8489be99010cd171ad, type: 3}
+  m_PrefabInstance: {fileID: 6140291154968501377}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67db9e8f0e2ae9c40bc1e2b64352a6b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &5836983631903131935 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 303874183937775006, guid: 8e22d9908e516c8489be99010cd171ad, type: 3}
+  m_PrefabInstance: {fileID: 6140291154968501377}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d199490a83bb2b844b9695cbf13b01ef, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!224 &6321736333926856202 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 184053807477238411, guid: 8e22d9908e516c8489be99010cd171ad, type: 3}
@@ -2754,9 +2776,17 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5461322195323250566, guid: 8e22d9908e516c8489be99010cd171ad, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6517129586540887647, guid: 8e22d9908e516c8489be99010cd171ad, type: 3}
       propertyPath: m_AnchorMax.y
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6666892127799516829, guid: 8e22d9908e516c8489be99010cd171ad, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

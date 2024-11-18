@@ -82,7 +82,9 @@ namespace YouSingStudio.Private {
 				if(display<0) {display=Mathf.Min(idx,7);}
 				string key=s_Titles[display];
 					game.titleContent=new GUIContent(key);
+#if !UNITY_EDITOR_WIN&&!UNITY_STANDALONE_WIN
 					game.position=new Rect(rect.x,rect.y,rect.width-16,rect.height);
+#endif
 					type.GetField("m_NoCameraWarning",bf).SetValue(game,false);
 					type.GetMethod("SetTargetDisplay",bf).Invoke(game,new object[]{display});
 					type.GetMethod("SnapZoom",bf).Invoke(game,new object[]{1.0f});

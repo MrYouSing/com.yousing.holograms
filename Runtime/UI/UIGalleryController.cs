@@ -1,7 +1,8 @@
 /* <!-- Macro.Table Shortcut
 Refresh,
 Play,
-Open,
+Load,
+Save,
 Prev,
 Next,
 PageUp,
@@ -70,6 +71,7 @@ namespace YouSingStudio.Holograms {
 		[System.NonSerialized]protected List<GameObject> m_Views=new List<GameObject>();
 		[System.NonSerialized]protected ScrollRect m_Scroll;
 		[System.NonSerialized]protected GridLayoutGroup m_Layout;
+		[System.NonSerialized]protected WaitForEndOfFrame m_WaitEof;
 
 		#endregion Fields
 
@@ -79,11 +81,13 @@ namespace YouSingStudio.Holograms {
 			this.LoadSettings(name);
 			//
 			MonoCamera.s_AllowDummy=true;
+			ImageConverter.settings.download=UnityExtension.Path_Combine(paths[0],"Downloads");
 			var sm=ShortcutManager.instance;int i=0;
 // <!-- Macro.Patch Start
 			sm.Add(name+".Refresh",Refresh,keys[i]);++i;
 			sm.Add(name+".Play",Play,keys[i]);++i;
-			sm.Add(name+".Open",Open,keys[i]);++i;
+			sm.Add(name+".Load",Load,keys[i]);++i;
+			sm.Add(name+".Save",Save,keys[i]);++i;
 			sm.Add(name+".Prev",Prev,keys[i]);++i;
 			sm.Add(name+".Next",Next,keys[i]);++i;
 			sm.Add(name+".PageUp",PageUp,keys[i]);++i;
@@ -135,7 +139,7 @@ namespace YouSingStudio.Holograms {
 		}
 
 		public virtual int Add(string path) {
-			int i=m_Paths.Count;m_Paths.Add(path);
+			int i=m_Paths.Count;m_Paths.Add(Path.GetFullPath(path).FixPath());
 			GameObject v=null;
 			if(i<m_Views.Count) {v=m_Views[i];}
 			else {v=CreateView();m_Views.Add(v);}
@@ -148,15 +152,7 @@ namespace YouSingStudio.Holograms {
 			//
 			var es=EventSystem.current;if(es!=null) {es.SetSelectedGameObject(null);}
 			if(arrow!=null) {arrow.SetParent(m_Views[m_Index].transform,false);}
-			if(m_Scroll!=null) {
-				RectTransform rt=m_Views[m_Index].transform as RectTransform;
-				Vector2 u,v;if(m_Layout==null) {
-					u=0.5f*rt.sizeDelta;v=Vector2.zero;
-				}else {
-					u=0.5f*m_Layout.cellSize;v=m_Layout.spacing;
-				}
-				m_Scroll.normalizedPosition=m_Scroll.GetNormalizedPoint(rt,u,v);
-			}
+			UpdateScroll();
 			//
 			InternalPlay(m_Paths[m_Index]);
 		}
@@ -171,9 +167,20 @@ namespace YouSingStudio.Holograms {
 			Set(m_Index);
 		}
 
-		public virtual void Open() {
-			// TODO: Dialog APIs
-			throw new System.NotImplementedException();
+		public virtual void Load() {
+			//
+			string url=GUIUtility.systemCopyBuffer;
+			if(!string.IsNullOrEmpty(url)) {
+				if(url.IsWebsite()) {
+					if(ImageConverter.ConvertFromWeb(url,Set)) {return;}
+				}
+				if(File.Exists(url)) {Set(url);return;}
+			}
+			//
+		}
+
+		public virtual void Save() {
+			Screenshot(null);
 		}
 
 		public virtual void Prev() {
@@ -190,6 +197,38 @@ namespace YouSingStudio.Holograms {
 
 		public virtual void PageDown() {
 			Set(m_Index+m_Page);
+		}
+
+		protected virtual void UpdateScroll() {
+			StopCoroutine("UpdateScrollDelayed");StartCoroutine(UpdateScrollDelayed());
+		}
+
+		protected virtual IEnumerator UpdateScrollDelayed() {
+			yield return null;
+			if(m_Scroll!=null) {
+				RectTransform rt=m_Views[m_Index].transform as RectTransform;
+				Vector2 u,v;if(m_Layout==null) {
+					u=0.5f*rt.sizeDelta;v=Vector2.zero;
+				}else {
+					u=0.5f*m_Layout.cellSize;v=m_Layout.spacing;
+				}
+				m_Scroll.normalizedPosition=m_Scroll.GetNormalizedPoint(rt,u,v);
+			}
+		}
+
+		/// <summary>
+		/// <seealso cref="ScreenCapture.CaptureScreenshot(string)"/>
+		/// </summary>
+		public virtual void Screenshot(string path) {
+			if(string.IsNullOrEmpty(path)) {
+				path=System.DateTime.Now.ToString("yyyyMMddHHmmss")+Random.Range(0,10000).ToString("0000");
+				path=Path.Combine("Screenshots",path);
+			}
+			StopCoroutine("ScreenshotDelayed");StartCoroutine(ScreenshotDelayed(path));
+		}
+
+		protected virtual IEnumerator ScreenshotDelayed(string path) {
+			yield return m_WaitEof;player.device.Screenshot(path);
 		}
 
 		protected virtual void InternalPlay(string path) {

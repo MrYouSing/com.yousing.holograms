@@ -166,7 +166,7 @@ namespace YouSingStudio.Holograms {
 
 		public virtual int[] CreateIndexes(Vector3 from,Vector3 to) {
 			int x=(int)(from.x*from.y),y=(int)(to.x*to.y);
-			int[] ids=new int[y];float p=0.0f,d=x/(y-1.0f);
+			int[] ids=new int[y];float p=0.0f,d=(x-1.0f)/(y-1.0f);
 			if(from.z*to.z>=0.0f) {
 				for(x=0;x<y;++x) {ids[x]=(int)p;p+=d;}
 			}else {

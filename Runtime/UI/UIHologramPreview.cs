@@ -143,7 +143,8 @@ namespace YouSingStudio.Holograms {
 
 		protected override void OnSliderChanged(string value) {
 			if(int.TryParse(value,out int idx)) {
-				screen.quiltIndex=idx;
+				int cnt=screen.quiltSize.x*screen.quiltSize.y;
+				screen.quiltIndex=Mathf.Clamp(idx-1,-1,cnt-1);//H2C
 				UpdateSlider();
 			}
 		}
