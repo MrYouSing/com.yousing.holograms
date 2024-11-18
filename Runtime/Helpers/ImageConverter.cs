@@ -63,39 +63,40 @@ namespace YouSingStudio.Holograms {
 			public string ffmpeg;
 			public int maxTasks=4;
 			public float taskWait=1.0f;
+			public int videoEncoder=4000;
 		}
 
 		public class FFmpeg
 			:AsyncTask<FFmpeg>
 		{
-			public static FFmpeg Obtain(string path,System.Action<string,string> action) {
+			public static FFmpeg Obtain(string path,string argument,System.Action<string,string> action) {
 				FFmpeg tmp=(FFmpeg)Obtain();
 				tmp.delay=settings.taskWait;
-				tmp.path=path;tmp.action=action;
+				tmp.path=path;tmp.argument=argument;tmp.action=action;
 				tmp.StartAsThread();return tmp;
 			}
 
 			public string path;
+			public string argument;
 			public System.Action<string,string> action;
 
 			protected override void OnComplete() {
-				int i=id;string t=Path.Combine(settings.temporary,(i%settings.maxTasks).ToString("0000")+".png");
-				//if(File.Exists(t)) {File.Delete(t);}
-				int tc=System.Environment.TickCount;
+				int i=id;int tc=argument.LastIndexOf('.');string ext=argument.Substring(tc,argument.Length-tc-(argument.EndsWith('"')?1:0));
+				string tmp=Path.Combine(settings.temporary,(i%settings.maxTasks).ToString("0000")).FixPath();tc=System.Environment.TickCount;
 				//
 				Process p=new Process();var s=p.StartInfo;
-				s.FileName=settings.ffmpeg;
-				s.Arguments=$"-i {path} -y {t}";
-				s.UseShellExecute=false;
-				s.CreateNoWindow=true;
-				p.Start();p.WaitForExit();
+					s.FileName=settings.ffmpeg;
+					s.Arguments=string.Format(argument,path,tmp);
+					s.UseShellExecute=false;
+					s.CreateNoWindow=true;
+				p.Start();p.WaitForExit();tmp+=ext;
 				//
-				if(id!=i||!File.Exists(t)) {
+				if(id!=i||!File.Exists(tmp)) {
 					OnKill();
 				}else {
 					if(settings.debug) {Debug.Log("FFmpeg uses "+((System.Environment.TickCount-tc)/1000f)+"s.");}
 					//
-					OnEvent(()=>action?.Invoke(path,t),true);
+					OnEvent(()=>action?.Invoke(path,tmp),true);
 					OnFFmpegConvert(path);base.OnComplete();
 				}
 			}
@@ -236,6 +237,9 @@ namespace YouSingStudio.Holograms {
 				if(!File.Exists(settings.ffmpeg)) {
 					settings.ffmpeg=Path.Combine(UnityExtension.s_ExeRoot,"ffmpeg.exe");
 				}
+				if(((settings.videoEncoder>>16)&0xFFFF)==0) {
+					settings.videoEncoder|=0x00050000;
+				}
 			}
 			if(!File.Exists(settings.ffmpeg)) {settings.ffmpeg=null;}
 			//
@@ -267,8 +271,39 @@ namespace YouSingStudio.Holograms {
 		public static AsyncTask VideoToImage(string path,System.Action<string,string> action) {
 			if(!s_IsInited) {Init();}
 			//
-			if(File.Exists(path)) {return FFmpeg.Obtain(path,action);}
+			if(File.Exists(path)) {return FFmpeg.Obtain(path,"-i \"{0}\" -y \"{1}.png\"",action);}
 			else {action?.Invoke(path,null);return null;}
+		}
+
+		public static void GetVideoEncoder(Vector2Int size,out string encoder) {
+			if(!s_IsInited) {Init();}
+			// Flag:[0:x264][1:x265][2:NPOT]
+			string cv="h264_nvenc";int max=settings.videoEncoder&0xFFFF;
+			int flag=(settings.videoEncoder>>16)&0xFFFF;
+			if(size.x>=max||size.y>=max) {
+				if((flag&0x2)==0) {
+					if((flag&0x4)==0) {
+						size.Set(max,max);
+					}else {
+						float f=max/(float)Mathf.Max(size.x,size.y);
+						size.x=Mathf.RoundToInt(size.x*f);size.y=Mathf.RoundToInt(size.y*f);
+					}
+				}else {
+					cv="hevc_nvenc";
+				}
+			}
+			encoder=$"-vf scale={size.x}:{size.y} -c:v {cv} -pix_fmt yuv420p";
+		}
+
+		public static AsyncTask ImageToVideo(string path,Vector2Int size,System.Action<string,string> action) {
+			if(!s_IsInited) {Init();}
+			//
+			if(File.Exists(path)) {
+				GetVideoEncoder(size,out var encoder);
+				return FFmpeg.Obtain(path,$"-i \"{{0}}\" {encoder} -r 1 -t 1 -y \"{{1}}.mp4\"",action);
+			}else {
+				action?.Invoke(path,null);return null;
+			}
 		}
 
 		public static string GetDownloadPath() {

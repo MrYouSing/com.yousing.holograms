@@ -1,5 +1,8 @@
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using UnityEngine;
 using UnityEngine.Video;
 
@@ -14,6 +17,7 @@ namespace YouSingStudio.Holograms {
 		public static readonly int _Depth=Shader.PropertyToID("_Depth");
 		public static readonly int _Vector=Shader.PropertyToID("_Vector");
 		public static readonly int _Falloff=Shader.PropertyToID("_Falloff");
+		public static bool s_IsInited;
 		public static Dictionary<string,Vector4> s_Vectors=new Dictionary<string,Vector4>();
 		public static Dictionary<string,float> s_Sliders=new Dictionary<string,float>();
 		public static Dictionary<int,Mesh> s_Meshes=new Dictionary<int,Mesh>();
@@ -46,9 +50,50 @@ namespace YouSingStudio.Holograms {
 			}
 		}
 
+		protected virtual void OnDestroy() {
+			if(s_IsInited) {ExitStatic();}
+		}
+
 		#endregion Unity Messages
 
 		#region Methods
+
+		public static void InitStatic() {
+			if(s_IsInited) {return;}
+			s_IsInited=true;
+			//
+			string fn="$(SaveData)/DepthRenderer.json".GetFullPath();
+			if(File.Exists(fn)) {
+				JObject jo=JObject.Parse(File.ReadAllText(fn));JToken jt;
+				jt=jo.SelectToken("Sliders");if(jt!=null) {JsonConvert.PopulateObject(jt.ToString(),s_Sliders);}
+				jt=jo.SelectToken("Vectors");if(jt!=null) {JsonConvert.PopulateObject(jt.ToString(),s_Vectors);}
+			}
+		}
+
+		public static void ExitStatic() {
+			if(!s_IsInited) {return;}
+			s_IsInited=false;
+			//
+			s_Sliders.TryGetValue("*",out var s);s_Vectors.TryGetValue("*",out var v);
+			StringBuilder sb=new StringBuilder();int i;
+			sb.AppendLine("{\"Sliders\":{");i=0;
+			foreach(var it in s_Sliders) {
+				var tmp=it.Value;if(tmp!=s) {
+					if(i>0) {sb.AppendLine(",");}++i;
+					sb.Append($"  \"{it.Key}\":{tmp}");
+				}
+			}
+			if(i>0) {sb.AppendLine();}
+			sb.AppendLine("},\"Vectors\":{");i=0;
+			foreach(var it in s_Vectors) {
+				var tmp=it.Value;if(tmp!=v) {
+					if(i>0) {sb.AppendLine(",");}++i;
+					sb.Append($"  \"{it.Key}\":{{\"x\":{tmp.x},\"y\":{tmp.y},\"z\":{tmp.z},\"w\":{tmp.w}}}");
+				}
+			}
+			if(i>0) {sb.AppendLine();}sb.Append("}}");
+			File.WriteAllText("$(SaveData)/DepthRenderer.json".GetFullPath(),sb.ToString());
+		}
 
 		public static int GetResolution(Vector2Int a,Vector2Int b) {
 			if(a.sqrMagnitude==0) {a=b;}
@@ -65,7 +110,10 @@ namespace YouSingStudio.Holograms {
 			}else if(path.EndsWith("_rgb",UnityExtension.k_Comparison)) {
 				path=path.Substring(0,path.Length-4);
 			}
-			return Path.Combine(dir,path+"_depth"+ext);
+			// Find
+			foreach(string it in UnityExtension.s_ImageExtensions) {
+				ext=Path.Combine(dir,path+"_depth"+it);if(File.Exists(ext)) {return ext;}
+			}return null;
 		}
 
 		public override void PlayImage(string path) {
@@ -79,6 +127,7 @@ namespace YouSingStudio.Holograms {
 		protected override void Init() {
 			if(m_IsInited) {return;}
 			m_IsInited=true;
+			if(!s_IsInited) {InitStatic();}
 			//
 			this.LoadSettings(name);
 			if(material==null) {material=new Material(Shader.Find("Unlit/Offset By Depth"));}
@@ -149,26 +198,17 @@ namespace YouSingStudio.Holograms {
 			depth.wrapMode=TextureWrapMode.Clamp;material.SetTexture(_Depth,depth);
 			if(renderer!=null) {renderer.enabled=true;}
 			//
+			s_Sliders.TryGetValue(m_Path,out m_Value);m_Vector=Vector2.zero;
 			if(s_Vectors.TryGetValue(m_Path,out var v)||s_Vectors.TryGetValue("*",out v)) {
 				range.Set(v.x,v.y);factor.Set(v.z,v.w);
 				if(range.sqrMagnitude==0.0f) {range=GetRange(depth,depth==texture);}
 			}else {
 				range=GetRange(depth,depth==texture);factor=Vector2.right;
 			}
-			UpdateVector();
+			//
 			UpdateMesh();
 			UpdateTransform();
-		}
-
-		public virtual void UpdateVector() {
-			if(!m_IsInited) {Init();}
-			//
-			Vector4 v=new Vector4(range.x,range.y,factor.x,factor.y);
-			if(v.sqrMagnitude==0.0f) {return;}
-			if(material!=null) {material.SetVector(_Vector,v);}
-			if(saveVector&&!string.IsNullOrEmpty(m_Path)) {s_Vectors[m_Path]=v;}
-			//
-			float f=m_Value;m_Value=-1024.0f;Value=f;
+			UpdateVector();
 		}
 
 		public virtual void UpdateMesh() {
@@ -217,8 +257,17 @@ namespace YouSingStudio.Holograms {
 			}else {// Outside Fit.
 				m_Vector=new Vector3(v.x-f,1.0f-v.y,0.0f)*0.5f;
 			}
-			s_Sliders.TryGetValue(m_Path,out f);
-			m_Value=-1024.0f;Value=f;
+		}
+
+		public virtual void UpdateVector() {
+			if(!m_IsInited) {Init();}
+			//
+			Vector4 v=new Vector4(range.x,range.y,factor.x,factor.y);
+			if(v.sqrMagnitude==0.0f) {return;}
+			if(material!=null) {material.SetVector(_Vector,v);}
+			if(saveVector&&!string.IsNullOrEmpty(m_Path)) {s_Vectors[m_Path]=v;}
+			//
+			float f=m_Value;m_Value=-1024.0f;Value=f;
 		}
 
 		Vector2 ISlider.Range=>new Vector2(-1.0f,1.0f);

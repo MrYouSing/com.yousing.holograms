@@ -612,6 +612,12 @@ namespace YouSingStudio.Holograms {
 					case "streamingassets":return Path_Combine(Application.streamingAssetsPath,thiz);
 					case "temporarycache":return Path_Combine(Application.temporaryCachePath,thiz);
 					//
+					case "savedata":
+#if !UNITY_EDITOR&&UNITY_STANDALONE_WIN
+					return Path_Combine(Application.dataPath,thiz);
+#else
+					return Path_Combine(Application.persistentDataPath,thiz);
+#endif
 					case "document":return Path_Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments),thiz);
 					case "appdata":return Path_Combine(Path.GetDirectoryName(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData)),thiz);
 				}

@@ -103,16 +103,22 @@ namespace YouSingStudio.Holograms {
 		#region Methods
 
 		internal virtual void UpdateSlider(float value) {
-			string s=value.ToString(format);
-			if(slider!=null) {
+			string s;if(slider!=null) {
+				float a=slider.minValue,z=slider.maxValue;
 				if(soft) {
-					if(value<slider.minValue) {slider.minValue=value;}
-					if(value>slider.maxValue) {slider.maxValue=value;}
+					if(value<a) {slider.minValue=value;}
+					if(value>z) {slider.maxValue=value;}
+				}else {
+					value=Mathf.Clamp(value,a,z);
 				}
+				s=value.ToString(format);
+				//
 				SetText(0,slider.minValue);
 				SetText(1,s);
 				SetText(2,slider.maxValue);
 				slider.SetValueWithoutNotify(value);
+			}else {
+				s=value.ToString(format);
 			}
 			if(field!=null) {field.SetTextWithoutNotify(s);}
 			//

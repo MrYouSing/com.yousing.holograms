@@ -82,6 +82,7 @@ namespace YouSingStudio.Holograms {
 			//
 			MonoCamera.s_AllowDummy=true;
 			ImageConverter.settings.download=UnityExtension.Path_Combine(paths[0],"Downloads");
+			TextureManager.instance.SetupFormats();
 			var sm=ShortcutManager.instance;int i=0;
 // <!-- Macro.Patch Start
 			sm.Add(name+".Refresh",Refresh,keys[i]);++i;
@@ -228,7 +229,18 @@ namespace YouSingStudio.Holograms {
 		}
 
 		protected virtual IEnumerator ScreenshotDelayed(string path) {
-			yield return m_WaitEof;player.device.Screenshot(path);
+			var d=player!=null?player.device:null;if(d==null) {yield break;}
+			yield return m_WaitEof;d.Screenshot(path);
+			// For C1 devices.
+			if(ImageConverter.FFmpegSupported()) {
+				string fn=path+"_quilt.png";
+				if(File.Exists(fn)) {path+=".mp4";
+					ImageConverter.ImageToVideo(
+						Path.GetFullPath(fn),d.quiltTexture.GetSizeI(),
+						(x,y)=>File.Move(y,path)
+					);
+				}
+			}
 		}
 
 		protected virtual void InternalPlay(string path) {

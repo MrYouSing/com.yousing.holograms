@@ -85,18 +85,19 @@ namespace YouSingStudio.Holograms {
 			if(best!=current) {
 				current=best;
 				//
-				UpdateSlider(current?.Value??0.0f);
+				float f=0.0f;
+				if(current!=null) {
+					this.SetRange(current.Range);
+					f=current.Value;
+				}
+				UpdateSlider(f);
 			}
 		}
 
 		internal override void UpdateSlider(float value) {
 			if(current!=null) {
-				current.Value=value;Vector2 v=current.Range;
-				if(slider!=null) {
-					slider.minValue=v.x;
-					slider.maxValue=v.y;
-				}
-				base.UpdateSlider(value);
+				Vector2 v=current.Range;value=Mathf.Clamp(value,v.x,v.y);
+				current.Value=value;base.UpdateSlider(value);
 			}else {
 				HideSlider();
 			}

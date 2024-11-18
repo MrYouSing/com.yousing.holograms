@@ -64,6 +64,16 @@ namespace YouSingStudio.Holograms {
 			return key;
 		}
 
+		public virtual void SetupFormats() {
+			if(UnityExtension.s_ImageExtensions.Count==4) {return;}
+			//Texture2D.LoadImage();
+			UnityExtension.s_ImageExtensions.Clear();
+			UnityExtension.s_ImageExtensions.Add(".png");
+			UnityExtension.s_ImageExtensions.Add(".jpeg");
+			UnityExtension.s_ImageExtensions.Add(".jpg");
+			UnityExtension.s_ImageExtensions.Add(".exr");
+		}
+
 		#endregion Methods
 	}
 }
