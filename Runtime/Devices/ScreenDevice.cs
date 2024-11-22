@@ -54,7 +54,8 @@ namespace YouSingStudio.Holograms {
 			Graphics.Blit(quiltTexture,canvas,new Vector2(w,h),new Vector2(x*w,y*h));
 		}
 
-		public override void Screenshot(string path) {
+		public override void Screenshot(string path,int mask=-1) {
+			base.Screenshot(path,mask&0x1);
 		}
 
 		#endregion Methods

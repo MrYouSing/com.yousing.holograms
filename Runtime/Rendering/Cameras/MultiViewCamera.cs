@@ -71,6 +71,12 @@ namespace YouSingStudio.Holograms {
 		}
 #endif
 		public override void SetupCamera() {
+			//
+			if(RenderingExtension.GetRenderPipeline()>2) {
+				Debug.LogError("Unsupported RP:"+UnityEngine.Rendering.GraphicsSettings.currentRenderPipelineAssetType.FullName);
+				return;
+			}
+			//
 			if(camera==null) {camera=GetComponentInChildren<Camera>();}
 			if(device==null||camera==null) {return;}
 			if(focus==null) {focus=transform;}
@@ -78,6 +84,9 @@ namespace YouSingStudio.Holograms {
 			m_RT0=device.quiltTexture as RenderTexture;
 			//
 			Vector4 w=device.PreferredSize();int d=0;
+			if(camera.depthTextureMode!=DepthTextureMode.None) {
+				d=16;Debug.Log("Depth Bits:"+d);
+			}
 			if(m_RT0==null) {
 				m_RT0=RenderTexture.GetTemporary((int)w.x,(int)w.y,d,HologramDevice.s_GraphicsFormat);
 				m_RT0.name=UnityExtension.s_TempTag;
@@ -88,6 +97,7 @@ namespace YouSingStudio.Holograms {
 			camera.enabled=false;
 			camera.targetTexture=m_RT1;
 			camera.aspect=device.ParseQuilt().z;
+			//camera.cullingMask&=~(1<<LayerMask.NameToLayer("UI"));
 			//
 			SetupCamera(m_RT0,device.ParseQuilt());
 		}
@@ -135,7 +145,9 @@ namespace YouSingStudio.Holograms {
 				else {camera.targetTexture=m_RT1;}camera.enabled=m_Preview;
 			}
 			if(preview) {return;}
+			RenderingExtension.BeginRenderUI();
 			InternalRender();
+			RenderingExtension.EndRenderUI();
 		}
 
 		protected virtual void ClearBackground() {

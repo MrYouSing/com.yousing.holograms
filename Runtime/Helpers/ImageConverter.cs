@@ -80,16 +80,28 @@ namespace YouSingStudio.Holograms {
 			public string argument;
 			public System.Action<string,string> action;
 
+			protected virtual void GetOutput(out string tmp,out string ext) {
+				bool b=argument.EndsWith('"');int n=argument.Length;
+				if(argument.IndexOf("{1}")>=0) {
+					tmp=Path.Combine(settings.temporary,(id%settings.maxTasks).ToString("0000")).FixPath();
+					int i=argument.LastIndexOf('.');ext=argument.Substring(i,n-i-(b?1:0));
+				}else {
+					char c=b?'"':' ';int i=argument.LastIndexOf(c,n-2);++i;
+					tmp=argument.Substring(i,n-i-(b?1:0));ext=null;
+				}
+			}
+
 			protected override void OnComplete() {
-				int i=id;int tc=argument.LastIndexOf('.');string ext=argument.Substring(tc,argument.Length-tc-(argument.EndsWith('"')?1:0));
-				string tmp=Path.Combine(settings.temporary,(i%settings.maxTasks).ToString("0000")).FixPath();tc=System.Environment.TickCount;
+				int i=id;int tc=System.Environment.TickCount;
+				GetOutput(out var tmp,out var ext);
 				//
 				Process p=new Process();var s=p.StartInfo;
 					s.FileName=settings.ffmpeg;
 					s.Arguments=string.Format(argument,path,tmp);
 					s.UseShellExecute=false;
 					s.CreateNoWindow=true;
-				p.Start();p.WaitForExit();tmp+=ext;
+				p.Start();p.WaitForExit();
+				if(!string.IsNullOrEmpty(ext)) {tmp+=ext;}
 				//
 				if(id!=i||!File.Exists(tmp)) {
 					OnKill();
@@ -295,14 +307,14 @@ namespace YouSingStudio.Holograms {
 			encoder=$"-vf scale={size.x}:{size.y} -c:v {cv} -pix_fmt yuv420p";
 		}
 
-		public static AsyncTask ImageToVideo(string path,Vector2Int size,System.Action<string,string> action) {
+		public static AsyncTask ImageToVideo(string path,Vector2Int size,string video) {
 			if(!s_IsInited) {Init();}
 			//
 			if(File.Exists(path)) {
 				GetVideoEncoder(size,out var encoder);
-				return FFmpeg.Obtain(path,$"-i \"{{0}}\" {encoder} -r 1 -t 1 -y \"{{1}}.mp4\"",action);
+				return FFmpeg.Obtain(path,$"-i \"{{0}}\" {encoder} -r 1 -t 1 -y \"{video}\"",null);
 			}else {
-				action?.Invoke(path,null);return null;
+				return null;
 			}
 		}
 

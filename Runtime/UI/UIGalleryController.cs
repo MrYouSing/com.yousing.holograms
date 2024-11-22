@@ -63,6 +63,7 @@ namespace YouSingStudio.Holograms {
 		[Header("Controller")]
 		public MediaPlayer player;
 		public StageDirector director;
+		public DialogPicker[] pickers=new DialogPicker[2];
 		public Key[] keys=new Key[7];
 
 		[System.NonSerialized]protected int m_Index;
@@ -174,14 +175,25 @@ namespace YouSingStudio.Holograms {
 			if(!string.IsNullOrEmpty(url)) {
 				if(url.IsWebsite()) {
 					if(ImageConverter.ConvertFromWeb(url,Set)) {return;}
+					// TODO: Sketchfab????
 				}
 				if(File.Exists(url)) {Set(url);return;}
 			}
 			//
+			var p=pickers[0];if(p!=null) {
+				p.onPicked=Set;p.ShowDialog();
+			}
 		}
 
 		public virtual void Save() {
-			Screenshot(null);
+			// TODO: Add Toolbox????
+			bool b=ShortcutManager.s_Instance==null||ShortcutManager.s_Instance.current==null;
+			//
+			var p=pickers[1];if(b&&p!=null) {// Click open dialog.
+				p.onPicked=Screenshot;p.ShowDialog();
+			}else {
+				Screenshot("*");
+			}
 		}
 
 		public virtual void Prev() {
@@ -221,7 +233,8 @@ namespace YouSingStudio.Holograms {
 		/// <seealso cref="ScreenCapture.CaptureScreenshot(string)"/>
 		/// </summary>
 		public virtual void Screenshot(string path) {
-			if(string.IsNullOrEmpty(path)) {
+			if(string.IsNullOrEmpty(path)) {return;}
+			if(path=="*") {
 				path=System.DateTime.Now.ToString("yyyyMMddHHmmss")+Random.Range(0,10000).ToString("0000");
 				path=Path.Combine("Screenshots",path);
 			}
@@ -233,12 +246,8 @@ namespace YouSingStudio.Holograms {
 			yield return m_WaitEof;d.Screenshot(path);
 			// For C1 devices.
 			if(ImageConverter.FFmpegSupported()) {
-				string fn=path+"_quilt.png";
-				if(File.Exists(fn)) {path+=".mp4";
-					ImageConverter.ImageToVideo(
-						Path.GetFullPath(fn),d.quiltTexture.GetSizeI(),
-						(x,y)=>File.Move(y,path)
-					);
+				string fn=path+"_quilt.png";if(File.Exists(fn)) {
+					ImageConverter.ImageToVideo(Path.GetFullPath(fn),d.quiltTexture.GetSizeI(),path+".mp4");
 				}
 			}
 		}
@@ -256,6 +265,7 @@ namespace YouSingStudio.Holograms {
 					if(director!=null) {director.Set("Open Media");}// Stop the other.
 					if(player!=null) {player.Play(path);}
 				}break;
+				case TextureType.Raw:
 				case TextureType.Quilt:
 					if(director!=null) {director.Set("Open Media");}// Stop the other.
 					if(player!=null) {player.Play(path);}
@@ -266,14 +276,6 @@ namespace YouSingStudio.Holograms {
 				break;
 			}
 			type.InvokeEvent();
-		}
-
-		protected virtual string GetPreview(string path) {
-			path=Path.Combine(Path.GetDirectoryName(path),Path.GetFileNameWithoutExtension(path)+"_preview");string
-			pv=path+".png";if(File.Exists(pv)) {return pv;}
-			pv=path+".jpg";if(File.Exists(pv)) {return pv;}
-			pv=path+".jpeg";if(File.Exists(pv)) {return pv;}
-			return null;
 		}
 
 		protected virtual void LoadIcon(RawImage image,string path) {
@@ -288,6 +290,7 @@ namespace YouSingStudio.Holograms {
 					count=path.ParseQuilt();
 					if(!count.TwoPieces()) {count=path.ParseLayout(layout);}
 				break;
+				case TextureType.Raw:// Only $(FileName)_preview.$(Extension)
 				case TextureType.Quilt:
 					count=path.ParseQuilt();
 				break;
@@ -296,7 +299,7 @@ namespace YouSingStudio.Holograms {
 			bool b=tm.assets?.TryGetValue(UnityExtension.s_TempTag+path,out tex)??false;
 			if(!b||tex==null) {
 				b=false;string icon=Path.GetExtension(path);
-				string pv=GetPreview(path);
+				string pv=tm.GetPreview(path);
 				if(!string.IsNullOrEmpty(pv)) {icon=pv;b=true;}// Highest priority.
 				else {icon=tm.ToIconKey(icon);}
 				//
@@ -305,7 +308,7 @@ namespace YouSingStudio.Holograms {
 				}
 			}
 			//
-			if(!b&&preview>0) {
+			if(!b&&preview*count.x*count.y>0.0f) {
 #if (UNITY_EDITOR_WIN||UNITY_STANDALONE_WIN)&&!NET_STANDARD
 				a=0.0f;int size=Mathf.ClosestPowerOfTwo((int)Mathf.Min(preview*count.x,preview*count.y));
 				Rect rect=count.ToPreview();
@@ -313,7 +316,7 @@ namespace YouSingStudio.Holograms {
 					path,size,size,ShellThumbs.ThumbnailOptions.None
 				)) {
 					int bw=bm.Width,bh=bm.Height;
-					var tmp=UnityExtension.NewTexture2D(1,1);
+					var tmp=RenderingExtension.NewTexture2D(1,1);
 					tmp.LoadBitmap(bm,new RectInt(
 						(int)(bw*rect.x),
 						(int)(bh*rect.y),

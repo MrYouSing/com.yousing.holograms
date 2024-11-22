@@ -62,9 +62,10 @@ namespace YouSingStudio.Holograms {
 			if(s_IsInited) {return;}
 			s_IsInited=true;
 			//
-			string fn="$(SaveData)/DepthRenderer.json".GetFullPath();
-			if(File.Exists(fn)) {
-				JObject jo=JObject.Parse(File.ReadAllText(fn));JToken jt;
+			string tmp="$(SaveData)/DepthRenderer.json".GetFullPath();
+			if(File.Exists(tmp)) {
+				tmp=File.ReadAllText(tmp);if(string.IsNullOrEmpty(tmp)) {return;}
+				JObject jo=JObject.Parse(tmp);JToken jt;
 				jt=jo.SelectToken("Sliders");if(jt!=null) {JsonConvert.PopulateObject(jt.ToString(),s_Sliders);}
 				jt=jo.SelectToken("Vectors");if(jt!=null) {JsonConvert.PopulateObject(jt.ToString(),s_Vectors);}
 			}
@@ -122,6 +123,11 @@ namespace YouSingStudio.Holograms {
 			Texture d=tm.Get(ToDepth(m_Path));Render(m_Path,rgb,d);
 		}
 
+		public override void PlayVideo(string path) {
+			LoadVector(path);
+			base.PlayVideo(path);
+		}
+
 		public override void Render(Texture value)=>Render(m_Path,value,null);
 
 		protected override void Init() {
@@ -150,14 +156,31 @@ namespace YouSingStudio.Holograms {
 				v=new Vector2(1.0f,0.0f);
 				int x=0,y=0,w=tex.width,h=tex.height;
 				Color[] c=tex.GetPixels();float f;
-				for(;y<h;++y) {
-				for(x=half?w/2:0;x<w;++x) {
-					f=c[w*y+x].r;
-					if(f>0.0f) {
-						if(f<v.x){v.x=f;}
-						else if(f>v.y) {v.y=f;}
-					}
-				}}
+				switch(layout) {
+					case Video3DLayout.SideBySide3D:
+						for(;y<h;++y) {
+						for(x=half?w/2:0;x<w;++x) {
+							f=c[w*y+x].r;
+							if(f>0.0f) {
+								if(f<v.x){v.x=f;}
+								else if(f>v.y) {v.y=f;}
+							}
+						}}
+					break;
+					case Video3DLayout.OverUnder3D:
+						for(h=half?h/2:h;y<h;++y) {
+						for(x=0;x<w;++x) {
+							f=c[w*y+x].r;
+							if(f>0.0f) {
+								if(f<v.x){v.x=f;}
+								else if(f>v.y) {v.y=f;}
+							}
+						}}
+					break;
+					default:
+						v=Vector2.up;
+					break;
+				}
 			}else {
 				v=Vector2.up;
 			}
@@ -198,17 +221,20 @@ namespace YouSingStudio.Holograms {
 			depth.wrapMode=TextureWrapMode.Clamp;material.SetTexture(_Depth,depth);
 			if(renderer!=null) {renderer.enabled=true;}
 			//
-			s_Sliders.TryGetValue(m_Path,out m_Value);m_Vector=Vector2.zero;
-			if(s_Vectors.TryGetValue(m_Path,out var v)||s_Vectors.TryGetValue("*",out v)) {
+			LoadVector(m_Path);
+			UpdateMesh();
+			UpdateTransform();
+			UpdateVector();
+		}
+
+		public virtual void LoadVector(string path) {
+			s_Sliders.TryGetValue(path,out m_Value);m_Vector=Vector2.zero;
+			if(s_Vectors.TryGetValue(path,out var v)||s_Vectors.TryGetValue("*",out v)) {
 				range.Set(v.x,v.y);factor.Set(v.z,v.w);
 				if(range.sqrMagnitude==0.0f) {range=GetRange(depth,depth==texture);}
 			}else {
 				range=GetRange(depth,depth==texture);factor=Vector2.right;
 			}
-			//
-			UpdateMesh();
-			UpdateTransform();
-			UpdateVector();
 		}
 
 		public virtual void UpdateMesh() {

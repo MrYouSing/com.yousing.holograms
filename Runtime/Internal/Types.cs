@@ -12,6 +12,10 @@ namespace YouSingStudio.Holograms {
 	/// </summary>
 	public enum TextureType {
 		/// <summary>
+		/// <seealso cref="Screen"/>
+		/// </summary>
+		Raw=-1,
+		/// <summary>
 		/// <seealso cref="Texture2D"/>
 		/// </summary>
 		Default,

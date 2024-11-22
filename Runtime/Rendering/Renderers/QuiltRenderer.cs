@@ -180,6 +180,7 @@ namespace YouSingStudio.Holograms {
 		}
 
 		public virtual void RefreshMesh() {
+			if(m_Args.sqrMagnitude==0.0f) {mesh=null;return;}
 			VideoAspectRatio a=aspect;float z=size.z;
 			//
 			m_Id=0;aspect=GetAspect(m_Args.z,size.z);
@@ -216,7 +217,7 @@ namespace YouSingStudio.Holograms {
 			if(texture!=null) {
 				source=texture;
 				//
-				if(material==null) {material=UnityExtension.GetUnlit();}
+				if(material==null) {material=Instantiate(RenderingExtension.GetUnlit());}
 				material.mainTexture=source;
 				if(float.IsNaN(args.z)||(args.z<0.0f&&args.TwoPieces())) {
 					args.z=(source.width/args.x)/(source.height/args.y);
@@ -246,12 +247,12 @@ namespace YouSingStudio.Holograms {
 		public virtual void RenderDestination() {
 			if(mesh!=null&&destination!=null) {
 #if false
-				Camera cam=UnityExtension.GetCameraHelper();
+				Camera cam=RenderingExtension.GetCameraHelper();
 				cam.targetTexture=destination;
 				Graphics.DrawMesh(mesh,Matrix4x4.identity,material,cam.gameObject.layer,cam);
 				cam.Render();
 #else
-				GLRenderer gl=UnityExtension.GetGLRenderer();
+				GLRenderer gl=RenderingExtension.GetGLRenderer();
 				gl.Set(mesh);
 				gl.material=material;
 				gl.Render(destination);

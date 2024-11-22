@@ -6,7 +6,6 @@ k_Type_,k_OAuth_
  Macro.End --> */
 /* <!-- Macro.Copy File
 :Packages/com.yousing.io/Runtime/Modules/MediaModule/Core/MediaExtension.cs,81~95,229,240~271,278
-:Packages/com.yousing.io/Runtime/APIs/TextureAPI.cs,169,345~354,359~374,479~503,516~529
 :Packages/com.yousing.io/Runtime/Internal/UnityExtension.cs,25~32,11,73~90
 :Packages/com.yousing.input-extensions/Runtime/Internal/LangExtension.cs,15~25
 :Packages/com.yousing.ui/Runtime/Internal/LangExtension.cs,238~243,320~331
@@ -20,31 +19,20 @@ k_Type_,k_OAuth_
 MediaExtension,UnityExtension
 if(FileUtility.Exists(json),json=json.GetFullPath();if(File.Exists(json)
 FileUtility,File
-TempTexture2D,GetTemp2D();}//
 else if(texture.GetSizeI()!=s) {,if(texture.GetSizeI()!=s) {
 GetFieldOfView(),fieldOfView
  Macro.End --> */
 /* <!-- Macro.Patch
 ,AutoGen
  Macro.End --> */
-#if (UNITY_EDITOR_WIN||UNITY_STANDALONE_WIN)&&!NET_STANDARD
-#define DOTNET_GDI_PLUS
-#endif
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.InteropServices;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
 using UnityEngine.Pool;
 using UnityEngine.UI;
 using UnityEngine.Video;
-#if DOTNET_GDI_PLUS
-using System.Drawing;
-using System.Drawing.Imaging;
-using Color=UnityEngine.Color;
-using Graphics=UnityEngine.Graphics;
-#endif
 
 namespace YouSingStudio.Holograms {
 	public static partial class UnityExtension {
@@ -72,14 +60,14 @@ namespace YouSingStudio.Holograms {
 
 		static UnityExtension() {
 			// https://docs.unity3d.com/Manual/ImportingTextures.html
-			s_ImageExtensions.Add(".bmp");
+			s_ImageExtensions.Add(".png");
+			s_ImageExtensions.Add(".jpg");s_ImageExtensions.Add(".jpeg");
 			s_ImageExtensions.Add(".exr");
+			s_ImageExtensions.Add(".bmp");
 			s_ImageExtensions.Add(".gif");
 			s_ImageExtensions.Add(".hdr");
 			s_ImageExtensions.Add(".iff");
-			s_ImageExtensions.Add(".jpg");
 			s_ImageExtensions.Add(".pict");
-			s_ImageExtensions.Add(".png");
 			s_ImageExtensions.Add(".psd");
 			s_ImageExtensions.Add(".tga");
 			s_ImageExtensions.Add(".tiff");
@@ -104,72 +92,6 @@ namespace YouSingStudio.Holograms {
 			s_ModelExtensions.Add(".obj");
 			s_ModelExtensions.Add(".fbx");
 		}
-		public static int[] s_Bitmap;
-		public static void LoadBitmap<T>(this Texture2D thiz,T[] bitmap,int width,int height,TextureFormat format=TextureFormat.RGBA32) {
-			if(thiz!=null&&bitmap!=null) {
-				if(thiz.width!=width||thiz.height!=height||thiz.format!=format) {
-					thiz.Reinitialize(width,height,format,thiz.mipmapCount>1);
-				}
-				System.IntPtr ptr=Marshal.UnsafeAddrOfPinnedArrayElement(bitmap,0);
-				thiz.LoadRawTextureData(ptr,width*height*4);thiz.Apply();
-			}
-		}
-
-#if DOTNET_GDI_PLUS
-		// https://learn.microsoft.com/en-us/dotnet/desktop/winforms/advanced/about-gdi-managed-code
-		public static void LoadBitmap(this Texture2D thiz,Bitmap bitmap,RectInt rect) {
-			if(thiz!=null&&bitmap!=null) {
-				int x,y,w,h;if(rect.size.sqrMagnitude==0) {x=y=0;w=bitmap.Width;h=bitmap.Height;}
-				else {x=rect.x;y=rect.y;w=rect.width;h=rect.height;}
-				int s=w*h;if((s_Bitmap?.Length??0)<s) {s_Bitmap=new int[s];}
-				var bmd=bitmap.LockBits(new Rectangle(x,y,w,h),ImageLockMode.ReadOnly,PixelFormat.Format32bppArgb);
-					System.IntPtr ptr=bmd.Scan0;int o=bmd.Stride;
-					for(int i=h-1;i>=0;--i,ptr+=o) {Marshal.Copy(ptr,s_Bitmap,i*w,w);}
-				bitmap.UnlockBits(bmd);
-				thiz.LoadBitmap(s_Bitmap,w,h,TextureFormat.BGRA32);
-			}
-		}
-#endif
-		
-		public static RenderTexture Begin(this RenderTexture thiz) {
-			RenderTexture rt=RenderTexture.active;
-				RenderTexture.active=thiz;return rt;
-		}
-
-		public static void End(this RenderTexture thiz,RenderTexture rt) {
-			RenderTexture.active=rt;
-		}
-
-		public static void Clear(this RenderTexture thiz) {
-			if(thiz==null) {return;}
-			//
-			var rt=thiz.Begin();
-				GL.Clear(true,true,Color.clear);
-			thiz.End(rt);
-		}
-
-		public static void CopyFrom(this RenderTexture thiz,Texture texture) {
-			if(thiz==null||texture==null||thiz==texture) {return;}
-			//
-			var rt=thiz.Begin();
-				Graphics.Blit(texture,thiz);
-			thiz.End(rt);
-		}
-
-		public static Texture2D ToTexture2D(this RenderTexture thiz,Texture2D texture=null,bool apply=true) {
-			if(thiz!=null) {
-				Vector2Int s=thiz.GetSizeI();
-				if(texture==null) {texture=GetTemp2D();}//(s.x,s.y);}
-				if(texture.GetSizeI()!=s) {texture.Reinitialize(s.x,s.y);}
-				//
-				var rt=thiz.Begin();
-					texture.ReadPixels(new Rect(0,0,s.x,s.y),0,0,false);
-					if(apply) {texture.Apply();}
-				thiz.End(rt);
-			}
-			return texture;
-		}
-
 		public static void SetRealName(this Object thiz) {// TODO: Fix the "(Clone)".
 			if(thiz!=null) {
 				string key=thiz.name;if(key.EndsWith("(Clone)")) {
@@ -287,8 +209,8 @@ namespace YouSingStudio.Holograms {
 					f=s.y*0.5f-padding.y;if(o.y*o.y>f*f) {y=System.MathF.Sign(o.y);}
 					//
 					if(x!=0||y!=0) {
-						spacing.x*=x;spacing.y*=y;
-						o.x=x*0.5f+0.5f;o.y=y*0.5f+0.5f;
+						o.x=x*0.5f+0.5f;spacing.x*=x;
+						o.y=y*0.5f+0.5f;spacing.y*=y;
 						v=thiz.WorldToNormalizedPoint(rect.GetWorldPoint(
 							new Vector2(o.x,o.y),new Vector3(-s.x*o.x+spacing.x,-s.y*o.y+spacing.y,0.0f)
 						));
@@ -408,10 +330,6 @@ namespace YouSingStudio.Holograms {
 		public static char[] s_InvalidPathChars=Path.GetInvalidPathChars();
 		public static string[] s_ByteSizes={"Byte","KB","MB","GB","TB"};
 
-		public static Texture2D s_Temp2D;
-		public static Material s_Unlit;
-		public static Camera s_CameraHelper;
-		public static GLRenderer s_GLRenderer;
 		public static JObject s_Settings;
 		public static Dictionary<string,Vector3> s_QuiltMap=new Dictionary<string,Vector3>();
 		public static Dictionary<System.Type,System.Delegate> s_Events=new Dictionary<System.Type,System.Delegate>();
@@ -500,6 +418,9 @@ namespace YouSingStudio.Holograms {
 				if(thiz.EndsWith("_vr",k_Comparison)||thiz.EndsWith("_xr",k_Comparison)) {
 					return TextureType.Panoramic;
 				}
+				if(thiz.EndsWith("_raw",k_Comparison)) {
+					return TextureType.Raw;
+				}
 				int i=thiz.LastIndexOf("_qs");
 				if((i>=0&&char.IsDigit(thiz[i+3]))||b) {
 					return TextureType.Quilt;
@@ -526,10 +447,11 @@ namespace YouSingStudio.Holograms {
 				//
 				if(s_QuiltMap.TryGetValue(Path.GetFileNameWithoutExtension(thiz),out var v)) {return v;}
 				//
+				int l=thiz.LastIndexOf('.');if(thiz.IndexOf("_raw",k_Comparison)==l-4) {return Vector3.zero;}
 				int i=thiz.LastIndexOf("_qs");
 				if(i>=0) {
-					string ext=Path.GetExtension(thiz);bool b=IsImage(ext)||IsVideo(ext);
-					i+=2;int j=thiz.IndexOf('x',i),k=thiz.IndexOf('a',j),l=b?thiz.LastIndexOf('.'):thiz.Length;
+					string ext=l>=0?thiz.Substring(l):string.Empty;bool b=IsImage(ext)||IsVideo(ext);
+					i+=2;int j=thiz.IndexOf('x',i),k=thiz.IndexOf('a',j);if(!b) {l=thiz.Length;}
 					if(j>=0&&k>=0&&l>=0) {
 						return new Vector3(
 							float.Parse(thiz.Substring(i+1,j-i-1)),
@@ -744,127 +666,6 @@ namespace YouSingStudio.Holograms {
 
 		  //
 
-		public static Vector2Int GetSizeI(this Texture thiz) {
-			if(thiz!=null) {return new Vector2Int(thiz.width,thiz.height);}
-			else {return Vector2Int.zero;}
-		}
-
-		public static Texture2D NewTexture2D(int width,int height,bool linear) {
-			return new Texture2D(width,height,TextureFormat.RGBA32,false,linear) ;
-		}
-
-		public static Texture2D NewTexture2D(int width,int height)=>NewTexture2D(width,height,false);
-
-		public static bool IsNullOrEmpty(this RenderTexture thiz) {
-			if(thiz!=null) {
-				int w=thiz.width,h=thiz.height;var tex=GetTemp2D();
-				if(tex.width!=w||tex.height!=h) {tex.Reinitialize(w,h);}
-				var tmp=thiz.Begin();
-					tex.ReadPixels(new Rect(0,0,w,h),0,0,false);tex.Apply();
-				thiz.End(tmp);
-				Color[] colors=tex.GetPixels();Color it;
-				for(int i=0,imax=colors?.Length??0;i<imax;++i) {
-					it=colors[i];if(it.r>0.0f||it.g>0.0f||it.b>0.0f) {
-						return false;
-					}
-				}
-			}
-			return true;
-		}
-
-		public static void Free(this RenderTexture thiz) {
-			if(thiz!=null) {RenderTexture.ReleaseTemporary(thiz);}
-		}
-
-		public static RenderTexture GetTexture(this VideoPlayer thiz,bool resize=false) {
-			RenderTexture rt=null;
-			if(thiz!=null) {
-				rt=thiz.targetTexture;Texture tex=thiz.texture;
-				if(rt==null) {
-					rt=tex as RenderTexture;
-				}else if(tex!=null) {Vector2Int a=tex.GetSizeI(),b=rt.GetSizeI();if(a!=b){
-					if(resize) {
-						if(rt.IsTemporary()) {rt.Free();}
-						rt=RenderTexture.GetTemporary(a.x,a.y);rt.name=s_TempTag;
-						thiz.targetTexture=rt;
-					}else {
-						Debug.Log($"({a.x}x{a.y}) to ({b.x}x{b.y}).");
-					}
-				}}
-			}
-			return rt;
-		}
-
-		public static void SetResolution(this VideoPlayer thiz,Vector2Int value) {
-			if(thiz==null) {return;}
-			//
-			if(value.sqrMagnitude>0) {
-				if(thiz.targetTexture==null) {thiz.targetTexture=RenderTexture.GetTemporary(value.x,value.y);}
-				else {Debug.Log("Exists a target texture.");}
-				thiz.renderMode=VideoRenderMode.RenderTexture;
-			}else {
-				thiz.targetTexture=null;
-				thiz.renderMode=VideoRenderMode.APIOnly;
-			}
-		}
-
-		public static void Set(this Material thiz,int id,Vector2 offset,Vector2 scale) {
-			if(thiz!=null) {
-				thiz.SetTextureOffset(id,offset);
-				thiz.SetTextureScale(id,scale);
-			}
-		}
-
-		public static void Set(this Material thiz,int id,Rect rect) {
-			if(thiz!=null) {
-				thiz.SetTextureOffset(id,rect.position);
-				thiz.SetTextureScale(id,rect.size);
-			}
-		}
-
-		public static void Set(this Renderer thiz,Mesh mesh) {
-			if(thiz!=null) {
-				if(thiz is SkinnedMeshRenderer sr) {sr.sharedMesh=mesh;}
-				else {
-					var mf=thiz.GetComponent<MeshFilter>();
-					if(mf!=null) {mf.sharedMesh=mesh;}
-				}
-			}
-		}
-
-		public static Mesh CreatePlane(this Mesh thiz,int cols,int rows) {
-			if(thiz==null) {thiz=new Mesh();}else {thiz.Clear();}
-			float w=1.0f/cols,h=1.0f/rows;int i=0,imax=(cols+1)*(rows+1),j=0;
-			Vector3[] vertices=new Vector3[imax];
-			Vector2[] uv=new Vector2[imax];
-			int[] triangles=new int[cols*rows*6];
-			for(int y=0;y<=rows;++y) {for(int x=0;x<=cols;++x) {
-				vertices[i]=new Vector3(-x*w+0.5f,y*h-0.5f,0.0f);// Flip X
-				uv[i]=new Vector2(x*w,y*h);
-				if(x<cols&&y<rows) {
-					triangles[j++]=i;
-					triangles[j++]=i+cols+2;
-					triangles[j++]=i+1;
-					triangles[j++]=i+cols+1;
-					triangles[j++]=i+cols+2;
-					triangles[j++]=i;
-				}++i;
-			}}
-			if(imax>=uint.MaxValue) {
-				Debug.LogError($"{vertices.Length}>={uint.MaxValue}");
-			}
-			thiz.indexFormat=imax>=ushort.MaxValue
-				?UnityEngine.Rendering.IndexFormat.UInt32
-				:UnityEngine.Rendering.IndexFormat.UInt16;
-			thiz.vertices=vertices;
-			thiz.uv=uv;
-			thiz.triangles=triangles;
-			thiz.RecalculateBounds();
-			return thiz;
-		}
-
-		  //
-
 		/// <summary>
 		/// <seealso cref="GameObject.SetActive(bool)"/>
 		/// </summary>
@@ -888,51 +689,6 @@ namespace YouSingStudio.Holograms {
 		}
 
 		  //
-
-		public static Texture2D GetTemp2D() {
-			if(s_Temp2D==null) {
-				s_Temp2D=NewTexture2D(1,1);
-				s_Temp2D.name=s_TempTag;
-			}
-			return s_Temp2D;
-		}
-
-		public static Material GetUnlit() {
-			if(s_Unlit==null) {
-				s_Unlit=new Material(Shader.Find("Sprites/Default"));
-			}
-			return s_Unlit;
-		}
-
-		public static Camera GetCameraHelper() {
-			if(s_CameraHelper==null) {
-				GameObject go=new GameObject(typeof(UnityExtension).FullName+".CameraHelper");
-				go.layer=31;GameObject.DontDestroyOnLoad(go);
-				//
-				s_CameraHelper=go.AddComponent<Camera>();
-				s_CameraHelper.transform.localPosition=new Vector3(0.5f,0.5f,0.5f);
-				s_CameraHelper.enabled=false;
-				s_CameraHelper.cullingMask=1<<go.layer;
-				s_CameraHelper.orthographic=true;
-				s_CameraHelper.orthographicSize=0.5f;
-				s_CameraHelper.aspect=1.0f;
-				s_CameraHelper.nearClipPlane=-1.0f;
-				s_CameraHelper.clearFlags=CameraClearFlags.SolidColor;
-				s_CameraHelper.backgroundColor=Color.clear;
-			}
-			return s_CameraHelper;
-		}
-
-		public static GLRenderer GetGLRenderer() {
-			if(s_GLRenderer==null) {
-				GameObject go=new GameObject(typeof(UnityExtension).FullName+"."+nameof(GLRenderer));
-				go.layer=31;GameObject.DontDestroyOnLoad(go);
-				//
-				s_GLRenderer=go.AddComponent<GLRenderer>();
-				s_GLRenderer.enabled=false;
-			}
-			return s_GLRenderer;
-		}
 
 		public static JObject GetSettings() {
 			if(s_Settings==null) {

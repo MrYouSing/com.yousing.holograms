@@ -1,0 +1,17 @@
+{
+	"name": "YouSingStudio.Samples.HologramGallery",
+	"references": [
+		"YouSingStudio.Holograms",
+		"eu.netherlands3d.filebrowser.Runtime"
+	],
+	"allowUnsafeCode": false,
+	"versionDefines": [
+		{
+			"name": "eu.netherlands3d.filebrowser",
+			"define": "UNITY_STANDALONE_FILE_BROWSER"
+		},{
+			"name": "com.yasirkula.simplefilebrowser",
+			"define": "UNITY_SIMPLE_FILE_BROWSER"
+		}
+	]
+}

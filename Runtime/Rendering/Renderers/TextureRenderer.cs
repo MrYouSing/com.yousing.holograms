@@ -86,7 +86,7 @@ namespace YouSingStudio.Holograms {
 			m_IsInited=true;
 			//
 			this.LoadSettings(name);
-			if(material==null) {material=UnityExtension.GetUnlit();}
+			if(material==null) {material=Instantiate(RenderingExtension.GetUnlit());}
 			if(renderer==null) {renderer=GetComponentInChildren<Renderer>();}
 			renderer.sharedMaterial=material;m_Renderer=renderer.transform;
 			if(root==null) {root=transform;}

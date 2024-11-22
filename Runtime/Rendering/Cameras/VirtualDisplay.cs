@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.UI;
 using YouSingStudio.Private;
@@ -11,6 +12,7 @@ namespace YouSingStudio.Holograms {
 
 		public HologramDevice device;
 		public new Camera camera;
+		public Material material;
 		public Canvas canvas;
 		public RawImage image;
 #if UNITY_EDITOR
@@ -31,7 +33,18 @@ namespace YouSingStudio.Holograms {
 		}
 #endif
 		protected virtual void Start() {
+			RenderPipelineManager.endContextRendering+=OnEndContextRendering;
 			CreateUnityDisplay();
+		}
+
+		protected virtual void OnDestroy() {
+			RenderPipelineManager.endContextRendering-=OnEndContextRendering;
+		}
+
+		protected virtual void OnEndContextRendering(ScriptableRenderContext ctx,List<Camera> list){
+			if(m_Active&&list.IndexOf(camera)>=0) {
+				Graphics.Blit(device.canvas,material!=null?material:RenderingExtension.GetUnlit());
+			}
 		}
 
 		#endregion Unity Messages
@@ -42,37 +55,51 @@ namespace YouSingStudio.Holograms {
 			if(m_IsCreated) {return device!=null&&device.display>=0;}
 			m_IsCreated=true;
 			//
+			if(CreateDeviceDisplay()) {
+				int i=RenderingExtension.GetRenderPipelines();
+				if((i&~0x7)==0) {
+					return CreateCameraDisplay();
+				}else {// Legacy
+					return CreateCanvasDisplay();
+				}
+			}
+			return false;
+		}
+
+		protected virtual bool CreateDeviceDisplay() {
 #if !UNITY_EDITOR
 			if(!device.IsPresent()) {device=null;}
 #endif
-			if(device==null) {return false;}device.Init();
-			return CreateCameraDisplay();//CreateCanvasDisplay();
+			if(device==null) {return false;}
+			device.Init();if(device.display<0) {
+				if(camera!=null) {camera.enabled=false;}
+				if(canvas!=null) {canvas.enabled=false;}
+				return false;
+			}
+			ScreenManager.Activate(device.display);
+			return true;
 		}
 
 		protected virtual bool CreateCameraDisplay() {
-			if(device.display<0) {
-				if(camera!=null) {camera.enabled=false;}return false;
-			}
 			//
-			ScreenManager.Activate(device.display);
 			if(camera==null) {
 				GameObject go=new GameObject(nameof(VirtualDisplay)+"@"+device.display);
 				camera=go.AddComponent<Camera>();camera.cullingMask=0;
 				camera.clearFlags=CameraClearFlags.SolidColor;camera.backgroundColor=Color.clear;
 			}
 			camera.targetDisplay=device.display;
-			if(m_Buffer==null) {m_Buffer=new CommandBuffer();m_Buffer.Blit(device.canvas,BuiltinRenderTextureType.CameraTarget);}
+			if(m_Buffer==null) {
+				m_Buffer=new CommandBuffer();
+				if(material!=null) {m_Buffer.Blit(device.canvas,BuiltinRenderTextureType.CameraTarget,material);}
+				else {m_Buffer.Blit(device.canvas,BuiltinRenderTextureType.CameraTarget);}
+			}
 			camera.RemoveCommandBuffer(CameraEvent.BeforeImageEffects,m_Buffer);camera.AddCommandBuffer(CameraEvent.BeforeImageEffects,m_Buffer);
 			//
 			return m_Active=true;
 		}
 
 		protected virtual bool CreateCanvasDisplay() {
-			if(device.display<0) {
-				if(canvas!=null) {canvas.enabled=false;}return false;
-			}
 			//
-			ScreenManager.Activate(device.display);
 			if(canvas==null) {
 				GameObject go=new GameObject(nameof(VirtualDisplay)+"@"+device.display);
 				canvas=go.AddComponent<Canvas>();
@@ -88,7 +115,7 @@ namespace YouSingStudio.Holograms {
 				}
 			}
 			image.rectTransform.StretchParent(canvas.transform);
-			image.texture=device.canvas;
+			image.texture=device.canvas;image.material=material;
 			//
 			return m_Active=true;
 		}

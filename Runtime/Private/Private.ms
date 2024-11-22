@@ -86,6 +86,14 @@ else if(asset is,if(asset is
  Macro.End --> */
 // Macro.End -->
 
+//<!-- Macro.File DialogPicker.cs
+/* <!-- Macro.Copy File
+:Packages/com.yousing.io/Runtime/Modules/PickerModule/$(GeneratedFileName).cs
+ Macro.End --> */
+/* <!-- Macro.Replace Replace
+ Macro.End --> */
+// Macro.End -->
+
 //<!-- Macro.File MonoSingleton.cs
 /* <!-- Macro.Copy File
 :Packages/com.yousing.io/Runtime/Internal/$(GeneratedFileName).cs
@@ -104,7 +112,7 @@ else if(asset is,if(asset is
 &#44;OAuthAPI.API,
 OAuthAPI.Se,//
 OAuthAPI.k_Type_,UnityExtension.k_OAuth_
-TextureAPI.,UnityExtension.
+TextureAPI.,RenderingExtension.
 icon.SaveFile(fn),File.WriteAllBytes(fn&#44;icon.EncodeToPNG())
  Macro.End --> */
 // Macro.End -->

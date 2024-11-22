@@ -180,6 +180,10 @@ namespace YouSingStudio.Holograms {
 			return video!=null&&!string.IsNullOrEmpty(video.url)&&video.isPrepared;
 		}
 
+		protected virtual bool IsPause() {
+			return (video.isPaused||!video.isPlaying);
+		}
+
 		protected virtual void SetActive(bool value) {
 			canvas.SetActive(value);
 		}
@@ -189,7 +193,7 @@ namespace YouSingStudio.Holograms {
 				string str=video.url;
 				float t=(float)video.time,d=(float)video.length;
 				if(!string.IsNullOrEmpty(str)) {
-					SetImage(k_PlayOrPauseUI,GetSprite(video.isPaused?k_Play:k_Pause));
+					SetImage(k_PlayOrPauseUI,GetSprite(IsPause()?k_Play:k_Pause));
 					SetImage(k_MuteOrUnmuteUI,GetSprite(video.GetDirectAudioMute(track)?k_Unmute:k_Mute));
 					SetText(k_Title,Path.GetFileName(str));
 					//
@@ -208,7 +212,7 @@ namespace YouSingStudio.Holograms {
 
 		protected virtual void PlayOrPause() {
 			if(IsVideo()) {
-				if(video.isPaused) {video.Play();}
+				if(IsPause()) {video.Play();}
 				else {video.Pause();}
 			}
 		}

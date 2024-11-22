@@ -24,6 +24,9 @@ DeclareKeys_1,
 DeclareKeys_2
 DeclareKeys_3,
  Macro.End --> */
+/* <!-- Macro.Define Bind=
+true
+ Macro.End --> */
 /* <!-- Macro.Define Bind
 			Bind$(Table.Name)(k_{0},{0},$(Bind));
  Macro.End --> */

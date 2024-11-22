@@ -117,6 +117,7 @@ namespace YouSingStudio.Private {
 		public Dictionary<string,Key[]> mappings;
 		public Dictionary<Key,Key> remap;
 
+		[System.NonSerialized]public Shortcut current;
 		[System.NonSerialized]protected HashSet<Key> m_Keys=new HashSet<Key>();
 
 		#endregion Fields
@@ -227,7 +228,9 @@ namespace YouSingStudio.Private {
 				it=shortcut.keys[i];
 				if(!IsModifier(it)) {m_Keys.Add(it);}
 			}
-			shortcut.Invoke();
+			var tmp=current;current=shortcut;
+				shortcut.Invoke();
+			shortcut=tmp;
 		}
 
 		#endregion Methods

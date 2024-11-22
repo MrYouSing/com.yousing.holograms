@@ -117,7 +117,7 @@ namespace YouSingStudio.Private {
 					action.Invoke(DownloadHandlerTexture.GetContent(www));
 				};
 			}else if(File.Exists(url)) {// File
-				Texture2D tex=UnityExtension.NewTexture2D(1,1);
+				Texture2D tex=RenderingExtension.NewTexture2D(1,1);
 				tex.LoadImage(File.ReadAllBytes(url));
 				action.Invoke(tex);
 			}else {

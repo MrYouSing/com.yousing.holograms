@@ -116,26 +116,26 @@ namespace YouSingStudio.Holograms {
 		/// <summary>
 		/// <seealso cref="ScreenCapture.CaptureScreenshot(string)"/>
 		/// </summary>
-		public virtual void Screenshot(string path) {
+		public virtual void Screenshot(string path,int mask=-1) {
 			string dir=Path.GetDirectoryName(path);
 			if(!Directory.Exists(dir)) {Directory.CreateDirectory(dir);}
 			//
 			Texture2D tmp=null;bool del=false;
-			if(quiltTexture!=null) {
+			if((mask&0x2)!=0&&quiltTexture!=null) {
 				//
 				tmp=quiltTexture as Texture2D;
 				if(tmp!=null) {tmp=Instantiate(tmp);del=true;}
 				else {tmp=(quiltTexture as RenderTexture).ToTexture2D(tmp);}
 				//
 				Vector3 v=ParseQuilt();if(v.z>0.0f) {
-					File.WriteAllBytes($"{path}_quilt.png",tmp.EncodeToPNG());
+					if((mask&0x4)!=0) {File.WriteAllBytes($"{path}_quilt.png",tmp.EncodeToPNG());}
 					ImageConverter.FlipQuiltY(tmp,(int)v.y);
 				}else {
 					v.z*=-1.0f;
 				}
 				File.WriteAllBytes($"{path}_qs{v.x}x{v.y}a{v.z.ToString("0.00")}.png",tmp.EncodeToPNG());
 			}
-			if(canvas!=null) {
+			if((mask&0x1)!=0&&canvas!=null) {
 				tmp=canvas.ToTexture2D(tmp);
 				File.WriteAllBytes($"{path}_raw.png",tmp.EncodeToPNG());
 			}

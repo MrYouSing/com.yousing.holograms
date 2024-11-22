@@ -14,7 +14,7 @@ namespace YouSingStudio.Holograms {
 			path=path.GetFullPath();
 			if(File.Exists(path)) {
 				if(UnityExtension.IsImage(Path.GetExtension(path))) {
-					var tex=UnityExtension.NewTexture2D(1,1);
+					var tex=RenderingExtension.NewTexture2D(1,1);
 					tex.LoadImage(File.ReadAllBytes(path));
 					tex.name=path;return tex;
 				}else {
@@ -35,7 +35,7 @@ namespace YouSingStudio.Holograms {
 			if(texture==null) {return;}
 			//
 			int w=texture.width,h=texture.height;
-			Texture2D tex=UnityExtension.NewTexture2D(w,h,IsLinear(texture));
+			Texture2D tex=RenderingExtension.NewTexture2D(w,h,IsLinear(texture));
 			var tmp=texture.Begin();
 				tex.ReadPixels(new Rect(0,0,w,h),0,0);tex.Apply();
 			texture.End(tmp);
@@ -72,6 +72,16 @@ namespace YouSingStudio.Holograms {
 			UnityExtension.s_ImageExtensions.Add(".jpeg");
 			UnityExtension.s_ImageExtensions.Add(".jpg");
 			UnityExtension.s_ImageExtensions.Add(".exr");
+		}
+
+		public virtual string GetPreview(string path) {
+			string pv=Path.GetFileNameWithoutExtension(path);
+			int i=pv.LastIndexOf('_');if(i>=0) {pv=pv.Substring(0,i);}
+			path=Path.Combine(Path.GetDirectoryName(path),pv+"_preview");
+			pv=path+".png";if(File.Exists(pv)) {return pv;}
+			pv=path+".jpg";if(File.Exists(pv)) {return pv;}
+			pv=path+".jpeg";if(File.Exists(pv)) {return pv;}
+			return null;
 		}
 
 		#endregion Methods
