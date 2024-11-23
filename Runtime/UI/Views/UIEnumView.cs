@@ -41,7 +41,7 @@ namespace YouSingStudio.Holograms {
 			}
 			BindDropdown(0,OnDropdownChanged);
 		}
-		
+
 		protected virtual void OnEnable() {
 			OnValueChanged(values[PlayerPrefs.GetInt(name,index)]);
 		}

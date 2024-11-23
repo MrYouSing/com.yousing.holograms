@@ -2181,8 +2181,14 @@ MonoBehaviour:
   - "\u6B63\u5411\u5FAA\u73AF"
   - "\u53CD\u5411\u5FAA\u73AF"
   - "\u4E52\u4E53\u5FAA\u73AF"
-  - "\u89C6\u89D2\u56FE\u96C6"
-  m_Sprites: []
+  - "\u5BAB\u683C\u56FE\u96C6"
+  m_Sprites:
+  - {fileID: 21300000, guid: 55f5fdf295909ef418df1c58e0ff0d8f, type: 3}
+  - {fileID: 21300000, guid: 809914edf89bdf74fb5e9b4274b2a302, type: 3}
+  - {fileID: 21300000, guid: 4c792b92399526041b832ae48f60e0a5, type: 3}
+  - {fileID: 21300000, guid: 40851c98708ff344b9fe20c67f7276c5, type: 3}
+  - {fileID: 21300000, guid: 7ae35dd7f4720a14988229c4b4179b21, type: 3}
+  - {fileID: 21300000, guid: 8de860bc35882af43ad36efc7d6a0b54, type: 3}
   m_Textures: []
   m_GameObjects: []
   m_Texts: []

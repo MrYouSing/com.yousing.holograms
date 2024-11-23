@@ -60,7 +60,9 @@ namespace YouSingStudio.Holograms {
 		}
 
 		protected virtual void InternalRender() {
-			if(material!=null) {
+			if(canvas==null) {
+				// TODO: Raw Mode.
+			}else if(material!=null) {
 				var tmp=canvas.Begin();
 					Graphics.Blit(quiltTexture,material);
 				canvas.End(tmp);

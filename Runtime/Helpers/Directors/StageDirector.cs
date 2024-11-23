@@ -1,8 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
-using YouSingStudio.Private;
-using Key=UnityEngine.KeyCode;
 
 namespace YouSingStudio.Holograms {
 	/// <summary>
@@ -10,7 +8,7 @@ namespace YouSingStudio.Holograms {
 	/// <seealso cref="UnityEngine.SceneManagement.SceneManager"/>
 	/// </summary>
 	public class StageDirector
-		:MonoBehaviour
+		:MonoDirector
 	{
 		#region Nested Types
 
@@ -51,56 +49,23 @@ namespace YouSingStudio.Holograms {
 
 		#region Fields
 
-		public Key[] modifiers;
-		public Key[] keys;
 		public List<Stage> stages=new List<Stage>();
-
-		[System.NonSerialized]protected int m_Index=-1;
-		[System.NonSerialized]protected Dictionary<string,int> m_Key2Index;
 
 		#endregion Fields
 
-		#region Unity Messages
-
-		protected virtual void Awake() {
-			Set(-2);
-		}
-
-		protected virtual void Start() {
-			var sm=ShortcutManager.instance;
-			for(int i=0,imax=Mathf.Min(keys?.Length??0,stages?.Count??0);i<imax;++i) {
-				int ii=i;
-				sm.Add(name+" Show "+stages[i]?.name??("Stage#"+i),()=>Set(ii),ShortcutManager.GetKeys(keys[i],modifiers));
-			}
-			Set(0);
-		}
-
-		#endregion Unity Messages
-
 		#region Methods
 
-		public virtual int IndexOf(string key) {
-			//
-			int i=0,imax=stages?.Count??0;if(m_Key2Index==null) {
-				m_Key2Index=new Dictionary<string,int>(imax);
-				for(;i<imax;++i) {m_Key2Index.AddRange(stages[i].name,i);}
-			}
-			//
-			if(m_Key2Index.TryGetValue(key,out i)&&i>=0) {return i;}
-			for(i=m_Key2Index.Count;i<imax;++i) {
-				if(string.Equals(stages[i]?.name,key,UnityExtension.k_Comparison)) {return i;}
-			}
-			return -1;
-		}
+		public override int Count=>stages.Count;
+		public override string KeyOf(int index)=>stages[index].name;
 
 		public virtual void Add(Stage stage) {
-			if(stage!=null) {
-				m_Key2Index.AddRange(stage.name,stages.Count);
+			if(stage!=null&&stages.IndexOf(stage)<0) {
+				base.Add(stage.name);
 				stages.Add(stage);
 			}
 		}
 
-		public virtual void Set(int index) {
+		public override void Set(int index) {
 			if(index==m_Index) {return;}
 			if(m_Index>=0) {stages[m_Index]?.SetActive(false);}
 			m_Index=index;
@@ -108,8 +73,6 @@ namespace YouSingStudio.Holograms {
 				stages[i]?.SetActive(i==m_Index);
 			}
 		}
-
-		public virtual void Set(string key)=>Set(IndexOf(key));
 
 		public virtual void Open(string key,string path) {
 			int i=IndexOf(key);

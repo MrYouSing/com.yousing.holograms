@@ -21,6 +21,7 @@ namespace YouSingStudio.Holograms {
 		[System.NonSerialized]protected bool m_Active;
 		[System.NonSerialized]protected bool m_IsCreated;
 		[System.NonSerialized]protected CommandBuffer m_Buffer;
+		[System.NonSerialized]protected Texture m_Texture;
 
 		#endregion Fields
 
@@ -39,11 +40,12 @@ namespace YouSingStudio.Holograms {
 
 		protected virtual void OnDestroy() {
 			RenderPipelineManager.endContextRendering-=OnEndContextRendering;
+			if(device!=null) {device.onPostRender-=OnDeviceRender;}
 		}
 
 		protected virtual void OnEndContextRendering(ScriptableRenderContext ctx,List<Camera> list){
 			if(m_Active&&list.IndexOf(camera)>=0) {
-				Graphics.Blit(device.canvas,material!=null?material:RenderingExtension.GetUnlit());
+				Graphics.Blit(m_Texture,material!=null?material:RenderingExtension.GetUnlit());
 			}
 		}
 
@@ -76,6 +78,7 @@ namespace YouSingStudio.Holograms {
 				if(canvas!=null) {canvas.enabled=false;}
 				return false;
 			}
+			device.onPostRender+=OnDeviceRender;
 			ScreenManager.Activate(device.display);
 			return true;
 		}
@@ -88,12 +91,7 @@ namespace YouSingStudio.Holograms {
 				camera.clearFlags=CameraClearFlags.SolidColor;camera.backgroundColor=Color.clear;
 			}
 			camera.targetDisplay=device.display;
-			if(m_Buffer==null) {
-				m_Buffer=new CommandBuffer();
-				if(material!=null) {m_Buffer.Blit(device.canvas,BuiltinRenderTextureType.CameraTarget,material);}
-				else {m_Buffer.Blit(device.canvas,BuiltinRenderTextureType.CameraTarget);}
-			}
-			camera.RemoveCommandBuffer(CameraEvent.BeforeImageEffects,m_Buffer);camera.AddCommandBuffer(CameraEvent.BeforeImageEffects,m_Buffer);
+			SetCameraTexture(device.canvas);
 			//
 			return m_Active=true;
 		}
@@ -118,6 +116,33 @@ namespace YouSingStudio.Holograms {
 			image.texture=device.canvas;image.material=material;
 			//
 			return m_Active=true;
+		}
+
+		protected virtual void SetCameraTexture(Texture value) {
+			m_Texture=value;bool b=m_Texture!=null;
+			var e=CameraEvent.BeforeImageEffects;
+			// Disable
+			if(m_Buffer!=null) {
+				camera.RemoveCommandBuffer(e,m_Buffer);
+				m_Buffer.Clear();
+			}else if(b) {
+				m_Buffer=new CommandBuffer();
+			}
+			// Enable
+			if(b) {
+				if(material!=null) {m_Buffer.Blit(m_Texture,BuiltinRenderTextureType.CameraTarget,material);}
+				else {m_Buffer.Blit(m_Texture,BuiltinRenderTextureType.CameraTarget);}
+				camera.AddCommandBuffer(e,m_Buffer);
+			}
+		}
+
+		protected virtual void OnDeviceRender() {
+			Texture t=device.canvas!=null?device.canvas:device.quiltTexture;
+			if(t==m_Texture) {return;}
+			//
+			if(m_Buffer!=null) {SetCameraTexture(t);}
+			if(image!=null) {image.texture=t;}
+			m_Texture=t;
 		}
 
 		public virtual bool isActive=>m_IsCreated?m_Active:false;

@@ -60,16 +60,16 @@ namespace YouSingStudio.Holograms {
 			if(video!=null) {
 				video.prepareCompleted-=OnVideoPrepared;
 				video.prepareCompleted+=OnVideoPrepared;
-				video.isLooping=loop;
+				video.SetLoop(loop);
 				video.url=m_Path=path;video.Play();
 			}
 		}
 
 		protected virtual void OnVideoPrepared(VideoPlayer _) {
-			if(video!=null) {
-				video.prepareCompleted-=OnVideoPrepared;
-				if(isActiveAndEnabled) {Render(video.GetTexture());}
-			}
+			if(string.IsNullOrEmpty(m_Path)||!isActiveAndEnabled) {return;}// TODO: For Shared VideoPlayer.
+			//
+			if(_!=null) {_.prepareCompleted-=OnVideoPrepared;}
+			if(video!=null) {Render(video.GetTexture());}
 		}
 
 		public virtual void SetAspect(VideoAspectRatio value) {

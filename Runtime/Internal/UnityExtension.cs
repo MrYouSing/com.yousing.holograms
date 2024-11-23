@@ -666,6 +666,14 @@ namespace YouSingStudio.Holograms {
 
 		  //
 
+		public static void SetLoop(this VideoPlayer thiz,bool value) {
+			if(thiz!=null) {
+				thiz.isLooping=value;thiz.skipOnDrop=value;
+			}
+		}
+
+		  //
+
 		/// <summary>
 		/// <seealso cref="GameObject.SetActive(bool)"/>
 		/// </summary>
