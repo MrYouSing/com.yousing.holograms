@@ -215,7 +215,7 @@ namespace YouSingStudio.Holograms {
 			if(!string.IsNullOrEmpty(m_Path)) {
 				var s=video.GetTexture().GetSizeI();
 				return (s.x*s.y>=2048*2048)
-					&&video.length>=60.0f
+					//&&video.length>=60.0f
 					&&video.frameRate>=60.0f;
 			}
 			return false;
