@@ -145,7 +145,14 @@ namespace YouSingStudio.Holograms {
 			}
 			if(root==null) {root=transform;}
 			m_Point=root.localPosition;
-			if(m_Path=="*") {s_Vectors[m_Path]=new Vector4(range.x,range.y,factor.x,factor.y);}
+			//
+			if(float.IsNaN(factor.x)) {
+				if(MonoApplication.s_Instance==null) {factor=Vector2.right;}
+				else {Vector2 v=MonoApplication.s_Instance.depth;factor.Set(v.y-v.x,v.x);}
+			}
+			if(m_Path=="*") {
+				s_Vectors[m_Path]=new Vector4(range.x,range.y,factor.x,factor.y);
+			}
 		}
 
 		public virtual Vector2 GetRange(Texture texture,bool half) {
@@ -257,15 +264,14 @@ namespace YouSingStudio.Holograms {
 				f=camera.GetPlaneHeight(f);
 				//
 				float s;if(device!=null) {// Fit depth.
-					s=(device.size.z-device.size.w);
-					s=s/device.size.y*f;
+					s=device.HeightToDepth()*f;
 					//
-					t=m_Point+new Vector3(0.0f,0.0f,device.size.z/device.size.y*f);
+					t=m_Point+new Vector3(0.0f,0.0f,device.HeightToForward()*f);
 					if(p!=null) {t=p.position+p.rotation*t;}root.position=t;
 					//
-					t.x=f;f=camera.GetPlaneHeight(camera.WorldToDepth(t));
+					float x=f;f=camera.GetPlaneHeight(camera.WorldToDepth(t));
 					if(material!=null) {
-						t.x=(t.x-f)/f;t.y=device.size.z/(device.size.z-device.size.w);
+						t.x=(x-f)/f;t.y=device.size.z/(device.size.z-device.size.w);
 						material.SetFloat(_Falloff,t.x/t.y);
 					}
 				}else {

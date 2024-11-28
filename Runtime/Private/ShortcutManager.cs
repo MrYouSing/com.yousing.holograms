@@ -230,7 +230,7 @@ namespace YouSingStudio.Private {
 			}
 			var tmp=current;current=shortcut;
 				shortcut.Invoke();
-			shortcut=tmp;
+			current=tmp;
 		}
 
 		#endregion Methods

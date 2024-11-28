@@ -1,4 +1,3 @@
-
 using UnityEngine;
 using UnityEngine.EventSystems;
 using YouSingStudio.Private;
@@ -27,12 +26,14 @@ namespace YouSingStudio.Holograms {
 			KeyCode.RightShift+0,KeyCode.RightShift+1,KeyCode.RightShift+2,
 			KeyCode.RightShift+3,KeyCode.RightShift+4,KeyCode.RightShift+5,
 		};
-		public int[] types=new int[] {0,0};
+		public int[] types=new int[]{0,0};
 		public string[] cursors;
 		[Header("Misc")]// For resolving target role.
 		public Transform stage;
 		public Transform viewer;
 		public new Collider collider;
+
+		[System.NonSerialized]protected MultiViewCamera m_MultiView;
 
 		[System.NonSerialized]protected int m_Action=-1;
 		[System.NonSerialized]protected Vector3 m_Start;
@@ -52,7 +53,9 @@ namespace YouSingStudio.Holograms {
 		protected virtual void Start() {
 			if(viewer!=null) {
 				s_Camera=viewer.GetComponent<Camera>();
-				m_Start=new Vector3(0.0f,GetPlane(target.position),viewer.localPosition.z);
+				m_MultiView=viewer.GetComponentInParent<MultiViewCamera>();
+				float z=m_MultiView!=null?m_MultiView.plane:viewer.localPosition.z;
+				m_Start=new Vector3(0.0f,GetPlane(target.position),z);
 			}
 			SetTarget(target);
 		}
@@ -124,27 +127,9 @@ namespace YouSingStudio.Holograms {
 				target.SetLocalPositionAndRotation(m_Pose.position,m_Pose.rotation);
 				target.localScale=m_Scale;
 			}
-			if(viewer!=null) {
-				viewer.localPosition=new Vector3(0.0f,0.0f,m_Start.z);
-			}
+			if(m_MultiView!=null) {m_MultiView.plane=m_Start.z;}
+			else if(viewer!=null) {viewer.localPosition=new Vector3(0.0f,0.0f,m_Start.z);}
 			int a=m_Action;m_Action=-1;SetAction(a);
-		}
-
-		public virtual void FitTarget() {
-			if(target!=null&&collider!=null) {
-				Bounds a=target.gameObject.GetBounds();
-				Bounds b=collider.bounds;int n=0;Vector3 s=a.size;
-				Vector3 p=target.InverseTransformPoint(a.center);
-				if(collider.isTrigger) {// Clamp : Inside
-					if(s.y>s.x) {n=1;}
-					if(s.z>s.y) {n=2;}
-				}else {// Free : Outside
-					if(s.y<s.x) {n=1;}
-					if(s.z<s.y) {n=2;}
-				}
-				target.localScale=Vector3.one*(b.size[n]/s[n]);
-				target.position+=b.center-target.TransformPoint(p);
-			}
 		}
 
 		protected virtual void SetAction(int action) {
@@ -185,7 +170,8 @@ namespace YouSingStudio.Holograms {
 			m_R=target.rotation;
 			m_S=target.localScale;
 			//
-			if(viewer!=null) {m_V=viewer.localPosition;}
+			if(m_MultiView!=null) {m_V.z=m_MultiView.plane;}
+			else if(viewer!=null) {m_V=viewer.localPosition;}
 			if(stage!=null) {m_R=Quaternion.Inverse(stage.rotation)*m_R;}
 		}
 
@@ -245,7 +231,8 @@ namespace YouSingStudio.Holograms {
 			}
 			if(IsScrolling(mouse.z)) {
 				mouse=new Vector3(0.0f,0.0f,sensitivity.x*mouse.z);
-				if(viewer!=null) {viewer.localPosition=m_V+mouse;}
+				if(m_MultiView!=null) {m_MultiView.plane=m_V.z/ToScale(mouse.z);}
+				else if(viewer!=null) {viewer.localPosition=m_V+mouse;}
 				else {target.position=m_T+mouse;}
 				SetCursor(3);
 			}
@@ -263,7 +250,7 @@ namespace YouSingStudio.Holograms {
 				SetCursor(0);switch(m_Action&0xFF) {
 					case 1:SetPosition(mouse.y);SetCursor(5);break;
 					case 2:SetRotation(mouse.y);SetCursor(6);break;// Clockwise TODO: Two Parts????
-					case 3:FitTarget();SetCursor(7);break;
+					case 3:ResetTarget();SetCursor(4);break;
 				}
 			}else {
 				return;

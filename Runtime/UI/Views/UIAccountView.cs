@@ -61,17 +61,17 @@ namespace YouSingStudio.Holograms {
 
 		public virtual void SetEvents(bool value) {
 			if(context!=null) {
-				context.SetEvent(UnityExtension.k_OAuth_Register,Render,value);
-				context.SetEvent(UnityExtension.k_OAuth_Login,Render,value);
-				context.SetEvent(UnityExtension.k_OAuth_Logout,Render,value);
-				context.SetEvent(UnityExtension.k_OAuth_Verify,OnVerify,value);
-				context.SetEvent(UnityExtension.k_OAuth_Error,OnError,value);
+				context.SetEvent(OAuthBehaviour.k_Type_Register,Render,value);
+				context.SetEvent(OAuthBehaviour.k_Type_Login,Render,value);
+				context.SetEvent(OAuthBehaviour.k_Type_Logout,Render,value);
+				context.SetEvent(OAuthBehaviour.k_Type_Verify,OnVerify,value);
+				context.SetEvent(OAuthBehaviour.k_Type_Error,OnError,value);
 				if(login!=null) {
-					login.BindButton(UnityExtension.k_OAuth_Register,context.Register,true);
-					login.BindButton(UnityExtension.k_OAuth_Login,Login,true);
-					login.BindButton(UnityExtension.k_OAuth_Logout,Logout,true);
-					login.BindButton(UnityExtension.k_OAuth_Verify,Verify,true);
-					login.BindButton(UnityExtension.k_OAuth_Forget,context.Forget,true);
+					login.BindButton(OAuthBehaviour.k_Type_Register,context.Register,true);
+					login.BindButton(OAuthBehaviour.k_Type_Login,Login,true);
+					login.BindButton(OAuthBehaviour.k_Type_Logout,Logout,true);
+					login.BindButton(OAuthBehaviour.k_Type_Verify,Verify,true);
+					login.BindButton(OAuthBehaviour.k_Type_Forget,context.Forget,true);
 					login.BindButton(5,Login,true);
 				}
 			}
@@ -101,7 +101,7 @@ namespace YouSingStudio.Holograms {
 					SetLogin(false);
 				}else {
 					if(login!=null) {
-						context.GetForm(UnityExtension.k_OAuth_Login,s_Form);
+						context.GetForm(OAuthBehaviour.k_Type_Login,s_Form);
 						login.SetInputField(0,s_Form[0]);
 						login.SetInputField(1,s_Form[1]);
 						login.SetInputField(2,s_Form[0]);
@@ -125,16 +125,16 @@ namespace YouSingStudio.Holograms {
 				s_Form[0]=login.GetInputField(b?0:2);
 				s_Form[1]=!b?null:login.GetInputField(1);
 				s_Form[2]=b?null:login.GetInputField(3);
-				context.SetForm(UnityExtension.k_OAuth_Login,s_Form);context.Login();
+				context.SetForm(OAuthBehaviour.k_Type_Login,s_Form);context.Login();
 			}
 		}
 
 		public virtual void Logout() {
 			if(context!=null&&login!=null) {
 				if(true) {// TODO: Clean the password.
-				context.GetForm(UnityExtension.k_OAuth_Login,s_Form);
+				context.GetForm(OAuthBehaviour.k_Type_Login,s_Form);
 					s_Form[1]=null;
-				context.SetForm(UnityExtension.k_OAuth_Login,s_Form);
+				context.SetForm(OAuthBehaviour.k_Type_Login,s_Form);
 				}
 				//
 				context.Logout();
@@ -145,7 +145,7 @@ namespace YouSingStudio.Holograms {
 			if(context!=null&&login!=null) {
 				s_Form[0]=login.GetInputField(2);
 				s_Form[1]="login";
-				context.SetForm(UnityExtension.k_OAuth_Verify,s_Form);context.Verify();
+				context.SetForm(OAuthBehaviour.k_Type_Verify,s_Form);context.Verify();
 			}
 		}
 
@@ -159,7 +159,7 @@ namespace YouSingStudio.Holograms {
 		}
 
 		protected virtual void OnMessage(string color) {
-			context.GetForm(UnityExtension.k_OAuth_Error,s_Form);
+			context.GetForm(OAuthBehaviour.k_Type_Error,s_Form);
 			if(login!=null) {
 				string str=string.IsNullOrEmpty(color)?s_Form[0]:$"<color=#{color}>{s_Form[0]}</color>";
 				login.SetText(1,str);

@@ -281,7 +281,7 @@ public class OpenStageAiSdk
 				OnDeviceUpdated();
 				// Fire a fake event to update ui.
 				displayName=jo["deviceNumber"]?.Value<string>()??"已获取设备参数";
-				InvokeEvent(UnityExtension.k_OAuth_Login);
+				InvokeEvent(k_Type_Login);
 			}else {
 				Log("Pass the invalid confg.");
 			}
@@ -361,8 +361,8 @@ public class OpenStageAiSdk
 
 	public override void SetForm(int type,string[] table) {
 		switch(type) {
-			case UnityExtension.k_OAuth_Login:
-			case UnityExtension.k_OAuth_Verify:
+			case k_Type_Login:
+			case k_Type_Verify:
 				SetString(".Phone",table[0]);
 			break;
 		}
@@ -380,7 +380,7 @@ public class OpenStageAiSdk
 		Log($"Login account {texts[0]}.");
 		int offset=k_Offset_DoLogin;
 		string str=string.Format(texts[offset+1],texts[0],texts[1],texts[2],string.IsNullOrEmpty(texts[2])?"password":"verifyCode");
-		var www=UnityWebRequest.Post(GetUrl(UnityExtension.k_OAuth_Login),str,texts[offset+0]);
+		var www=UnityWebRequest.Post(GetUrl(k_Type_Login),str,texts[offset+0]);
 		SendRequest(www,OnLogin);
 	}
 
@@ -412,7 +412,7 @@ public class OpenStageAiSdk
 #endif
 		if(string.IsNullOrEmpty(texts[0])) {return;}
 		//
-		var www=UnityWebRequest.Get(GetUrl(UnityExtension.k_OAuth_Verify)+$"?account={texts[0]}&type={texts[2]}&accountType=phone");
+		var www=UnityWebRequest.Get(GetUrl(k_Type_Verify)+$"?account={texts[0]}&type={texts[2]}&accountType=phone");
 		SendRequest(www,OnVerify);
 	}
 
@@ -420,7 +420,7 @@ public class OpenStageAiSdk
 		Log("Verify :"+text);
 		JObject jo=JObject.Parse(text);
 		m_Message=jo?.SelectToken(texts[k_Offset_OnLogin+1])?.Value<string>();
-		InvokeEvent(UnityExtension.k_OAuth_Verify);
+		InvokeEvent(k_Type_Verify);
 	}
 
 	public virtual void Query() {

@@ -1,8 +1,51 @@
+/* <!-- Macro.Define bFixPatch=
+true
+ Macro.End --> */
+/* <!-- Macro.Define Width=
+thiz.size.x
+ Macro.End --> */
+/* <!-- Macro.Define Height=
+thiz.size.y
+ Macro.End --> */
+/* <!-- Macro.Define Depth=
+(thiz.size.z-thiz.size.w)
+ Macro.End --> */
+/* <!-- Macro.Define Forward=
+thiz.size.z
+ Macro.End --> */
+/* <!-- Macro.Define Back=
+thiz.size.w
+ Macro.End --> */
+/* <!-- Macro.Define SizeToSize
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static float {0}To{1}(this HologramDevice thiz)=>$({1})/$({0});
+ Macro.End --> */
+
+/* <!-- Macro.Call SizeToSize
+Height,Width,
+Height,Depth,
+Height,Forward,
+ Macro.End --> */
+/* <!-- Macro.Patch
+,UnityExtension
+ Macro.End --> */
+using System.Collections;
 using System.IO;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 
 namespace YouSingStudio.Holograms {
+	public static partial class UnityExtension {
+// <!-- Macro.Patch UnityExtension
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static float HeightToWidth(this HologramDevice thiz)=>thiz.size.x/thiz.size.y;
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static float HeightToDepth(this HologramDevice thiz)=>(thiz.size.z-thiz.size.w)/thiz.size.y;
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static float HeightToForward(this HologramDevice thiz)=>thiz.size.z/thiz.size.y;
+// Macro.Patch -->
+	}
 	public class HologramDevice
 		:MonoBehaviour
 	{
@@ -17,8 +60,9 @@ namespace YouSingStudio.Holograms {
 		public RenderTexture canvas;
 		public Material material;
 		[Header("Quilt")]
-		public Texture quiltTexture;
+		public Vector2Int quiltResolution;
 		public Vector2Int quiltSize;
+		public Texture quiltTexture;
 
 		[System.NonSerialized]public System.Action onPreRender=null;
 		[System.NonSerialized]public System.Action onPostRender=null;
@@ -28,8 +72,12 @@ namespace YouSingStudio.Holograms {
 
 		#region Unity Messages
 
-		protected virtual void LateUpdate() {
-			Render();
+		protected virtual void OnEnable() {
+			Application.onBeforeRender+=Render;
+		}
+
+		protected virtual void OnDisable() {
+			Application.onBeforeRender-=Render;
 		}
 
 		protected virtual void OnDestroy() {
@@ -46,7 +94,7 @@ namespace YouSingStudio.Holograms {
 
 		public static int FindDisplay(Vector2Int size) {
 			var tmp=Private.ScreenManager.GetRects();RectInt it;
-			for(int i=0,imax=tmp?.Length??0;i<imax;++i) {it=tmp[i];
+			for(int i=(tmp?.Length??0)-1;i>=0;--i) {it=tmp[i];
 				if(it.width==size.x&&it.height==size.y) {
 #if UNITY_EDITOR
 					if(Private.ScreenManager.IndexOf(Display.main)!=i) {// Sub
@@ -57,6 +105,13 @@ namespace YouSingStudio.Holograms {
 				}
 			}
 			return -1;
+		}
+
+		public static void CheckRenderTexture<T>(ref T texture,Vector2Int size) where T:Texture {
+			if(texture==null&&size.sqrMagnitude!=0) {
+				RenderTexture rt=RenderTexture.GetTemporary(size.x,size.y,0,s_GraphicsFormat);
+                rt.name=UnityExtension.s_TempTag;texture=rt as T;
+			}
 		}
 
 		protected virtual void InternalRender() {
@@ -88,10 +143,8 @@ namespace YouSingStudio.Holograms {
 				resolution.Set(Screen.width,Screen.height);
 			}
 			if(display<0) {display=FindDisplay(resolution);}
-			if(canvas==null) {
-				canvas=RenderTexture.GetTemporary(resolution.x,resolution.y,0,s_GraphicsFormat);
-				canvas.name=UnityExtension.s_TempTag;
-			}
+			CheckRenderTexture(ref canvas,resolution);
+			CheckRenderTexture(ref quiltTexture,quiltResolution);
 		}
 
 		public virtual void Quilt(Texture texture,Vector2Int size) {

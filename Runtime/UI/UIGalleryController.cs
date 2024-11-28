@@ -84,6 +84,10 @@ namespace YouSingStudio.Holograms {
 			MonoCamera.s_AllowDummy=true;
 			ImageConverter.settings.download=UnityExtension.Path_Combine(paths[0],"Downloads");
 			TextureManager.instance.SetupFormats();
+			//
+			var sdk=Sketchfab.SketchfabSdk.instance;
+			if(sdk!=null) {sdk.download=UnityExtension.Path_Combine(paths[0],"Downloads/sketchfab.com");}
+			//
 			var sm=ShortcutManager.instance;int i=0;
 // <!-- Macro.Patch Start
 			sm.Add(name+".Refresh",Refresh,keys[i]);++i;
@@ -175,9 +179,14 @@ namespace YouSingStudio.Holograms {
 			if(!string.IsNullOrEmpty(url)) {
 				if(url.IsWebsite()) {
 					if(ImageConverter.ConvertFromWeb(url,Set)) {return;}
-					// TODO: Sketchfab????
+					if(url.IndexOf("sketchfab",UnityExtension.k_Comparison)>=0) {
+						var sdk=Sketchfab.SketchfabSdk.instance;
+						if(sdk!=null) {sdk.Download(sdk.GetUid(url),OnSketchfab);}
+						return;
+					}
+				}else {
+					if(File.Exists(url)) {Set(url);return;}
 				}
-				if(File.Exists(url)) {Set(url);return;}
 			}
 			//
 			var p=pickers[0];if(p!=null) {
@@ -256,26 +265,37 @@ namespace YouSingStudio.Holograms {
 			TextureType type=path.ToTextureType(texture);
 			switch(type) {
 				case TextureType.Depth:
-					if(player!=null) {player.Stop();}// Stop the other.
-					if(director!=null) {director.Open("Open RGB-D",path);}
+					InternalPlay("Open RGB-D",path);
 				break;
 				case TextureType.Stereo:{
 					Vector3 count=path.ParseQuilt();
 					if(!count.TwoPieces()) {path.SetQuilt(path.ParseLayout());}
-					if(director!=null) {director.Set("Open Media");}// Stop the other.
-					if(player!=null) {player.Play(path);}
+					//
+					InternalPlay(null,path);
 				}break;
 				case TextureType.Raw:
 				case TextureType.Quilt:
-					if(director!=null) {director.Set("Open Media");}// Stop the other.
-					if(player!=null) {player.Play(path);}
+					InternalPlay(null,path);
 				break;
 				case TextureType.Model:
-					if(player!=null) {player.Stop();}// Stop the other.
-					if(director!=null) {director.Open("Open Model "+Path.GetExtension(path),path);}
+					InternalPlay("Open Model "+Path.GetExtension(path),path);
 				break;
 			}
 			type.InvokeEvent();
+		}
+
+		protected virtual void InternalPlay(string stage,string path) {
+			if(!string.IsNullOrEmpty(stage)) {
+				if(player!=null) {player.Stop();}// Stop the other.
+				if(director!=null) {director.Open(stage,path);}
+			}else {
+				if(director!=null) {director.Set("Open Media");}// Stop the other.
+				if(player!=null) {player.Play(path);}
+			}
+		}
+
+		protected virtual void OnSketchfab(string path) {
+			InternalPlay("Open Sketchfab",path);TextureType.Model.InvokeEvent();
 		}
 
 		protected virtual void LoadIcon(RawImage image,string path) {

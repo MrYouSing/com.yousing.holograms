@@ -1,6 +1,3 @@
-/* <!-- Macro.Copy File
-:Packages/com.yousing.io/Runtime/APIs/OAuthAPI.cs,54~58,64
- Macro.End --> */
 /* <!-- Macro.Replace
 k_Type_,k_OAuth_
  Macro.End --> */
@@ -37,12 +34,6 @@ using UnityEngine.Video;
 namespace YouSingStudio.Holograms {
 	public static partial class UnityExtension {
 // <!-- Macro.Patch AutoGen
-		public const int k_OAuth_Register=0;
-		public const int k_OAuth_Login=1;
-		public const int k_OAuth_Logout=2;
-		public const int k_OAuth_Verify=3;
-		public const int k_OAuth_Forget=4;
-		public const int k_OAuth_Error=k_OAuth_Forget+1;
 		public static HashSet<string> s_ImageExtensions=new HashSet<string>(System.StringComparer.OrdinalIgnoreCase);
 		public static bool IsImage(string ext) {
 			return s_ImageExtensions.Contains(ext);

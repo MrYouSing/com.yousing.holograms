@@ -2,9 +2,9 @@
 
 /* <!-- Macro.Define OpenURL
 		public virtual void {0}() {{
-			string url=GetUrl(UnityExtension.k_OAuth_{0});
+			string url=GetUrl(k_Type_{0});
 			if(!string.IsNullOrEmpty(url)) {{UnityEngine.Application.OpenURL(url);}}
-			InvokeEvent(UnityExtension.k_OAuth_{0});
+			InvokeEvent(k_Type_{0});
 		}}
 
  Macro.End --> */
@@ -30,23 +30,29 @@ namespace YouSingStudio.Private {
 		:MonoBehaviour
 		
 	{
+		public const int k_Type_Register=0;
+		public const int k_Type_Login=1;
+		public const int k_Type_Logout=2;
+		public const int k_Type_Verify=3;
+		public const int k_Type_Forget=4;
+		public const int k_Type_Error=k_Type_Forget+1;
 // <!-- Macro.Patch AutoGen
 		public virtual void Register() {
-			string url=GetUrl(UnityExtension.k_OAuth_Register);
+			string url=GetUrl(k_Type_Register);
 			if(!string.IsNullOrEmpty(url)) {UnityEngine.Application.OpenURL(url);}
-			InvokeEvent(UnityExtension.k_OAuth_Register);
+			InvokeEvent(k_Type_Register);
 		}
 
 		public virtual void Verify() {
-			string url=GetUrl(UnityExtension.k_OAuth_Verify);
+			string url=GetUrl(k_Type_Verify);
 			if(!string.IsNullOrEmpty(url)) {UnityEngine.Application.OpenURL(url);}
-			InvokeEvent(UnityExtension.k_OAuth_Verify);
+			InvokeEvent(k_Type_Verify);
 		}
 
 		public virtual void Forget() {
-			string url=GetUrl(UnityExtension.k_OAuth_Forget);
+			string url=GetUrl(k_Type_Forget);
 			if(!string.IsNullOrEmpty(url)) {UnityEngine.Application.OpenURL(url);}
-			InvokeEvent(UnityExtension.k_OAuth_Forget);
+			InvokeEvent(k_Type_Forget);
 		}
 
 // Macro.Patch -->
@@ -78,7 +84,7 @@ namespace YouSingStudio.Private {
 
 		protected virtual void Awake() {
 			this.SetRealName();
-			if(m_Actions==null) {m_Actions=new System.Action[UnityExtension.k_OAuth_Error+1];}
+			if(m_Actions==null) {m_Actions=new System.Action[k_Type_Error+1];}
 			m_Token=GetString(".Token",null);
 		}
 
@@ -153,7 +159,7 @@ namespace YouSingStudio.Private {
 
 		protected virtual void OnError(string msg) {
 			string tmp=m_Message;
-				m_Message=msg;InvokeEvent(UnityExtension.k_OAuth_Error);
+				m_Message=msg;InvokeEvent(k_Type_Error);
 			m_Message=tmp;
 		}
 
@@ -183,7 +189,7 @@ namespace YouSingStudio.Private {
 				displayName=GetString(".Name",m_DisplayName);
 				string img=GetString(".Icon",null);
 				if(string.IsNullOrEmpty(img)) {
-					avatarIcon=m_AvatarIcon;InvokeEvent(UnityExtension.k_OAuth_Login);
+					avatarIcon=m_AvatarIcon;InvokeEvent(k_Type_Login);
 				}else {
 					LoadTexture(img,OnIcon);
 				}
@@ -199,7 +205,7 @@ namespace YouSingStudio.Private {
 				Debug.LogException(e);
 			}
 			//
-			avatarIcon=icon;InvokeEvent(UnityExtension.k_OAuth_Login);
+			avatarIcon=icon;InvokeEvent(k_Type_Login);
 		}
 
 		/// <summary>
@@ -232,13 +238,13 @@ namespace YouSingStudio.Private {
 		public virtual int GetForm(int type,string[] table) {
 			int n=-1;
 			switch(type) {
-				case UnityExtension.k_OAuth_Login:
+				case k_Type_Login:
 					n=3;if(table!=null) {System.Array.Copy(texts,0,table,0,n);}
 				break;
-				case UnityExtension.k_OAuth_Verify:
+				case k_Type_Verify:
 					n=2;if(table!=null) {table[0]=texts[0];table[1]=texts[2];}
 				break;
-				case UnityExtension.k_OAuth_Error:
+				case k_Type_Error:
 					n=1;if(table!=null) {table[0]=m_Message;}
 				break;
 			}
@@ -247,13 +253,13 @@ namespace YouSingStudio.Private {
 
 		public virtual void SetForm(int type,string[] table) {
 			switch(type) {
-				case UnityExtension.k_OAuth_Login:
+				case k_Type_Login:
 					if(table!=null) {System.Array.Copy(table,0,texts,0,3);}
 				break;
-				case UnityExtension.k_OAuth_Verify:
+				case k_Type_Verify:
 					if(table!=null) {texts[0]=table[0];texts[2]=table[1];}
 				break;
-				case UnityExtension.k_OAuth_Error:
+				case k_Type_Error:
 					if(table!=null) {m_Message=table[0];}
 				break;
 			}
@@ -283,7 +289,7 @@ namespace YouSingStudio.Private {
 			//
 			int offset=k_Offset_DoLogin;
 			string str=string.Format(texts[offset+1],texts[0],texts[1]);
-			var www=UnityWebRequest.Post(GetUrl(UnityExtension.k_OAuth_Login),str,texts[offset+0]);
+			var www=UnityWebRequest.Post(GetUrl(k_Type_Login),str,texts[offset+0]);
 			SendRequest(www,OnLogin);
 		}
 
@@ -292,7 +298,7 @@ namespace YouSingStudio.Private {
 			m_Token=null;SetString(".Token",null);
 			displayName=m_DisplayName;SetString(".Name",null);
 			avatarIcon=m_AvatarIcon;SetString(".Icon",null);
-			InvokeEvent(UnityExtension.k_OAuth_Logout);
+			InvokeEvent(k_Type_Logout);
 		}
 
 		#endregion Methods

@@ -104,14 +104,20 @@ else if(asset is,if(asset is
 
 //<!-- Macro.File OAuthBehaviour.cs
 /* <!-- Macro.Copy File
-:Packages/com.yousing.io/Runtime/OS/$(GeneratedFileName).cs
+:Packages/com.yousing.io/Runtime/OS/$(GeneratedFileName).cs,0~29
+ Macro.End --> */
+/* <!-- Macro.Copy File
+:Packages/com.yousing.io/Runtime/APIs/OAuthAPI.cs,54~58,64
+ Macro.End --> */
+/* <!-- Macro.Copy File
+:Packages/com.yousing.io/Runtime/OS/$(GeneratedFileName).cs,30~300
  Macro.End --> */
 /* <!-- Macro.Replace Replace
  Macro.End --> */
 /* <!-- Macro.Replace 
 &#44;OAuthAPI.API,
 OAuthAPI.Se,//
-OAuthAPI.k_Type_,UnityExtension.k_OAuth_
+OAuthAPI.k_Type_,k_Type_
 TextureAPI.,RenderingExtension.
 icon.SaveFile(fn),File.WriteAllBytes(fn&#44;icon.EncodeToPNG())
  Macro.End --> */

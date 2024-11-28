@@ -1,48 +1,46 @@
+using Sketchfab;
+using System.IO;
 using UnityEngine;
 
 namespace YouSingStudio.Holograms {
-	[System.Obsolete("NotImplemented Loader")]
 	public class SketchfabLoader
 		:GltfLoader
 	{
 		#region Fields
 
-		[Header("Sketchfab")]
-		public string email;
-		public string password;
+		[System.NonSerialized]protected string m_Uid;
 
 		#endregion Fields
 
-		#region Unity Messages
-
-		protected override void Start() {
-			this.LoadSettings(name);
-#if ENABLE_SKETCHFAB_API
-			if(SketchfabAPI.Authorized) {OnAccess(null);}
-			else {SketchfabAPI.GetAccessToken(email,password,OnAccess);}
-#endif
-		}
-
-		#endregion Unity Messages
-
 		#region Methods
-#if ENABLE_SKETCHFAB_API
-		protected virtual void OnAccess(SketchfabResponse<SketchfabAccessToken> r) {
-			if(r!=null) {
-				if(r.Success) {SketchfabAPI.AuthorizeWithAccessToken(r.Object);}
-				else {return;}
-			}
-			if(!string.IsNullOrEmpty(m_Path)) {Load(m_Path);}
-		}
 
 		protected override void InternalLoad() {
-			SketchfabAPI.GetModel(path,(x)=>{
-				SketchfabModelImporter.Import(x.Object,(obj) => {
-					if(obj!=null) {Instantiate(obj);}
-				},true);
-			},true);
+			m_Uid=null;// TODO: BeginUid
+			//
+			var sdk=SketchfabSdk.instance;
+			if(sdk!=null&&sdk.current!=null) {m_Uid=sdk.current.uid;}
+			base.InternalLoad();
 		}
-#endif
+
+		public override Manifest LoadManifest(string path) {
+			var tmp=base.LoadManifest(path);
+			if(!string.IsNullOrEmpty(m_Uid)&&tmp!=null) {
+			var sdk=SketchfabSdk.instance;if(sdk!=null) {
+			var info=sdk.GetInfo(m_Uid);if(info!=null) {
+				tmp.json=info.ToString();
+				//
+				File.WriteAllText(Path.ChangeExtension(path,".json"),JsonUtility.ToJson(tmp));
+			}}}
+			return tmp;
+		}
+
+		public override void LoadModel(Model model,GameObject prefab) {
+			if(model!=null&&!string.IsNullOrEmpty(m_Uid)) {s_Models[m_Uid]=model;}
+			base.LoadModel(model,prefab);
+			//
+			m_Uid=null;// TODO: EndUid
+		}
+
 		#endregion Methods
 	}
 }

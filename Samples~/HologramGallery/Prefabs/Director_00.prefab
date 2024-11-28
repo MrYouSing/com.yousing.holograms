@@ -34,6 +34,7 @@ Transform:
   - {fileID: 7491367887077729938}
   - {fileID: 1761730784227433152}
   - {fileID: 2383468488398959237}
+  - {fileID: 8189414147963308596}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &8458336726562584314
@@ -198,6 +199,36 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
+  - name: Open Sketchfab
+    actors:
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 5707191106331736883}
+    behaviours: []
+    onStart:
+      m_PersistentCalls:
+        m_Calls: []
+    onShow:
+      m_PersistentCalls:
+        m_Calls: []
+    onHide:
+      m_PersistentCalls:
+        m_Calls: []
+    onOpen:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 939872534111570744}
+          m_TargetAssemblyTypeName: YouSingStudio.Holograms.SketchfabLoader, YouSingStudio.Holograms
+          m_MethodName: Load
+          m_Mode: 0
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
 --- !u!1001 &1775243922886953193
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -284,11 +315,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4368262355176983642, guid: 91c13627d47f23747aa423bdd27c923e, type: 3}
       propertyPath: factor.x
-      value: 0.5
+      value: NaN
       objectReference: {fileID: 0}
     - target: {fileID: 4368262355176983642, guid: 91c13627d47f23747aa423bdd27c923e, type: 3}
       propertyPath: factor.y
-      value: 0.25
+      value: NaN
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -315,6 +346,40 @@ MonoBehaviour:
 Transform:
   m_CorrespondingSourceObject: {fileID: 2599290545693906887, guid: 91c13627d47f23747aa423bdd27c923e, type: 3}
   m_PrefabInstance: {fileID: 3827640249720685191}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &5215178171046340786
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 7239061710852563801}
+    m_Modifications: []
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 562e63133b9a9c945ad5ba5a6ce7508c, type: 3}
+--- !u!114 &939872534111570744 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5002111590595257226, guid: 562e63133b9a9c945ad5ba5a6ce7508c, type: 3}
+  m_PrefabInstance: {fileID: 5215178171046340786}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5707191106331736883}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f27a4c27fb6b2f4ca638f765e5ac6ae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!1 &5707191106331736883 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 528061319555666817, guid: 562e63133b9a9c945ad5ba5a6ce7508c, type: 3}
+  m_PrefabInstance: {fileID: 5215178171046340786}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &8189414147963308596 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4163204216476656262, guid: 562e63133b9a9c945ad5ba5a6ce7508c, type: 3}
+  m_PrefabInstance: {fileID: 5215178171046340786}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &6506454945057322861
 PrefabInstance:

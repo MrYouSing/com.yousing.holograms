@@ -92,11 +92,11 @@ namespace YouSingStudio.Holograms {
 			m_Actor=GameObject.Instantiate(model);m_Actor.name=model.name;
 			Transform t=m_Actor.transform;t.SetParent(container,false);
 			if(m_Manifest!=null) {
+				if(float.IsNaN(m_Manifest.S.x)) {FitStage(m_Manifest,m_Actor);}
+				//
 				t.SetLocalPositionAndRotation(m_Manifest.T,Quaternion.Euler(m_Manifest.R));
 				Vector3 s=m_Manifest.S.sqrMagnitude!=0.0f?m_Manifest.S:Vector3.one;
-				if(s.y==0.0f) {s.y=s.x;}if(s.z==0.0f) {s.z=s.x;}
-				// Auto Calculate????
-				t.localScale=s;
+				if(s.y*s.z==0.0f) {s.y=s.z=s.x;}t.localScale=s;
 			}
 		}
 
@@ -124,7 +124,10 @@ namespace YouSingStudio.Holograms {
 
 		public virtual void LoadModel(Model model,GameObject prefab) {
 			if(model==null||prefab==null) {return;}
+			//
 			if(prefab.scene.IsValid()) {Hide(prefab);}model.prefab=prefab;
+			if(model.manifest!=null) {
+			}
 			s_Models[model.path.FixPath()]=model;Load(model.prefab,model.manifest);
 		}
 
@@ -144,6 +147,30 @@ namespace YouSingStudio.Holograms {
 					//
 					m.manifest=!string.IsNullOrEmpty(s)?JsonUtility.FromJson<Manifest>(s):null;
 					LoadModel(m,ab.LoadAsset<GameObject>(m.Name));
+				}
+			}
+		}
+
+		//
+
+		protected virtual void FitStage(Manifest manifest,GameObject actor) {
+			Bounds a=actor.GetBounds();manifest.T=-a.center;
+			if(MonoApplication.s_Instance!=null) {
+				Transform t=actor.transform;
+				Bounds b=MonoApplication.s_Instance.GetBounds(container.position);
+				if(b.size.sqrMagnitude!=0.0f) {
+					Vector3 p=t.InverseTransformPoint(a.center);
+					Vector3 s=a.size;int n=0;
+					if(true) {// Clamp : Inside
+						if(s.y>s.x) {n=1;}
+						if(s.z>s.y) {n=2;}
+					}else {// Free : Outside
+						if(s.y<s.x) {n=1;}
+						if(s.z<s.y) {n=2;}
+					}
+					manifest.S=Vector3.one*(b.size[n]/s[n]);
+					manifest.T=b.center-Matrix4x4.TRS(t.position,t.rotation,manifest.S).MultiplyPoint3x4(p);
+					manifest.T=Quaternion.Inverse(Quaternion.Euler(manifest.R))*manifest.T;
 				}
 			}
 		}

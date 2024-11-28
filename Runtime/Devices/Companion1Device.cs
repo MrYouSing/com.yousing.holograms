@@ -32,6 +32,7 @@ namespace YouSingStudio.Holograms {
 			float f=5.7f*0.0254f;f=f*f/(9*9+16*16);f=Mathf.Sqrt(f);
 			size=new Vector4(9.0f*f,16.0f*f,.03f,-.03f);
 			Vector4 v=PreferredSize();
+			quiltResolution=new Vector2Int((int)v.x,(int)v.y);
 			quiltSize=new Vector2Int((int)v.z,(int)v.w);
 		}
 
@@ -39,7 +40,9 @@ namespace YouSingStudio.Holograms {
 			base.OnDestroy();
 			//
 			var sdk=OpenStageAiSdk.s_Instance;
-			if(sdk!=null) {sdk.onDeviceUpdated-=OnDeviceUpdated;}
+			if(sdk!=null) {
+				sdk.onDeviceUpdated-=OnDeviceUpdated;
+			}
 		}
 
 		#endregion Unity Messages
@@ -51,7 +54,9 @@ namespace YouSingStudio.Holograms {
 
 		public override bool IsPresent() {
 			var sdk=OpenStageAiSdk.instance;
-			if(sdk!=null) {return !string.IsNullOrEmpty(sdk.hardwareSN);}
+			if(sdk!=null) {
+				return !string.IsNullOrEmpty(sdk.hardwareSN);
+			}
 			return FindDisplay(resolution)>=0;
 		}
 
@@ -69,7 +74,14 @@ namespace YouSingStudio.Holograms {
 			base.Init();
 			//
 			var sdk=OpenStageAiSdk.instance;
-			if(sdk!=null) {sdk.onDeviceUpdated+=OnDeviceUpdated;}
+			if(sdk!=null) {
+				sdk.onDeviceUpdated+=OnDeviceUpdated;
+			}
+			var app=MonoApplication.s_Instance;
+			if(app!=null) {
+				if(app.depth.sqrMagnitude==0.0f) {app.depth=new Vector2(.25f,.75f);}
+			}
+			//
 			if(material==null) {
 				material=new Material(Shader.Find("Hidden/C1_Blit"));
 			}

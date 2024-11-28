@@ -76,8 +76,12 @@ namespace YouSingStudio.Holograms {
 
 		public virtual string GetPreview(string path) {
 			string pv=Path.GetFileNameWithoutExtension(path);
-			int i=pv.LastIndexOf('_');if(i>=0) {pv=pv.Substring(0,i);}
-			path=Path.Combine(Path.GetDirectoryName(path),pv+"_preview");
+			if(UnityExtension.IsModel(Path.GetExtension(path))) {
+				path=Path.Combine(Path.GetDirectoryName(path),pv);
+			}else {
+				int i=pv.LastIndexOf('_');if(i>=0) {pv=pv.Substring(0,i);}
+				path=Path.Combine(Path.GetDirectoryName(path),pv+"_preview");
+			}
 			pv=path+".png";if(File.Exists(pv)) {return pv;}
 			pv=path+".jpg";if(File.Exists(pv)) {return pv;}
 			pv=path+".jpeg";if(File.Exists(pv)) {return pv;}

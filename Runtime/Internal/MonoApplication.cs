@@ -30,8 +30,13 @@ namespace YouSingStudio.Holograms {
 
 		[System.NonSerialized]public new MonoCamera camera;
 		[System.NonSerialized]public HologramDevice device;
+		/// <summary>
+		/// The normalized depth range in object space.
+		/// </summary>
+		[System.NonSerialized]public Vector2 depth;
 		[System.NonSerialized]public int dirty;
 		[System.NonSerialized]protected int m_Display;
+		[System.NonSerialized]protected Camera m_Camera;
 
 		#endregion Fields
 
@@ -58,7 +63,7 @@ namespace YouSingStudio.Holograms {
 		}
 
 		protected virtual IEnumerator StartDelayed() {
-			yield return new WaitForSeconds(2.5f);
+			yield return new WaitForSeconds(1.0f);
 			//
 			bool b=PlayerPrefs.GetInt("Screenmanager Fullscreen mode")!=3;
 			b=PlayerPrefs.GetInt(name+".FullScreen",b?1:0)==1;
@@ -119,8 +124,21 @@ namespace YouSingStudio.Holograms {
 		public virtual void SetupCamera(MonoCamera value) {
 			if(value!=null) {
 				camera=value;device=camera.device;
+				if(display==null) {display=camera.display;}
+				m_Camera=camera.GetComponentInChildren<Camera>();
 				Debug.Log($"{Application.productName} uses {camera.GetFriendlyName()} to render {device.GetFriendlyName()}.");
 			}
+		}
+
+		public virtual Bounds GetBounds(Vector3 point) {
+			Vector3 size=Vector3.zero;
+			if(m_Camera!=null&&device!=null) {
+				float h=m_Camera.GetPlaneHeight(m_Camera.WorldToDepth(point));
+				size.Set(device.HeightToWidth()*h,h,device.HeightToDepth()*h);
+				Vector3 d=(point-m_Camera.cameraToWorldMatrix.GetPosition()).normalized;
+				point+=d*(((depth.x+depth.y)*0.5f-0.5f)*size.z);size.z*=depth.y-depth.x;
+			}
+			return new Bounds(point,size);
 		}
 
 		#endregion Methods

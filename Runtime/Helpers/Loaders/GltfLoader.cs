@@ -22,15 +22,20 @@ namespace YouSingStudio.Holograms {
 		#region Methods
 
 		protected override void Start() {
-			this.LoadSettings(name);
+			this.SetRealName();this.LoadSettings(name);
 			base.Start();
 		}
 
-		public override void Load(string path) {
-			// TODO: Download or cache????
-			base.Load(path);
+		public override Manifest LoadManifest(string path) {
+			Manifest tmp=base.LoadManifest(path);
+			if(tmp==null) {
+				tmp=new Manifest{
+					R=new Vector3(0.0f,180.0f,0.0f),
+					S=new Vector3(float.NaN,float.NaN,float.NaN)
+				};
+			}
+			return tmp;
 		}
-
 #if ENABLE_GLTF_UTILITY||ENABLE_GLTFAST
 		protected override
 #if ENABLE_GLTFAST
