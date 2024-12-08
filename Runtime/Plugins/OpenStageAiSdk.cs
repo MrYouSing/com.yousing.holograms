@@ -304,7 +304,7 @@ public class OpenStageAiSdk
 		deviceConfig=GetString(".DeviceConfig",deviceConfig);// TODO : 3rd Priority.
 		string fn="deviceConfig.json";// TODO : 1st Priority.
 		if(!File.Exists(fn)) {
-			fn=Path.Combine(settingsPath,fn);// TODO : 2nd Priority.
+			fn=Path.Combine(Path.GetDirectoryName(settingsPath),"3DGallery/screen_params.json");// TODO : 2nd Priority.
 		}
 		if(File.Exists(fn)) {deviceConfig=File.ReadAllText(fn);}
 	}

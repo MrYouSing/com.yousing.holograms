@@ -44,12 +44,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 261fa9ebff066574d8e06d8023cbf71c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_DisplayName: 
-  m_AvatarIcon: {fileID: 0}
+  m_DisplayName: "\u672A\u767B\u5165"
+  m_AvatarIcon: {fileID: 2800000, guid: a7b2b7a3a422a20439f65ff948001043, type: 3}
   expiration: -1
   url: 
   urls: []
   texts:
+  - 
   - 
   - 
   username: 

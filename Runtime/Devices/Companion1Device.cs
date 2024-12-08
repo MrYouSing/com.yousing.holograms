@@ -92,6 +92,7 @@ namespace YouSingStudio.Holograms {
 				string n=name;
 					JsonConvert.PopulateObject(text,this);
 				name=n;
+				if(string.IsNullOrEmpty(sdkType)) {sdkType="local";}
 				Debug.Log($"Load {sdkType} settings : {text}");
 			}
 		}

@@ -83,6 +83,7 @@ namespace YouSingStudio.Holograms {
 				video.waitForFirstFrame=true;
 				video.timeUpdateMode=VideoTimeUpdateMode.GameTime;
 				//
+				video.errorReceived+=OnVideoError;
 				video.prepareCompleted+=OnVideoPrepared;
 				video.loopPointReached+=OnVideoLooped;
 				//
@@ -214,11 +215,15 @@ namespace YouSingStudio.Holograms {
 		protected virtual bool IsBigVideo() {
 			if(!string.IsNullOrEmpty(m_Path)) {
 				var s=video.GetTexture().GetSizeI();
+				if(s.x*s.y>=4096*4096) {return true;}
 				return (s.x*s.y>=2048*2048)
 					//&&video.length>=60.0f
 					&&video.frameRate>=60.0f;
 			}
 			return false;
+		}
+
+		protected virtual void OnVideoError(VideoPlayer _,string error) {
 		}
 
 		protected virtual void OnVideoPrepared(VideoPlayer _) {

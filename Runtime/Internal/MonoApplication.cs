@@ -10,6 +10,16 @@ SubScreen,
 /* <!-- Macro.Patch
 ,Start
  Macro.End --> */
+
+/* <!-- Macro.Include
+UnityExtension.cs
+ Macro.End --> */
+/* <!-- Macro.Call DeclareEvent
+protected,,Startup,,,,
+ Macro.End --> */
+/* <!-- Macro.Patch
+,Events
+ Macro.End --> */
 using System.Collections;
 using UnityEngine;
 using YouSingStudio.Private;
@@ -68,6 +78,8 @@ namespace YouSingStudio.Holograms {
 			bool b=PlayerPrefs.GetInt("Screenmanager Fullscreen mode")!=3;
 			b=PlayerPrefs.GetInt(name+".FullScreen",b?1:0)==1;
 			FullScreen(fullscreen>=0?fullscreen==1:b);
+			//
+			OnStartup();
 		}
 
 		#endregion Unity Messages
@@ -132,7 +144,7 @@ namespace YouSingStudio.Holograms {
 
 		public virtual Bounds GetBounds(Vector3 point) {
 			Vector3 size=Vector3.zero;
-			if(m_Camera!=null&&device!=null) {
+			if(m_Camera!=null&&device!=null&&depth.sqrMagnitude!=0.0f) {
 				float h=m_Camera.GetPlaneHeight(m_Camera.WorldToDepth(point));
 				size.Set(device.HeightToWidth()*h,h,device.HeightToDepth()*h);
 				Vector3 d=(point-m_Camera.cameraToWorldMatrix.GetPosition()).normalized;
@@ -142,5 +154,15 @@ namespace YouSingStudio.Holograms {
 		}
 
 		#endregion Methods
+// <!-- Macro.Patch Events
+		[System.NonSerialized]public System.Action onStartup=null;
+		[SerializeField]protected UnityEngine.Events.UnityEvent m_OnStartup=null;
+
+		protected virtual void OnStartup() {
+			onStartup?.Invoke();
+			m_OnStartup?.Invoke();
+		}
+
+// Macro.Patch -->
 	}
 }

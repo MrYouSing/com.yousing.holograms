@@ -102,14 +102,15 @@ namespace YouSingStudio.Holograms {
 			m_Scroll=container.GetComponentInParent<ScrollRect>();
 			m_Layout=container.GetComponent<GridLayoutGroup>();
 			if(m_Layout!=null) {m_Page=m_Layout.constraintCount;}
-			//
-			Refresh();
-			StartCoroutine(StartDelayed());
+			// You need wait until app startup.if not,you will
+			// get an error hwnd on windows because of GDI+.
+			var app=MonoApplication.instance;
+			if(app!=null) {app.onStartup+=StartDelayed;}
+			else {AsyncTask.Obtain(0.1f,StartDelayed).StartAsCoroutine();}
 		}
 
-		protected virtual IEnumerator StartDelayed() {
-			yield return null;
-			// After all started.
+		protected virtual void StartDelayed() {
+			Refresh();
 			if(m_Index==0) {Set(0);}
 		}
 
@@ -192,6 +193,26 @@ namespace YouSingStudio.Holograms {
 			var p=pickers[0];if(p!=null) {
 				p.onPicked=Set;p.ShowDialog();
 			}
+		}
+
+		protected virtual void OnDrop(string value) {
+			bool b=Input.GetKey(Key.LeftControl)||Input.GetKey(Key.RightControl);
+			if(b&&File.Exists(value)) {
+				//
+				string pv=TextureManager.instance.GetPreview(value);
+				if(!string.IsNullOrEmpty(pv)&&File.Exists(pv)) {
+					pv.CopyToDirectory(paths[0]);
+				}
+				//
+				value=value.CopyToDirectory(paths[0]);
+			}
+			//
+			DialogPicker tmpP=pickers[0];
+			string tmpS=GUIUtility.systemCopyBuffer;
+				GUIUtility.systemCopyBuffer=value;
+				pickers[0]=null;Load();
+			pickers[0]=tmpP;
+			GUIUtility.systemCopyBuffer=tmpS;
 		}
 
 		public virtual void Save() {

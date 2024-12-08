@@ -218,7 +218,9 @@ namespace YouSingStudio.Holograms {
 			else {text=jo.SelectToken("title")?.Value<string>().ValidatePath()??text;}
 			  // Fix
 			text=$"{l.ToString("D8")}_{text}_qs{i}x{j}a{f.ToString("0.00")}{Path.GetExtension(url)}";
-			DownloadTexture(url,action,Path.Combine(GetDownloadPath(),"blocks.glass",text));
+			text=Path.Combine(GetDownloadPath(),"blocks.glass",text);
+			if(File.Exists(text)) {UIProgressView.s_Size=0;action(text);}
+			else {DownloadTexture(url,action,text);}
 		}
 
 		public static bool ConvertFromWeb(string url,System.Action<string> action) {
@@ -328,8 +330,8 @@ namespace YouSingStudio.Holograms {
 			if(!s_IsInited) {Init();}
 			//
 			string str=settings.progresses[0];
-			if(www!=null) {UIProgressView.Set(str,www,ao);}
-			else {UIProgressView.Set(str,null);}
+			if(www!=null) {MessageBox.ShowProgress(str,www,ao);}
+			else {MessageBox.Clear();}
 		}
 
 		#endregion Methods

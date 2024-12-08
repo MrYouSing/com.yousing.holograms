@@ -133,7 +133,7 @@ namespace YouSingStudio.Holograms {
 			if(context!=null&&login!=null) {
 				if(true) {// TODO: Clean the password.
 				context.GetForm(OAuthBehaviour.k_Type_Login,s_Form);
-					s_Form[1]=null;
+					s_Form[1]=null;PlayerPrefs.DeleteKey(context.name+".Password");
 				context.SetForm(OAuthBehaviour.k_Type_Login,s_Form);
 				}
 				//

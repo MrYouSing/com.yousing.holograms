@@ -50,9 +50,10 @@ namespace Sketchfab {
 		public override void Run() {
 			if(context==null) {return;}
 			//
+			MessageBox.ShowInfo(context.messages[0],"Fetch uid="+uid);
+			//
 			request=new SketchfabRequest(SketchfabPlugin.Urls.modelEndPoint+"/"+uid,context.m_Logger.getHeader());
-			request.setCallback(OnFetch);
-			request.setFailedCallback(OnFetch);
+			request.setCallback(OnFetch);request.setFailedCallback(OnFetch);
 			context.m_API.registerRequest(request);
 		}
 
@@ -75,9 +76,10 @@ namespace Sketchfab {
 		public virtual void Pull() {
 			if(context==null) {return;}
 			//
+			MessageBox.ShowInfo(context.messages[0],"Pull uid="+uid);
+			//
 			request=new SketchfabRequest($"https://sketchfab.com/models/{uid}/embed");
-			request.setCallback(OnPull);
-			request.setFailedCallback(OnPull);
+			request.setCallback(OnPull);request.setFailedCallback(OnPull);
 			context.m_API.registerRequest(request);
 		}
 
@@ -96,9 +98,10 @@ namespace Sketchfab {
 		public virtual void Download() {
 			if(context==null) {return;}
 			//
+			MessageBox.ShowInfo(context.messages[0],"Download uid="+uid);
+			//
 			request=new SketchfabRequest(SketchfabPlugin.Urls.modelEndPoint+"/"+uid+"/download",context.m_Logger.getHeader());
-			request.setCallback(OnDownload);
-			request.setFailedCallback(OnDownload);
+			request.setCallback(OnDownload);request.setFailedCallback(OnDownload);
 			context.m_API.registerRequest(request);
 		}
 
@@ -147,6 +150,7 @@ namespace Sketchfab {
 		public int preview;
 		public string download;
 		public string[] formats=new string[]{"gltf","glb"};
+		public string[] messages=new string[4];
 
 		[System.NonSerialized]public SketchfabTask current;
 		[System.NonSerialized]internal SketchfabAPI m_API;
@@ -159,6 +163,18 @@ namespace Sketchfab {
 		#endregion Fields
 
 		#region Unity Messages
+
+		protected virtual void Reset() {
+			expiration=60*60*24*30;// One month.
+			url="";
+			urls=new string[]{
+			};
+			texts=new string[]{
+				"",// user name
+				"",// password
+				"",// verification code
+			};
+		}
 
 		protected override void Awake() {
 			s_Instance=this;this.SetRealName();
@@ -280,6 +296,10 @@ namespace Sketchfab {
 		}
 
 		protected virtual void RunTask() {
+			if(string.IsNullOrEmpty(m_Token)) {
+				m_Token=PlayerPrefs.GetString(SketchfabLogger.accessTokenKey);
+			}
+			//
 			int i=0,imax=m_Tasks?.Count??0;
 			if(imax>0) {
 				for(;i<imax;++i) {m_Tasks[i]?.Run();}
@@ -302,7 +322,7 @@ namespace Sketchfab {
 		public virtual void OnError(SketchfabTask task,string error) {
 			if(task==null) {return;}
 			//
-			Debug.LogError(error);
+			MessageBox.ShowError(messages[2],error);
 			task.Kill();
 		}
 
@@ -330,8 +350,8 @@ namespace Sketchfab {
 			}
 			//
 			if(i>=0) {
-				UnityWebRequest www=UnityWebRequest.Get(images[i].url);
-				var ao=www.SendWebRequest();Debug.Log(www.url);
+				UnityWebRequest www=UnityWebRequest.Get(images[i].url);var ao=www.SendWebRequest();
+				MessageBox.ShowProgress(messages[3],www,ao,(ulong)images[i].size);
 				task.preview=www;ao.completed+=task.OnPreview;
 			}else {
 				task.OnPreview(null);
@@ -350,8 +370,8 @@ namespace Sketchfab {
 					if(File.Exists(it)) {
 						task.path=it;OnDownload(task);
 					}else {
-						UnityWebRequest www = UnityWebRequest.Get(url);
-						var ao=www.SendWebRequest();Debug.Log(url);
+						UnityWebRequest www=UnityWebRequest.Get(url);var ao=www.SendWebRequest();
+						MessageBox.ShowProgress(messages[3],www,ao,jt["size"]?.Value<ulong>()??0);
 						task.model=www;ao.completed+=task.OnModel;
 					}
 					return;
@@ -416,7 +436,13 @@ namespace Sketchfab {
 
 		public override void Login() {
 			if(string.IsNullOrEmpty(texts[0])||string.IsNullOrEmpty(texts[1])) {return;}
-			m_Logger.requestAccessToken(texts[0],texts[1]);
+			m_Logged=0;
+			// Hook a request.
+			int i=m_API._requests.Count;
+				m_Logger.requestAccessToken(texts[0],texts[1]);
+			int j=m_API._requests.Count;if(j!=i) {
+				m_API._requests[j-1].setFailedCallback((TextRequestCallback)OnLogin);
+			}
 		}
 
 		protected override void OnLogin() {
@@ -424,6 +450,22 @@ namespace Sketchfab {
 				displayName=p?.displayName??m_DisplayName;
 				avatarIcon=p?.avatar??m_AvatarIcon;
 			InvokeEvent(k_Type_Login);
+		}
+
+		protected override void OnLogin(string msg) {
+			JObject jo=JObject.Parse(msg);
+			msg=jo.SelectToken("error")?.Value<string>()??msg;
+			//
+			string tmp=m_Message;
+				m_Message=msg;InvokeEvent(k_Type_Error);
+			m_Message=tmp;
+		}
+
+		public override void Logout() {
+			m_Logged=0;
+			m_Logger.logout();
+			//
+			base.Logout();
 		}
 
 		#endregion Methods

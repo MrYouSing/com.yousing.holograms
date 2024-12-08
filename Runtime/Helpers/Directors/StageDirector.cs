@@ -39,7 +39,7 @@ namespace YouSingStudio.Holograms {
 				if(value) {
 					if(!m_Start) {m_Start=true;onStart?.Invoke();}
 					onShow?.Invoke();
-				}else {
+				}else if(m_Start) {
 					onHide?.Invoke();
 				}
 			}

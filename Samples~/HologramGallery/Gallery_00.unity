@@ -1137,11 +1137,11 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1784301182}
     m_Modifications:
-    - target: {fileID: 317836039771972844, guid: 58b12bda410d78e469d43ec2eed7570d, type: 3}
+    - target: {fileID: 9080116625522189354, guid: 58b12bda410d78e469d43ec2eed7570d, type: 3}
       propertyPath: stage
       value: 
       objectReference: {fileID: 873960012}
-    - target: {fileID: 317836039771972844, guid: 58b12bda410d78e469d43ec2eed7570d, type: 3}
+    - target: {fileID: 9080116625522189354, guid: 58b12bda410d78e469d43ec2eed7570d, type: 3}
       propertyPath: target
       value: 
       objectReference: {fileID: 1476873889}
@@ -1149,11 +1149,11 @@ PrefabInstance:
       propertyPath: collider
       value: 
       objectReference: {fileID: 601289560}
-    - target: {fileID: 6949367969893634402, guid: 58b12bda410d78e469d43ec2eed7570d, type: 3}
+    - target: {fileID: 7016167514060977529, guid: 58b12bda410d78e469d43ec2eed7570d, type: 3}
       propertyPath: target
       value: 
       objectReference: {fileID: 873960012}
-    - target: {fileID: 6949367969893634402, guid: 58b12bda410d78e469d43ec2eed7570d, type: 3}
+    - target: {fileID: 7016167514060977529, guid: 58b12bda410d78e469d43ec2eed7570d, type: 3}
       propertyPath: viewer
       value: 
       objectReference: {fileID: 873960011}

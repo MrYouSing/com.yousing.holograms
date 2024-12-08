@@ -22,10 +22,7 @@ namespace YouSingStudio.Holograms {
 		[Tooltip("x:T\ny:R\nz:S\nw:Wheel")]
 		public Vector4 sensitivity=Vector4.one;
 		public int[] buttons=new int[]{0,1,2};
-		public KeyCode[] modifiers=new KeyCode[]{
-			KeyCode.RightShift+0,KeyCode.RightShift+1,KeyCode.RightShift+2,
-			KeyCode.RightShift+3,KeyCode.RightShift+4,KeyCode.RightShift+5,
-		};
+		public UIToggleButton[] modifiers;
 		public int[] types=new int[]{0,0};
 		public string[] cursors;
 		[Header("Misc")]// For resolving target role.
@@ -94,10 +91,12 @@ namespace YouSingStudio.Holograms {
 
 		#region Methods
 
-		public static int GetModifiers(KeyCode[] keys) {
-			int m=0;for(int i=0,imax=(keys?.Length??0)/2;i<imax;++i) {
-				if(Input.GetKey(keys[2*i])||Input.GetKey(keys[2*i+1])) {m|=1<<i;}
-			}return m;
+		public static int GetModifiers(UIToggleButton[] keys) {
+			int m=0;UIToggleButton it;
+			for(int i=0,imax=keys?.Length??0;i<imax;++i) {
+				it=keys[i];if(it!=null&&it.isActiveAndEnabled&&it.isOn) {m|=1<<i;}
+			}
+			return m;
 		}
 
 		public static float ToScale(float value) {

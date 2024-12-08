@@ -73,11 +73,11 @@ namespace YouSingStudio.Holograms {
 		#region Unity Messages
 
 		protected virtual void OnEnable() {
-			Application.onBeforeRender+=Render;
+			SetRenderEvent(true);
 		}
 
 		protected virtual void OnDisable() {
-			Application.onBeforeRender-=Render;
+			SetRenderEvent(false);
 		}
 
 		protected virtual void OnDestroy() {
@@ -110,8 +110,13 @@ namespace YouSingStudio.Holograms {
 		public static void CheckRenderTexture<T>(ref T texture,Vector2Int size) where T:Texture {
 			if(texture==null&&size.sqrMagnitude!=0) {
 				RenderTexture rt=RenderTexture.GetTemporary(size.x,size.y,0,s_GraphicsFormat);
-                rt.name=UnityExtension.s_TempTag;texture=rt as T;
+				rt.name=UnityExtension.s_TempTag;texture=rt as T;
 			}
+		}
+
+		protected virtual void SetRenderEvent(bool value) {
+			Application.onBeforeRender-=Render;
+			if(m_IsInited&&value) {Application.onBeforeRender+=Render;}
 		}
 
 		protected virtual void InternalRender() {
@@ -145,6 +150,7 @@ namespace YouSingStudio.Holograms {
 			if(display<0) {display=FindDisplay(resolution);}
 			CheckRenderTexture(ref canvas,resolution);
 			CheckRenderTexture(ref quiltTexture,quiltResolution);
+			SetRenderEvent(true);
 		}
 
 		public virtual void Quilt(Texture texture,Vector2Int size) {

@@ -1,5 +1,12 @@
-/* <!-- Macro.Replace
-k_Type_,k_OAuth_
+/* <!-- Macro.Define DeclareEvent
+		[System.NonSerialized]public System.Action{1} on{2}=null;
+		[SerializeField]protected UnityEngine.Events.UnityEvent{1} m_On{2}=null;
+
+		{0} virtual void {3}On{2}({4}) {{
+			on{2}?.Invoke({5});
+			m_On{2}?.Invoke({5});
+		}}
+
  Macro.End --> */
 /* <!-- Macro.Copy File
 :Packages/com.yousing.io/Runtime/Modules/MediaModule/Core/MediaExtension.cs,81~95,229,240~271,278
@@ -535,7 +542,7 @@ namespace YouSingStudio.Holograms {
 					case "appdata":return Path_Combine(Path.GetDirectoryName(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData)),thiz);
 				}
 			}
-			return thiz;
+			return thiz.FixPath();
 		}
 
 		public unsafe static string FixPath(this string thiz) {
@@ -589,6 +596,16 @@ namespace YouSingStudio.Holograms {
 			return paths;
 		}
 
+		public static string CopyToDirectory(this string thiz,string directory) {
+			if(!string.IsNullOrEmpty(thiz)&&File.Exists(thiz)) {
+				if(!Directory.Exists(directory)) {Directory.CreateDirectory(directory);}
+				string dst=Path.Combine(directory,Path.GetFileName(thiz));
+				File.Copy(thiz,dst,true);File.SetLastWriteTime(dst,File.GetLastWriteTime(thiz));
+				thiz=dst;
+			}
+			return thiz;
+		}
+
 		public static void AddRange<T>(this IDictionary<string,T> thiz,string key,T value) {
 			if(thiz!=null&&!string.IsNullOrEmpty(key)) {
 				if(key.IndexOfAny(k_Split_Tag)>=0) {
@@ -615,7 +632,8 @@ namespace YouSingStudio.Holograms {
 
 		public static void LoadSettings(this object thiz,string path) {
 			if(thiz!=null) {
-				string it;for(int i=0,imax=s_SettingPaths?.Length??0;i<imax;++i) {
+				string it;int imax=s_SettingPaths?.Length??0,i=path.IndexOf('.')>=0?imax:0;
+				for(;i<imax;++i) {
 					it=string.Format(s_SettingPaths[i],path).GetFullPath();
 					if(File.Exists(it)) {JsonConvert.PopulateObject(File.ReadAllText(it),thiz);return;}
 				}

@@ -139,8 +139,9 @@ namespace YouSingStudio.Holograms {
 			if(material==null) {material=new Material(Shader.Find("Unlit/Offset By Depth"));}
 			if(renderer==null) {renderer=GetComponentInChildren<Renderer>();}
 			renderer.sharedMaterial=material;m_Renderer=renderer.transform;
-			if(device!=null&&resolution.sqrMagnitude==0) {
+			if(device!=null&&resolution.x<=0&&resolution.y<=0) {// Downsample
 				Vector4 v=device.PreferredSize();
+				v.x/=Mathf.Pow(2,-resolution.x);v.y/=Mathf.Pow(2,-resolution.y);
 				resolution=new Vector2Int((int)(v.x/v.z),(int)(v.y/v.w));
 			}
 			if(root==null) {root=transform;}
@@ -281,6 +282,7 @@ namespace YouSingStudio.Holograms {
 				if(p!=null) {f/=p.lossyScale.x;}
 				root.localScale=new Vector3(f,f,s);
 			}
+			// TODO: Use material value????
 			f=device!=null?Mathf.Abs(device.ParseQuilt().z):((float)Screen.width/Screen.height);
 			Vector2 v=UnityExtension.FitScale(new Vector2((float)m_Size.x/m_Size.y,1.0f),new Vector2(f,1.0f),aspect);
 			m_Renderer.localScale=new Vector3(v.x,v.y,1.0f);

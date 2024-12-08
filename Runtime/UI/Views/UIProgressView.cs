@@ -89,16 +89,12 @@ namespace YouSingStudio.Holograms {
 
 		#region Methods
 
-		public static void Set(string path,IProgress progress) {
-			UIProgressView v=UnityExtension.GetResourceInstance<UIProgressView>(path);
-			if(v!=null) {v.Set(progress);}s_Size=0;
-		}
-
-		public static void Set(string path,UnityWebRequest www,AsyncOperation ao) {
+		public static IProgress Get(UnityWebRequest www,AsyncOperation ao,ulong size=0) {
+			IProgress tmp=null;
 			if(www!=null&&!www.isDone&&ao!=null) {
-				var tmp=new WebRequestProgress{www=www,ao=ao,size=s_Size};
-				Set(path,tmp);
+				tmp=new WebRequestProgress{www=www,ao=ao,size=size>0?size:s_Size};s_Size=0;
 			}
+			return tmp;
 		}
 
 		public virtual void Set(IProgress value) {

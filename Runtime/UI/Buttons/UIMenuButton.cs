@@ -56,7 +56,7 @@ namespace YouSingStudio.Holograms {
 		}
 
 		public virtual void OnPointerClick(PointerEventData e) {
-			if((show&(1<<(int)e.button))!=0) {SetActive(true);}
+			if((show&(1<<(int)e.button))!=0) {SetActive(!m_Active);}
 			else if(button!=null) {button.OnPointerClick(e);}
 		}
 
