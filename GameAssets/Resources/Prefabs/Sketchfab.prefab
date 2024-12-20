@@ -60,3 +60,8 @@ MonoBehaviour:
   formats:
   - gltf
   - glb
+  messages:
+  - Prefabs/InfoView
+  - Prefabs/WarningView
+  - Prefabs/ErrorView
+  - Prefabs/DownloadView

@@ -1,0 +1,5 @@
+<linker>
+	<assembly fullname="YouSingStudio.Events">
+		<type fullname="YouSingStudio.Events.DragDropManager" preserve="all"/>
+	</assembly>
+</linker>

@@ -11,7 +11,7 @@ namespace YouSingStudio.Holograms {
 		[Header("Texture")]
 		[SerializeField]protected string m_Path;
 		public Texture texture;
-		public Vector2Int resolution=Vector2Int.zero;
+		public Vector2 resolution=Vector2.zero;
 		public Video3DLayout layout;
 		public VideoAspectRatio aspect;
 		[Header("Video")]

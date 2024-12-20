@@ -114,11 +114,30 @@ namespace YouSingStudio.Holograms {
 			}
 		}
 
+		// https://docs.unity3d.com/Manual/execution-order.html
 		protected virtual void SetRenderEvent(bool value) {
+#if UNITY_EDITOR
 			Application.onBeforeRender-=Render;
 			if(m_IsInited&&value) {Application.onBeforeRender+=Render;}
 		}
+#else
+			++m_RenderId;
+			if(m_IsInited&&value) {StartCoroutine(RenderCoroutine());}
+		}
 
+		[System.NonSerialized]protected int m_RenderId;
+		[System.NonSerialized]protected WaitForEndOfFrame m_RenderWait;
+
+		protected virtual IEnumerator RenderCoroutine() {
+			int id=++m_RenderId;
+			if(m_RenderWait==null) {m_RenderWait=new WaitForEndOfFrame();}
+			while(true) {
+				yield return m_RenderWait;
+				if(m_RenderId!=id) {yield break;}
+				Render();
+			}
+		}
+#endif
 		protected virtual void InternalRender() {
 			if(canvas==null) {
 				// TODO: Raw Mode.

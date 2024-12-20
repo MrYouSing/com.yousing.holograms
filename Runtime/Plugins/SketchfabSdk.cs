@@ -37,6 +37,8 @@ namespace Sketchfab {
 			if(context==null) {return;}
 			//
 			try {
+				MessageBox.Clear();
+				//
 				context.DisposeRequest(request);
 				preview?.Dispose();model?.Dispose();
 			}catch(System.Exception e) {
@@ -50,7 +52,7 @@ namespace Sketchfab {
 		public override void Run() {
 			if(context==null) {return;}
 			//
-			MessageBox.ShowInfo(context.messages[0],"Fetch uid="+uid);
+			MessageBox.ShowInfo(context.messages[0],"Fetch uid="+uid,null,Kill);
 			//
 			request=new SketchfabRequest(SketchfabPlugin.Urls.modelEndPoint+"/"+uid,context.m_Logger.getHeader());
 			request.setCallback(OnFetch);request.setFailedCallback(OnFetch);
@@ -76,7 +78,7 @@ namespace Sketchfab {
 		public virtual void Pull() {
 			if(context==null) {return;}
 			//
-			MessageBox.ShowInfo(context.messages[0],"Pull uid="+uid);
+			MessageBox.ShowInfo(context.messages[0],"Pull uid="+uid,null,Kill);
 			//
 			request=new SketchfabRequest($"https://sketchfab.com/models/{uid}/embed");
 			request.setCallback(OnPull);request.setFailedCallback(OnPull);
@@ -98,7 +100,7 @@ namespace Sketchfab {
 		public virtual void Download() {
 			if(context==null) {return;}
 			//
-			MessageBox.ShowInfo(context.messages[0],"Download uid="+uid);
+			MessageBox.ShowInfo(context.messages[0],"Download uid="+uid,null,Kill);
 			//
 			request=new SketchfabRequest(SketchfabPlugin.Urls.modelEndPoint+"/"+uid+"/download",context.m_Logger.getHeader());
 			request.setCallback(OnDownload);request.setFailedCallback(OnDownload);
@@ -322,8 +324,8 @@ namespace Sketchfab {
 		public virtual void OnError(SketchfabTask task,string error) {
 			if(task==null) {return;}
 			//
-			MessageBox.ShowError(messages[2],error);
 			task.Kill();
+			MessageBox.ShowError(messages[2],error,null,MessageBox.Clear);
 		}
 
 		public virtual SketchfabTask Download(string uid,System.Action<string> action) {

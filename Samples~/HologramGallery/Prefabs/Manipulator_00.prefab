@@ -86,17 +86,18 @@ MonoBehaviour:
   m_GameObject: {fileID: 1061066834018958730}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a17ffa3d9236e884ea5e4c3ffcb97bb0, type: 3}
+  m_Script: {fileID: 11500000, guid: ee9190feced68034fa078f83774c9a34, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   target: {fileID: 0}
   sensitivity: {x: -0.0025, y: 0.25, z: 1, w: -500}
-  buttons: 000000000100000002000000
+  scrolling: {x: 75, y: 180}
+  buttons: 010000000000000002000000
   modifiers:
   - {fileID: 5697718487553766690}
   - {fileID: 8088117688719761342}
   - {fileID: 4206280766335279871}
-  types: 02000000
+  types: 020000000300000006000000
   cursors:
   - 
   - Camera.Move
@@ -105,7 +106,7 @@ MonoBehaviour:
   - Camera.Reset
   stage: {fileID: 0}
   viewer: {fileID: 0}
-  collider: {fileID: 0}
+  m_Plane: {fileID: 0}
 --- !u!114 &9080116625522189354
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -120,12 +121,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   target: {fileID: 0}
   sensitivity: {x: 0.0025, y: 0.25, z: 1, w: 1}
-  buttons: 000000000100000002000000
+  scrolling: {x: 75, y: 180}
+  buttons: 010000000000000002000000
   modifiers:
   - {fileID: 5697718487553766690}
   - {fileID: 8088117688719761342}
   - {fileID: 4206280766335279871}
-  types: 0000000001000000
+  types: 000000000100000004000000
   cursors:
   - 
   - Model.Move
@@ -136,8 +138,6 @@ MonoBehaviour:
   - Model.RotateZ
   - Model.Fit
   stage: {fileID: 0}
-  viewer: {fileID: 0}
-  collider: {fileID: 0}
 --- !u!1 &2986772979755010399
 GameObject:
   m_ObjectHideFlags: 0
@@ -291,11 +291,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2192249508985887933, guid: 16f0a10a17a487c4689411f9054bff7e, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: ResetTarget
+      value: TryResetTarget
       objectReference: {fileID: 0}
     - target: {fileID: 2192249508985887933, guid: 16f0a10a17a487c4689411f9054bff7e, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_MethodName
-      value: ResetTarget
+      value: TryResetTarget
       objectReference: {fileID: 0}
     - target: {fileID: 2192249508985887933, guid: 16f0a10a17a487c4689411f9054bff7e, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName

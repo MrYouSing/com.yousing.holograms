@@ -17,6 +17,7 @@ namespace YouSingStudio.Holograms {
 		public static readonly int _Depth=Shader.PropertyToID("_Depth");
 		public static readonly int _Vector=Shader.PropertyToID("_Vector");
 		public static readonly int _Falloff=Shader.PropertyToID("_Falloff");
+		public static readonly int _Offset=Shader.PropertyToID("_Offset");
 		public static bool s_IsInited;
 		public static Dictionary<string,Vector4> s_Vectors=new Dictionary<string,Vector4>();
 		public static Dictionary<string,float> s_Sliders=new Dictionary<string,float>();
@@ -35,7 +36,7 @@ namespace YouSingStudio.Holograms {
 
 		[System.NonSerialized]protected float m_Value;
 		[System.NonSerialized]protected Vector3 m_Point;
-		[System.NonSerialized]protected Vector3 m_Vector;
+		[System.NonSerialized]protected Vector2 m_Vector;
 		[System.NonSerialized]protected Vector2Int m_Size;
 
 		#endregion Fields
@@ -139,9 +140,9 @@ namespace YouSingStudio.Holograms {
 			if(material==null) {material=new Material(Shader.Find("Unlit/Offset By Depth"));}
 			if(renderer==null) {renderer=GetComponentInChildren<Renderer>();}
 			renderer.sharedMaterial=material;m_Renderer=renderer.transform;
-			if(device!=null&&resolution.x<=0&&resolution.y<=0) {// Downsample
+			if(device!=null&&resolution.x<0.0f&&resolution.y<0.0f) {// Resample
 				Vector4 v=device.PreferredSize();
-				v.x/=Mathf.Pow(2,-resolution.x);v.y/=Mathf.Pow(2,-resolution.y);
+				v.x*=-resolution.x;v.y*=-resolution.y;
 				resolution=new Vector2Int((int)(v.x/v.z),(int)(v.y/v.w));
 			}
 			if(root==null) {root=transform;}
@@ -248,7 +249,8 @@ namespace YouSingStudio.Holograms {
 		public virtual void UpdateMesh() {
 			if(!m_IsInited) {Init();}
 			//
-			int r=GetResolution(resolution,m_Size);
+			Vector2Int v=new Vector2Int((int)resolution.x,(int)resolution.y);
+			int r=GetResolution(v,m_Size);
 			if(!s_Meshes.TryGetValue(r,out var m)) {
 				m=GetMesh(r);s_Meshes[r]=m;
 			}
@@ -282,14 +284,20 @@ namespace YouSingStudio.Holograms {
 				if(p!=null) {f/=p.lossyScale.x;}
 				root.localScale=new Vector3(f,f,s);
 			}
-			// TODO: Use material value????
+			//
 			f=device!=null?Mathf.Abs(device.ParseQuilt().z):((float)Screen.width/Screen.height);
-			Vector2 v=UnityExtension.FitScale(new Vector2((float)m_Size.x/m_Size.y,1.0f),new Vector2(f,1.0f),aspect);
-			m_Renderer.localScale=new Vector3(v.x,v.y,1.0f);
+			float a=m_Path.ToAspect();if(float.IsNaN(a)) {a=(float)m_Size.x/m_Size.y;}
+			Vector2 v=UnityExtension.FitScale(new Vector2(a,1.0f),new Vector2(f,1.0f),aspect);
+			m_Renderer.localScale=new Vector3(f,1.0f,1.0f);
 			if(v.x*v.y<=f) {// Inside Fit.
 				m_Vector=Vector2.zero;
 			}else {// Outside Fit.
-				m_Vector=new Vector3(v.x-f,1.0f-v.y,0.0f)*0.5f;
+				Vector2 u=new Vector2(f,1.0f);
+				Vector2 w=material.GetTextureScale(_MainTex);
+				//
+				m_Vector=(v-u)/u*0.5f;w*=u/v;
+				material.SetTextureScale(_MainTex,w);
+				material.SetTextureScale(_Depth,w);
 			}
 		}
 
@@ -317,8 +325,7 @@ namespace YouSingStudio.Holograms {
 				m_Value=value;
 				//
 				if(saveVector&&!string.IsNullOrEmpty(m_Path)) {s_Sliders[m_Path]=m_Value;}
-				float f=material!=null?material.GetFloat(_Falloff):0.0f;f=1.0f+factor.y*f;
-				if(m_Renderer!=null) {m_Renderer.localPosition=m_Vector*f*m_Value;}
+				if(material!=null) {material.SetVector(_Offset,m_Vector*(1.0f+m_Value));}
 			}
 		}
 

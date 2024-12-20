@@ -35,6 +35,10 @@ namespace YouSingStudio.Holograms {
 
 		public VirtualDisplay display;
 		public int fullscreen=-1;
+		/// <summary>
+		/// <seealso cref="RefreshRate"/>
+		/// </summary>
+		public int refresh=-1;
 		public Vector4 resolution=new Vector4(1280,720,1920,1080);
 		public Key[] keys=new Key[4];
 
@@ -68,6 +72,8 @@ namespace YouSingStudio.Holograms {
 // Macro.Patch -->
 			m_Display=ScreenManager.IndexOf(Display.main);
 			if(display==null) {display=FindAnyObjectByType<VirtualDisplay>();}
+			if(refresh>=0) {Application.targetFrameRate=refresh!=0?refresh:
+				(int)System.Math.Round(Screen.currentResolution.refreshRateRatio.value);}
 			//
 			StartCoroutine(StartDelayed());
 		}

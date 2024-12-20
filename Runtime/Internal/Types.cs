@@ -48,4 +48,14 @@ namespace YouSingStudio.Holograms {
 		Vector2 Range{get;}
 		float Value{get;set;}
 	}
+
+	/// <summary>
+	/// <seealso cref="UnityEngine.Plane"/>
+	/// </summary>
+	public interface IPlane {
+		public Vector3 position{get;set;}
+		public Quaternion rotation{get;set;}
+		public float aspect{get;set;}
+		public float size{get;set;}
+	}
 }

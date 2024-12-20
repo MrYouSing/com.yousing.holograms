@@ -88,10 +88,8 @@ namespace YouSingStudio.Holograms {
 		public virtual void SetupCamera(Texture texture,Vector3 vector) {
 			//
 			display.device=device;
-			if(!display.CreateUnityDisplay()) {
-#if !UNITY_EDITOR
+			if(!display.CreateUnityDisplay()&&!s_AllowDummy) {
 				return;
-#endif
 			}
 			//
 			Vector3 v=device.ParseQuilt();if(vector!=v) {

@@ -47,7 +47,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Path: '*'
-  resolution: {x: 0, y: 0}
+  resolution: {x: -1, y: -1}
   layout: 0
   aspect: 4
   fixRange: 0

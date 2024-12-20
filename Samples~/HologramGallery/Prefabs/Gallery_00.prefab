@@ -1260,6 +1260,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   display: {fileID: 0}
+  refresh: 60
   resolution: {x: 1280, y: 720, z: 1920, w: 1080}
   keys: 1b000000720000002401000025010000
 --- !u!114 &85189482213774107

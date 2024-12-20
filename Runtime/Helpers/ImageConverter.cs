@@ -95,12 +95,24 @@ namespace YouSingStudio.Holograms {
 				int i=id;int tc=System.Environment.TickCount;
 				GetOutput(out var tmp,out var ext);
 				//
+#if ENABLE_IL2CPP
+#if UNITY_STANDALONE_WIN
+				if(Virtofy.IO.ProcessHelper.Start(
+					settings.ffmpeg,string.Format(argument,path,tmp),
+					Path.GetDirectoryName(Application.dataPath),true,
+					out uint p
+				)) {
+					Virtofy.IO.ProcessHelper.WaitForExit(p);
+				}
+#endif
+#else
 				Process p=new Process();var s=p.StartInfo;
 					s.FileName=settings.ffmpeg;
 					s.Arguments=string.Format(argument,path,tmp);
 					s.UseShellExecute=false;
 					s.CreateNoWindow=true;
 				p.Start();p.WaitForExit();
+#endif
 				if(!string.IsNullOrEmpty(ext)) {tmp+=ext;}
 				//
 				if(id!=i||!File.Exists(tmp)) {

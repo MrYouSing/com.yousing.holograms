@@ -10,7 +10,7 @@ Shader "Unlit/Offset By Depth"
 		_Vector("Vector", Vector) = (0,1,1,0)
 		[Enum(Off,0,On,1)]_Frustum("Frustum", Int) = 0
 		_Falloff("Falloff", Float) = 0
-		[HideInInspector] _texcoord( "", 2D ) = "white" {}
+		_Offset("Offset", Vector) = (0,0,0,0)
 
 	}
 	
@@ -76,6 +76,7 @@ Shader "Unlit/Offset By Depth"
 			uniform float4 _Vector;
 			uniform sampler2D _Depth;
 			uniform float4 _Depth_ST;
+			uniform float2 _Offset;
 			uniform int _Frustum;
 			uniform sampler2D _MainTex;
 			uniform float4 _MainTex_ST;
@@ -89,6 +90,7 @@ Shader "Unlit/Offset By Depth"
 				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 				UNITY_TRANSFER_INSTANCE_ID(v, o);
 
+				v.ase_texcoord.xy+=_Offset;
 				float2 uv_Depth = v.ase_texcoord.xy * _Depth_ST.xy + _Depth_ST.zw;
 				float temp_output_10_0 = ( (0.0 + (tex2Dlod( _Depth, float4( uv_Depth, 0, 0.0) ).r - _Vector.x) * (1.0 - 0.0) / (_Vector.y - _Vector.x)) * _Vector.z );
 				float3 break14 = ( v.vertex.xyz * _Falloff * ( _Vector.w + ( temp_output_10_0 * _Frustum ) ) );

@@ -46,3 +46,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   container: {fileID: 4157149043178502764}
   m_Path: 
+  import:
+    animationSettings:
+      looping: 1
+      useLegacyClips: 1

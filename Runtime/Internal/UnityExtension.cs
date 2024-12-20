@@ -493,6 +493,14 @@ namespace YouSingStudio.Holograms {
 			return thiz;
 		}
 
+		public static string ToShorty(this string thiz,int length=0xFF,string link="~") {
+			int cnt=(thiz?.Length??0);if(length>0&&cnt>length) {
+				length=(length-link.Length)/2;
+				thiz=thiz.Substring(0,length)+link+thiz.Substring(cnt-length);
+			}
+			return thiz;
+		}
+
 		// Taken from https://blog.csdn.net/u013354943/article/details/86674509
 		public static string ToByteSize(this ulong thiz) {
 			int i=0;double d=thiz;

@@ -3,6 +3,7 @@ using UnityEngine;
 namespace YouSingStudio.Holograms {
 	public class MultiViewCamera
 		:MonoCamera
+		,IPlane
 	{
 		#region Fields
 
@@ -28,8 +29,27 @@ namespace YouSingStudio.Holograms {
 		#endregion Fields
 
 		#region Methods
-#if UNITY_EDITOR
 
+		Vector3 IPlane.position {
+			get=>m_Viewer.position;
+			set=>m_Viewer.position=value;
+		}
+
+		Quaternion IPlane.rotation {
+			get=>m_Viewer.rotation;
+			set=>m_Viewer.rotation=value;
+		}
+
+		float IPlane.aspect {
+			get=>camera.aspect;
+			set=>camera.aspect=value;
+		}
+
+		float IPlane.size {
+			get=>plane;
+			set=>plane=value;
+		}
+#if UNITY_EDITOR
 		protected override void InternalDrawGizmos(bool selected) {
 			bool d=false;
 			if(camera==null) {camera=GetComponentInChildren<Camera>();d=true;}

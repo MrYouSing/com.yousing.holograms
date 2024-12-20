@@ -63,7 +63,13 @@ namespace YouSingStudio.Holograms {
 		public Slider slider;
 		public Text[] texts;
 		public string[] formats;
+		[Header("Misc")]
+		public float renderRate;
+		public int shortCount=0;
+		public string shortLink="~";
+
 		[System.NonSerialized]public IProgress progress;
+		[System.NonSerialized]protected float m_RenderTime;
 
 		#endregion Fields
 
@@ -80,7 +86,11 @@ namespace YouSingStudio.Holograms {
 
 		protected virtual void Update() {
 			if(progress!=null) {
-				float f=progress.value;Render();
+				float f=progress.value;
+				//
+				m_RenderTime-=Time.deltaTime;
+				if(m_RenderTime<=0.0f) {Render();}
+				//
 				if(f<0.0f||f>=1.0f) {Set(null);}
 			}
 		}
@@ -105,13 +115,14 @@ namespace YouSingStudio.Holograms {
 		}
 
 		public virtual void Render() {
+			m_RenderTime=renderRate;
 			if(progress!=null) {
 				float f=progress.value;
 				if(slider!=null) {slider.value=f;}
 				if(image!=null) {image.fillAmount=f;}
 				//
 				if(texts[0]!=null) {
-					texts[0].text=string.Format(formats[0],progress.name);
+					texts[0].text=string.Format(formats[0],progress.name).ToShorty(shortCount,shortLink);
 				}
 				if(texts[1]!=null) {
 					texts[1].text=string.Format(formats[1],progress.text,f);

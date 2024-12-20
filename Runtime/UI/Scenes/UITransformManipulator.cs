@@ -21,24 +21,20 @@ namespace YouSingStudio.Holograms {
 		public Transform target;
 		[Tooltip("x:T\ny:R\nz:S\nw:Wheel")]
 		public Vector4 sensitivity=Vector4.one;
+		[Tooltip("x:T\ny:R")]
+		public Vector2 scrolling=Vector2.one;
 		public int[] buttons=new int[]{0,1,2};
 		public UIToggleButton[] modifiers;
 		public int[] types=new int[]{0,0};
 		public string[] cursors;
 		[Header("Misc")]// For resolving target role.
 		public Transform stage;
-		public Transform viewer;
-		public new Collider collider;
-
-		[System.NonSerialized]protected MultiViewCamera m_MultiView;
 
 		[System.NonSerialized]protected int m_Action=-1;
-		[System.NonSerialized]protected Vector3 m_Start;
 		[System.NonSerialized]protected Pose m_Pose;
 		[System.NonSerialized]protected Vector3 m_Scale;
 		[System.NonSerialized]protected Vector3 m_Mouse;
 		[System.NonSerialized]protected float m_Scroll;
-		[System.NonSerialized]protected Vector3 m_V;
 		[System.NonSerialized]protected Vector3 m_T;
 		[System.NonSerialized]protected Quaternion m_R;
 		[System.NonSerialized]protected Vector3 m_S;
@@ -48,12 +44,7 @@ namespace YouSingStudio.Holograms {
 		#region Unity Messages
 
 		protected virtual void Start() {
-			if(viewer!=null) {
-				s_Camera=viewer.GetComponent<Camera>();
-				m_MultiView=viewer.GetComponentInParent<MultiViewCamera>();
-				float z=m_MultiView!=null?m_MultiView.plane:viewer.localPosition.z;
-				m_Start=new Vector3(0.0f,GetPlane(target.position),z);
-			}
+			if(target==null) {return;}
 			SetTarget(target);
 		}
 
@@ -106,7 +97,7 @@ namespace YouSingStudio.Holograms {
 		public static float GetPlane(Vector3 point) {
 			if(s_Camera==null) {s_Camera=Camera.main;}
 			return s_Camera==null?1.0f:s_Camera.GetPlaneHeight
-				(s_Camera.worldToCameraMatrix.MultiplyPoint3x4(point).z);
+				(-s_Camera.worldToCameraMatrix.MultiplyPoint3x4(point).z);
 		}
 
 		public static float GetScreen() {
@@ -126,9 +117,13 @@ namespace YouSingStudio.Holograms {
 				target.SetLocalPositionAndRotation(m_Pose.position,m_Pose.rotation);
 				target.localScale=m_Scale;
 			}
-			if(m_MultiView!=null) {m_MultiView.plane=m_Start.z;}
-			else if(viewer!=null) {viewer.localPosition=new Vector3(0.0f,0.0f,m_Start.z);}
 			int a=m_Action;m_Action=-1;SetAction(a);
+		}
+
+		public virtual void TryResetTarget() {
+			if(System.Array.IndexOf(types,GetModifiers(modifiers))>=0) {
+				ResetTarget();
+			}
 		}
 
 		protected virtual void SetAction(int action) {
@@ -155,10 +150,17 @@ namespace YouSingStudio.Holograms {
 			}
 		}
 
+		public virtual string Info(string fmt="0.000") {
+			if(target!=null) {
+				return $"T:{target.position.ToString(fmt)}\nR:{target.eulerAngles.ToString(fmt)}\nS:{target.localScale.z.ToString(fmt)}";
+			}
+			return "None";
+		}
+
 		protected virtual void OnInput() {
 			m_Mouse.z-=Input.GetAxisRaw("Mouse ScrollWheel")*sensitivity.w;
+			if(Input.GetKey(KeyCode.Space)) {m_Action=buttons.Length;}
 			SetAction((GetModifiers(modifiers)<<8)|(m_Action&0xFF));
-			if(viewer!=null) {s_PlaneScale=GetPlane(target.position)/m_Start.y;}
 		}
 
 		protected virtual void OnEnter() {
@@ -169,21 +171,17 @@ namespace YouSingStudio.Holograms {
 			m_R=target.rotation;
 			m_S=target.localScale;
 			//
-			if(m_MultiView!=null) {m_V.z=m_MultiView.plane;}
-			else if(viewer!=null) {m_V=viewer.localPosition;}
 			if(stage!=null) {m_R=Quaternion.Inverse(stage.rotation)*m_R;}
 		}
 
 		protected virtual void OnUpdate() {
 			if(target==null) {return;}
 			//
-			if(viewer!=null) {UpdateCamera();}
-			else {UpdateActor();}
+			UpdateTransform();
 		}
 
 		protected virtual void OnExit() {
 			m_Mouse=Vector3.zero;m_Scroll=0.0f;
-			m_V=Vector3.zero;
 			m_T=Vector3.zero;
 			m_R=Quaternion.identity;
 			m_S=Vector3.one;
@@ -203,12 +201,14 @@ namespace YouSingStudio.Holograms {
 			target.position=m_T+v;
 		}
 
-		protected virtual void SetRotation(float x,float y) {
+		protected virtual void SetRotation(float x,float y,int m) {
 			Quaternion p=Quaternion.AngleAxis(sensitivity.y*x,Vector3.right);
 			Quaternion q=Quaternion.AngleAxis(sensitivity.y*y,Vector3.up);
 				if(stage!=null) {q=q*stage.rotation;}
-			if(viewer!=null) {target.rotation=q*m_R*p;}
-			else {target.rotation=q*p*m_R;}
+			switch(m) {
+				case 0:target.rotation=q*p*m_R;break;
+				case 1:target.rotation=q*m_R*p;break;
+			}
 		}
 
 		protected virtual void SetRotation(float z) {
@@ -217,58 +217,39 @@ namespace YouSingStudio.Holograms {
 			target.rotation=q*m_R;
 		}
 
-		protected virtual void UpdateCamera() {
+		protected virtual void UpdateTransform() {
+			//
+			int type=(m_Action>>8)&0xFF;
+			int index=System.Array.IndexOf(types,type);
+			if(index<0) {return;}
+			//
+			SetCursor(0);
 			Vector3 mouse=Input.mousePosition-m_Mouse;
-			int type=(m_Action>>8)&0xFF;if(type==types[0]) {
-				SetCursor(0);switch(m_Action&0xFF) {
-					case 1:SetPosition(mouse.x,mouse.y);SetCursor(1);break;
-					case 2:SetRotation(-mouse.y,mouse.x);SetCursor(2);break;
-					case 3:ResetTarget();SetCursor(4);break;
-				}
-			}else {
-				return;
+			switch(index) {
+				case 1:mouse.y=0.0f;break;
+				case 2:mouse.x=0.0f;break;
 			}
+			switch(m_Action&0xFF) {
+				case 1:SetPosition(mouse.x,mouse.y);SetCursor(1);break;
+				case 2:SetRotation(mouse.y,-mouse.x,0);SetCursor(2);break;// Inverse
+				case 4:ResetTarget();SetCursor(4);break;
+			}
+			//
 			if(IsScrolling(mouse.z)) {
-				mouse=new Vector3(0.0f,0.0f,sensitivity.x*mouse.z);
-				if(m_MultiView!=null) {m_MultiView.plane=m_V.z/ToScale(mouse.z);}
-				else if(viewer!=null) {viewer.localPosition=m_V+mouse;}
-				else {target.position=m_T+mouse;}
-				SetCursor(3);
-			}
-		}
-
-		protected virtual void UpdateActor() {
-			Vector3 mouse=Input.mousePosition-m_Mouse;
-			int type=(m_Action>>8)&0xFF;if(type==types[0]) {// Type A
-				SetCursor(0);switch(m_Action&0xFF) {
-					case 1:SetPosition(mouse.x,mouse.y);SetCursor(1);break;
-					case 2:SetRotation(mouse.y,-mouse.x);SetCursor(2);break;// Inverse
-					case 3:ResetTarget();SetCursor(4);break;
-				}
-			}else if(type==types[1]) {// Type B
-				SetCursor(0);switch(m_Action&0xFF) {
-					case 1:SetPosition(mouse.y);SetCursor(5);break;
-					case 2:SetRotation(mouse.y);SetCursor(6);break;// Clockwise TODO: Two Parts????
-					case 3:ResetTarget();SetCursor(4);break;
-				}
-			}else {
-				return;
-			}
-			if(IsScrolling(mouse.z)) {
-				target.localScale=m_S*ToScale(sensitivity.z*mouse.z);
-				SetCursor(3);
-			}
-		}
-
-		public virtual string Info(string fmt="0.000") {
-			if(target!=null) {
-				if(viewer!=null) {
-					return $"T:{target.position.ToString(fmt)}\nR:{target.eulerAngles.ToString(fmt)}\nZ:{viewer.localPosition.z.ToString(fmt)}";
-				}else {
-					return $"T:{target.position.ToString(fmt)}\nR:{target.eulerAngles.ToString(fmt)}\nS:{target.localScale.z.ToString(fmt)}";
-				}
-			}
-			return "None";
+			switch(index) {
+				case 0:
+					target.localScale=m_S*ToScale(sensitivity.z*mouse.z);
+					SetCursor(3);
+				break;
+				case 2:
+					SetPosition(scrolling.x*mouse.z);
+					SetCursor(5);
+				break;
+				case 1:
+					SetRotation(scrolling.y*mouse.z);
+					SetCursor(6);
+				break;
+			}}
 		}
 
 		#endregion Methods

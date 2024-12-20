@@ -286,6 +286,17 @@ namespace YouSingStudio.Private {
 			return s_Rects;
 		}
 
+		public static System.IntPtr GetHwnd(int display) {
+			if(!s_IsInited) {Init();}
+			//
+// <!-- Macro.Patch DisplayToWindow
+			Window it=null;
+			if(display>=0&&display<(s_Displays?.Length??0)) {it=s_Windows[display];}
+			if(it!=null) {if(it.index<0) {Activate(display);}}else return
+// Macro.Patch -->
+			System.IntPtr.Zero;return it.handle;
+		}
+
 		public static void Activate(int display) {
 			if(!s_IsInited) {Init();}
 			//
