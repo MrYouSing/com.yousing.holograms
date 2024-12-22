@@ -215,7 +215,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   show: 2
   hide: 7
-  menu: {fileID: 3346335152063523499}
+  view: {fileID: 3346335152063523499}
   main: {fileID: 351585988614224634}
   content: {fileID: 3803952276537604221}
   button: {fileID: 3817459695718643277}

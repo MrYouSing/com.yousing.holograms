@@ -1,3 +1,37 @@
+/* <!-- Macro.Table Events
+Start,
+Show,
+Hide,
+ Macro.End --> */
+/* <!-- Macro.Table Active
+Activate,true,
+Deactivate,false,
+ Macro.End --> */
+
+/* <!-- Macro.Call  Events
+		public virtual void InvokeOn{0}(string key) {{
+			int i=IndexOf(key);
+			if(i>=0) {{stages[i].on{0}?.Invoke();}}
+		}}
+
+ Macro.End --> */
+/* <!-- Macro.Call  Active
+		public virtual void {0}(string key) {{
+			int i=IndexOf(key);
+			if(i>=0) {{stages[i].SetActive({1});}}
+		}}
+
+ Macro.End --> */
+/* <!-- Macro.Patch
+,AutoGen
+ Macro.End --> */
+
+/* <!-- Macro.Call  Events
+			public UnityEvent on{0}=null;
+ Macro.End --> */
+/* <!-- Macro.Patch
+,Stage
+ Macro.End --> */
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
@@ -10,6 +44,33 @@ namespace YouSingStudio.Holograms {
 	public class StageDirector
 		:MonoDirector
 	{
+// <!-- Macro.Patch AutoGen
+		public virtual void InvokeOnStart(string key) {
+			int i=IndexOf(key);
+			if(i>=0) {stages[i].onStart?.Invoke();}
+		}
+
+		public virtual void InvokeOnShow(string key) {
+			int i=IndexOf(key);
+			if(i>=0) {stages[i].onShow?.Invoke();}
+		}
+
+		public virtual void InvokeOnHide(string key) {
+			int i=IndexOf(key);
+			if(i>=0) {stages[i].onHide?.Invoke();}
+		}
+
+		public virtual void Activate(string key) {
+			int i=IndexOf(key);
+			if(i>=0) {stages[i].SetActive(true);}
+		}
+
+		public virtual void Deactivate(string key) {
+			int i=IndexOf(key);
+			if(i>=0) {stages[i].SetActive(false);}
+		}
+
+// Macro.Patch -->
 		#region Nested Types
 
 		[System.Serializable]
@@ -17,10 +78,11 @@ namespace YouSingStudio.Holograms {
 			public string name;
 			public List<GameObject> actors;
 			public List<Behaviour> behaviours;
-
+// <!-- Macro.Patch Stage
 			public UnityEvent onStart=null;
 			public UnityEvent onShow=null;
 			public UnityEvent onHide=null;
+// Macro.Patch -->
 			public UnityEvent<string> onOpen=null;
 
 			[System.NonSerialized]protected bool m_Start=false;
@@ -65,19 +127,33 @@ namespace YouSingStudio.Holograms {
 			}
 		}
 
+		protected virtual void Activate() {
+			bool b=!didStart;// On Awake().
+			Stage it;for(int i=0,imax=stages?.Count??0;i<imax;++i) {
+				it=stages[i];
+				if(it!=null&&(b||!it.name.StartsWith('$'))) {
+					it.SetActive(i==m_Index);
+				}
+			}
+		}
+
+		protected virtual void Deactivate() {
+			if(m_Index>=0) {stages[m_Index]?.SetActive(false);}
+			m_Index=-1;
+		}
+
 		public override void Set(int index) {
 			if(index==m_Index) {return;}
-			if(m_Index>=0) {stages[m_Index]?.SetActive(false);}
+			//
+			Deactivate();
 			m_Index=index;
-			for(int i=0,imax=stages?.Count??0;i<imax;++i) {
-				stages[i]?.SetActive(i==m_Index);
-			}
+			Activate();
 		}
 
 		public virtual void Open(string key,string path) {
 			int i=IndexOf(key);
 			if(i>=0) {
-				Set(-1);Set(i);// Reload.
+				Deactivate();Set(i);// Reload.
 				stages[i].onOpen?.Invoke(path);
 			}
 		}

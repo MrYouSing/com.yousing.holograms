@@ -20,6 +20,7 @@ namespace YouSingStudio.Holograms {
 		public bool silent=true;
 		public Text text;
 		public RawImage image;
+		public GameObject logo;
 
 		[System.NonSerialized]protected float m_Time=-1.0f;
 
@@ -31,11 +32,7 @@ namespace YouSingStudio.Holograms {
 			this.CheckInstance(m_Context,ref context);
 			this.CheckInstance(m_Login,ref login);
 			SetEvents(true);
-/*			StartCoroutine(StartDelayed());
-		}
-
-		protected virtual System.Collections.IEnumerator StartDelayed() {
-			yield return null;*/
+			SetLogin(false);
 			if(context!=null) {Render();}
 		}
 
@@ -67,12 +64,21 @@ namespace YouSingStudio.Holograms {
 				context.SetEvent(OAuthBehaviour.k_Type_Verify,OnVerify,value);
 				context.SetEvent(OAuthBehaviour.k_Type_Error,OnError,value);
 				if(login!=null) {
-					login.BindButton(OAuthBehaviour.k_Type_Register,context.Register,true);
-					login.BindButton(OAuthBehaviour.k_Type_Login,Login,true);
-					login.BindButton(OAuthBehaviour.k_Type_Logout,Logout,true);
-					login.BindButton(OAuthBehaviour.k_Type_Verify,Verify,true);
-					login.BindButton(OAuthBehaviour.k_Type_Forget,context.Forget,true);
-					login.BindButton(5,Login,true);
+					login.BindButton(OAuthBehaviour.k_Type_Register,context.Register,value);
+					login.BindButton(OAuthBehaviour.k_Type_Login,Login,value);
+					login.BindButton(OAuthBehaviour.k_Type_Logout,Logout,value);
+					login.BindButton(OAuthBehaviour.k_Type_Verify,Verify,value);
+					login.BindButton(OAuthBehaviour.k_Type_Forget,context.Forget,value);
+					login.BindButton(5,Login,value);
+					// Hack Buttons
+					int len=login.m_Buttons?.Length??0;
+					if(6<len) {// Close
+						Button btn=login.m_Buttons[6];
+						if(btn!=null) {
+							btn.onClick.RemoveAllListeners();
+							if(value) {btn.onClick.AddListener(()=>SetLogin(false));}
+						}
+					}
 				}
 			}
 		}
@@ -80,12 +86,16 @@ namespace YouSingStudio.Holograms {
 		public virtual void SetLogin(bool value) {
 			if(context==null||!context.enabled) {value=false;}
 			if(login!=null) {login.gameObject.SetActive(value);}
+			//
+			var sm=ShortcutManager.s_Instance;if(sm==null) {return;}
+			if(value) {sm.Lock(this);}else {sm.Unlock(this);}
 		}
 
 		public virtual void Render() {
 			if(context!=null) {
 				if(text!=null) {text.text=context.displayName;}
 				if(image!=null) {image.texture=context.avatarIcon;}
+				if(logo!=null) {logo.SetActive(context.authorized);}
 				//
 				if(login!=null) {
 					login.SetText(0,context.displayName);

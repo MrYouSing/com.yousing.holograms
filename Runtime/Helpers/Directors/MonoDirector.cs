@@ -25,7 +25,7 @@ namespace YouSingStudio.Holograms {
 		#region Unity Messages
 
 		protected virtual void Awake() {
-			Set(-2);
+			Set(int.MinValue);// Awaken it.
 		}
 
 		protected virtual void Start() {
@@ -34,7 +34,7 @@ namespace YouSingStudio.Holograms {
 				int ii=i;key=KeyOf(i);if(string.IsNullOrEmpty(key)) {key=$"{name}#{i}";}
 				sm.Add(name+" Show "+key,()=>Set(ii),ShortcutManager.GetKeys(keys[i],modifiers));
 			}
-			Set(0);
+			Set(Mathf.Max(m_Index,0));
 		}
 
 		#endregion Unity Messages

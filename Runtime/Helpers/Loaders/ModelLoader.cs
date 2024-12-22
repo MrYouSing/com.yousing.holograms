@@ -77,7 +77,7 @@ namespace YouSingStudio.Holograms {
 			if(m_Actor!=null) {Unload();}
 			m_Path=path;if(string.IsNullOrEmpty(m_Path)||!didStart) {return;}
 			//
-			if(s_Models.TryGetValue(m_Path,out var tmp)&&tmp!=null) {
+			if(s_Models.TryGetValue(m_Path.GetFilePath(),out var tmp)&&tmp!=null) {
 				Load(tmp.prefab,tmp.manifest);
 			}else {
 				InternalLoad();
@@ -98,6 +98,8 @@ namespace YouSingStudio.Holograms {
 				Vector3 s=m_Manifest.S.sqrMagnitude!=0.0f?m_Manifest.S:Vector3.one;
 				if(s.y*s.z==0.0f) {s.y=s.z=s.x;}t.localScale=s;
 			}
+			//
+			this.InvokeEvent();
 		}
 
 		public virtual void Unload() {
@@ -128,7 +130,7 @@ namespace YouSingStudio.Holograms {
 			if(prefab.scene.IsValid()) {Hide(prefab);}model.prefab=prefab;
 			if(model.manifest!=null) {
 			}
-			s_Models[model.path.FixPath()]=model;Load(model.prefab,model.manifest);
+			s_Models[model.path.GetFilePath()]=model;Load(model.prefab,model.manifest);
 		}
 
 		protected virtual void InternalLoad() {
@@ -150,6 +152,9 @@ namespace YouSingStudio.Holograms {
 				}
 			}
 		}
+
+		public virtual GameObject GetActor()=>m_Actor;
+		public virtual Manifest GetManifest()=>m_Manifest;
 
 		//
 

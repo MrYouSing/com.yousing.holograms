@@ -118,6 +118,7 @@ namespace YouSingStudio.Private {
 		public Dictionary<Key,Key> remap;
 
 		[System.NonSerialized]public Shortcut current;
+		[System.NonSerialized]public List<object> locks;
 		[System.NonSerialized]protected HashSet<Key> m_Keys=new HashSet<Key>();
 
 		#endregion Fields
@@ -132,6 +133,7 @@ namespace YouSingStudio.Private {
 		}
 
 		protected virtual void Update() {
+			if((locks?.Count??0)>0) {return;}
 			m_Keys.Clear();
 			//
 			int i=0,imax=shortcuts.Count,j=0;
@@ -231,6 +233,22 @@ namespace YouSingStudio.Private {
 			var tmp=current;current=shortcut;
 				shortcut.Invoke();
 			current=tmp;
+		}
+
+		public virtual void Lock(object obj) {
+			if(obj==null) {return;}
+			if(locks==null) {locks=new List<object>();}
+			//
+			int i=locks.IndexOf(obj);
+			if(i<0) {locks.Add(obj);}
+		}
+
+		public virtual void Unlock(object obj) {
+			if(obj==null) {return;}
+			if(locks==null) {return;}
+			//
+			int i=locks.IndexOf(obj);
+			if(i>=0) {locks.RemoveAt(i);}
 		}
 
 		#endregion Methods

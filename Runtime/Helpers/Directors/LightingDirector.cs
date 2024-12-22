@@ -70,7 +70,8 @@ namespace YouSingStudio.Holograms {
 		public override string KeyOf(int index)=>snapshots[index].name;
 
 		public override void Set(int index) {
-			if(index>=-1) {ApplySnapshot(snapshots[index>0?index:0]);}
+			m_Index=index;if(!didStart) {return;}
+			ApplySnapshot(snapshots[Mathf.Max(m_Index,0)]);
 		}
 
 		protected virtual void OnTextureTypeChanged(TextureType type) {

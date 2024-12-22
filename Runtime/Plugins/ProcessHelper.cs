@@ -185,7 +185,7 @@ namespace Virtofy.IO
 				base.SetHandle(handle);
 			}
 
-			public override bool ReleaseHandle()
+			protected override bool ReleaseHandle()
 			{
 				return CloseHandle(base.handle);
 			}

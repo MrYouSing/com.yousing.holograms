@@ -18,61 +18,26 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using YouSingStudio.Private;
 using Key=UnityEngine.KeyCode;
 
 namespace YouSingStudio.Holograms {
 	public class UIGalleryController
-		:MonoBehaviour
+		:HologramPlayer
 	{
 		#region Fields
 
-		public static List<string> s_Whitelist=new List<string>{
-			// For General
-			"_preview",
-			// For RGB-D
-			"_depth",
-		};
-
 		[Header("Gallery")]
-		public Transform container;
-		public GameObject prefab;
-		public Transform arrow;
-		public TextureType texture=TextureType.Quilt;
-		public UnityEngine.Video.Video3DLayout layout=UnityEngine.Video.Video3DLayout.SideBySide3D;
 		public int preview;
-		public string[] filters=new string[]{
-			// Image
-			".jpg",
-			".jpeg",
-			".png",
-			// Video https://docs.lookingglassfactory.com/keyconcepts/quilts/quilt-video-encoding
-			".mp4",
-			".webm",
-			// Model
-			".unity",
-			".ab",// AssetBundle
-			".gltf",
-			".glb",
-			".obj",
-			".fbx",
-		};
 		public List<string> paths=new List<string>();
 		[Header("Controller")]
-		public MediaPlayer player;
-		public StageDirector director;
+		public UISelectorView selector;
 		public DialogPicker[] pickers=new DialogPicker[2];
-		public Key[] keys=new Key[7];
+		public Key[] keys=new Key[4];
 
 		[System.NonSerialized]protected int m_Index;
-		[System.NonSerialized]protected int m_Page;
 		[System.NonSerialized]protected List<string> m_Paths;
-		[System.NonSerialized]protected List<GameObject> m_Views=new List<GameObject>();
-		[System.NonSerialized]protected ScrollRect m_Scroll;
-		[System.NonSerialized]protected GridLayoutGroup m_Layout;
-		[System.NonSerialized]protected WaitForEndOfFrame m_WaitEof;
 
 		#endregion Fields
 
@@ -94,14 +59,13 @@ namespace YouSingStudio.Holograms {
 			sm.Add(name+".Play",Play,keys[i]);++i;
 			sm.Add(name+".Load",Load,keys[i]);++i;
 			sm.Add(name+".Save",Save,keys[i]);++i;
-			sm.Add(name+".Prev",Prev,keys[i]);++i;
-			sm.Add(name+".Next",Next,keys[i]);++i;
-			sm.Add(name+".PageUp",PageUp,keys[i]);++i;
-			sm.Add(name+".PageDown",PageDown,keys[i]);++i;
 // Macro.Patch -->
-			m_Scroll=container.GetComponentInParent<ScrollRect>();
-			m_Layout=container.GetComponent<GridLayoutGroup>();
-			if(m_Layout!=null) {m_Page=m_Layout.constraintCount;}
+			if(selector==null) {selector=GetComponent<UISelectorView>();}
+			//
+			if(selector!=null) {
+				selector.onRender=RenderView;
+				selector.onSelect=Play;
+			}
 			// You need wait until app startup.if not,you will
 			// get an error hwnd on windows because of GDI+.
 			var app=MonoApplication.instance;
@@ -111,87 +75,53 @@ namespace YouSingStudio.Holograms {
 
 		protected virtual void StartDelayed() {
 			Refresh();
-			if(m_Index==0) {Set(0);}
+			if(m_Index==0) {Play(0);}
 		}
 
 		#endregion Unity Messages
 
 		#region Methods
 
-		public virtual bool CanPlay(string path) {
-			if(!string.IsNullOrEmpty(path)) {
-				//
-				string fn=Path.GetFileNameWithoutExtension(path);
-				for(int i=0,imax=s_Whitelist.Count;i<imax;++i) {
-					if(fn.EndsWith(s_Whitelist[i],UnityExtension.k_Comparison)) {return false;}
-				}
-				//
-				for(int i=0,imax=filters?.Length??0;i<imax;++i) {
-					if(path.EndsWith(filters[i],System.StringComparison.OrdinalIgnoreCase)) {return true;}
-				}
-			}
-			return false;
-		}
-
 		public virtual void Refresh() {
 			string tmp=m_Index<(m_Paths?.Count??0)?m_Paths[m_Index]:null;
 			//
 			m_Paths=paths.UnpackPaths(CanPlay,m_Paths);
-			m_Views.Render(m_Paths,RenderView,CreateView);
-			if(m_Scroll!=null) {
-				m_Scroll.normalizedPosition=Vector2.up;
-			}
+			selector.Render(m_Paths);
 			//
-			if(!string.IsNullOrEmpty(tmp)) {Set(tmp);}
+			if(!string.IsNullOrEmpty(tmp)) {Play(tmp);}
 		}
 
 		public virtual int Add(string path) {
-			int i=m_Paths.Count;m_Paths.Add(Path.GetFullPath(path).FixPath());
-			GameObject v=null;
-			if(i<m_Views.Count) {v=m_Views[i];}
-			else {v=CreateView();m_Views.Add(v);}
-			RenderView(v,path);return i;
+			int i=m_Paths.Count;m_Paths.Add(path);
+			selector.Add(path);return i;
 		}
 
-		public virtual void Set(int index) {
+		public virtual void Play(int index) {
 			int len=m_Paths?.Count??0;if(len<=0) {return;}
 			m_Index=(index+len)%len;
 			//
-			var es=EventSystem.current;if(es!=null) {es.SetSelectedGameObject(null);}
-			if(arrow!=null) {arrow.SetParent(m_Views[m_Index].transform,false);}
-			UpdateScroll();
-			//
+			selector.Highlight(index);
 			InternalPlay(m_Paths[m_Index]);
 		}
 
-		public virtual void Set(string path) {
+		public override void Play(string path) {
+			path=path.GetFilePath();
+			//
 			int i=m_Paths.IndexOf(path);
 			if(i<0&&CanPlay(path)) {i=Add(path);}
-			if(i>=0) {Set(i);}
+			if(i>=0) {Play(i);}
 		}
 
 		public virtual void Play() {
-			Set(m_Index);
+			Play(m_Index);
 		}
 
 		public virtual void Load() {
-			//
 			string url=GUIUtility.systemCopyBuffer;
-			if(!string.IsNullOrEmpty(url)) {
-				if(url.IsWebsite()) {
-					if(ImageConverter.ConvertFromWeb(url,Set)) {return;}
-					if(url.IndexOf("sketchfab",UnityExtension.k_Comparison)>=0) {
-						var sdk=Sketchfab.SketchfabSdk.instance;
-						if(sdk!=null) {sdk.Download(sdk.GetUid(url),OnSketchfab);}
-						return;
-					}
-				}else {
-					if(File.Exists(url)) {Set(url);return;}
-				}
-			}
+			if(TryPlay(url)) {return;}
 			//
 			var p=pickers[0];if(p!=null) {
-				p.onPicked=Set;p.ShowDialog();
+				p.onPicked=Play;p.ShowDialog();
 			}
 		}
 
@@ -224,99 +154,6 @@ namespace YouSingStudio.Holograms {
 			}else {
 				Screenshot("*");
 			}
-		}
-
-		public virtual void Prev() {
-			Set(m_Index-1);
-		}
-
-		public virtual void Next() {
-			Set(m_Index+1);
-		}
-
-		public virtual void PageUp() {
-			Set(m_Index-m_Page);
-		}
-
-		public virtual void PageDown() {
-			Set(m_Index+m_Page);
-		}
-
-		protected virtual void UpdateScroll() {
-			StopCoroutine("UpdateScrollDelayed");StartCoroutine(UpdateScrollDelayed());
-		}
-
-		protected virtual IEnumerator UpdateScrollDelayed() {
-			yield return null;
-			if(m_Scroll!=null) {
-				RectTransform rt=m_Views[m_Index].transform as RectTransform;
-				Vector2 u,v;if(m_Layout==null) {
-					u=0.5f*rt.sizeDelta;v=Vector2.zero;
-				}else {
-					u=0.5f*m_Layout.cellSize;v=m_Layout.spacing;
-				}
-				m_Scroll.normalizedPosition=m_Scroll.GetNormalizedPoint(rt,u,v);
-			}
-		}
-
-		/// <summary>
-		/// <seealso cref="ScreenCapture.CaptureScreenshot(string)"/>
-		/// </summary>
-		public virtual void Screenshot(string path) {
-			if(string.IsNullOrEmpty(path)) {return;}
-			if(path=="*") {
-				path=System.DateTime.Now.ToString("yyyyMMddHHmmss")+Random.Range(0,10000).ToString("0000");
-				path=Path.Combine("Screenshots",path);
-			}
-			StopCoroutine("ScreenshotDelayed");StartCoroutine(ScreenshotDelayed(path));
-		}
-
-		protected virtual IEnumerator ScreenshotDelayed(string path) {
-			var d=player!=null?player.device:null;if(d==null) {yield break;}
-			yield return m_WaitEof;d.Screenshot(path);
-			// For C1 devices.
-			if(ImageConverter.FFmpegSupported()) {
-				string fn=path+"_quilt.png";if(File.Exists(fn)) {
-					ImageConverter.ImageToVideo(Path.GetFullPath(fn),d.quiltTexture.GetSizeI(),path+".mp4");
-				}
-			}
-		}
-
-		protected virtual void InternalPlay(string path) {
-			TextureType type=path.ToTextureType(texture);
-			switch(type) {
-				case TextureType.Depth:
-					InternalPlay("Open RGB-D",path);
-				break;
-				case TextureType.Stereo:{
-					Vector3 count=path.ParseQuilt();
-					if(!count.TwoPieces()) {path.SetQuilt(path.ParseLayout());}
-					//
-					InternalPlay(null,path);
-				}break;
-				case TextureType.Raw:
-				case TextureType.Quilt:
-					InternalPlay(null,path);
-				break;
-				case TextureType.Model:
-					InternalPlay("Open Model "+Path.GetExtension(path),path);
-				break;
-			}
-			type.InvokeEvent();
-		}
-
-		protected virtual void InternalPlay(string stage,string path) {
-			if(!string.IsNullOrEmpty(stage)) {
-				if(player!=null) {player.Stop();}// Stop the other.
-				if(director!=null) {director.Open(stage,path);}
-			}else {
-				if(director!=null) {director.Set("Open Media");}// Stop the other.
-				if(player!=null) {player.Play(path);}
-			}
-		}
-
-		protected virtual void OnSketchfab(string path) {
-			InternalPlay("Open Sketchfab",path);TextureType.Model.InvokeEvent();
 		}
 
 		protected virtual void LoadIcon(RawImage image,string path) {
@@ -381,19 +218,7 @@ namespace YouSingStudio.Holograms {
 			if(fit!=null) {fit.aspectRatio=a;}
 		}
 
-		protected virtual GameObject CreateView() {
-			GameObject go=GameObject.Instantiate(prefab);
-			go.transform.SetParent(container,false);
-			//
-			int i=m_Views.Count;
-			Button b=go.GetComponentInChildren<Button>();
-			if(b!=null) {b.onClick.AddListener(()=>Set(i));}
-			return go;
-		}
-
-		protected virtual void RenderView(GameObject view,string path) {
-			if(view==null) {return;}
-			if(string.IsNullOrEmpty(path)) {view.SetActive(false);return;}
+		protected virtual bool RenderView(GameObject view,string path) {
 			//
 			Text txt=view.GetComponentInChildren<Text>();
 			if(txt!=null) {
@@ -405,7 +230,7 @@ namespace YouSingStudio.Holograms {
 				LoadIcon(img,path);
 			}
 			//
-			view.SetActive(true);
+			return true;
 		}
 
 		#endregion Methods

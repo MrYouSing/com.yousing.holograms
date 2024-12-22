@@ -1216,6 +1216,7 @@ GameObject:
   - component: {fileID: 2179732307321863555}
   - component: {fileID: 1538135294576013592}
   - component: {fileID: 85189482213774107}
+  - component: {fileID: -6789729255047099522}
   - component: {fileID: 1791248286151798845}
   m_Layer: 5
   m_Name: Gallery_00
@@ -1275,9 +1276,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 12e6dad77aace08428b1a676621f7def, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  container: {fileID: 8021878057469536707}
-  prefab: {fileID: 4583432770310144017, guid: 3f646f728260aa44cbf1740586780aca, type: 3}
-  arrow: {fileID: 7702770675347967377}
   texture: 3
   preview: 256
   filters:
@@ -1295,6 +1293,7 @@ MonoBehaviour:
   - Holograms
   - $(StreamingAssets)/Holograms
   - $(AppData)/Roaming/3DGallery/downloads/
+  selector: {fileID: 0}
   player: {fileID: 0}
   director: {fileID: 0}
   pickers:
@@ -1302,7 +1301,23 @@ MonoBehaviour:
   - {fileID: 116425915331326771}
   - {fileID: 4564160161656543583}
   - {fileID: 5327437804324898250}
-  keys: 1e0100000d0000006f0000007000000014010000130100001101000012010000
+  keys: 1e0100000d0000006f00000070000000
+--- !u!114 &-6789729255047099522
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9160827665497521575}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2fcee05643a52bf46beee52b9d0c29b8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  container: {fileID: 8021878057469536707}
+  prefab: {fileID: 4583432770310144017, guid: 3f646f728260aa44cbf1740586780aca, type: 3}
+  arrow: {fileID: 7702770675347967377}
+  keys: 14010000130100001101000012010000
 --- !u!114 &1791248286151798845
 MonoBehaviour:
   m_ObjectHideFlags: 0

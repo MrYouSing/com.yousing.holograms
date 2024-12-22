@@ -84,6 +84,7 @@ namespace YouSingStudio.Private {
 
 		protected virtual void Awake() {
 			this.SetRealName();
+			displayName=m_DisplayName;avatarIcon=m_AvatarIcon;
 			if(m_Actions==null) {m_Actions=new System.Action[k_Type_Error+1];}
 			m_Token=GetString(".Token",null);
 		}

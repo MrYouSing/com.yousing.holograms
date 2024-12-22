@@ -31,6 +31,7 @@ GetFieldOfView(),fieldOfView
  Macro.End --> */
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
@@ -571,16 +572,19 @@ namespace YouSingStudio.Holograms {
 			return thiz;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static string GetFilePath(this string thiz)=>Path.GetFullPath(thiz).FixPath();
+
 		internal static void UnpackPath(this string thiz,System.Func<string,bool> func,List<string> paths) {
 			bool b=false;
 			using(ListPool<string>.Get(out var list)) {
 				foreach(string fn in Directory.GetFiles(thiz,"*.*",SearchOption.TopDirectoryOnly)) {
 					if(IsModel(Path.GetExtension(fn))) {// Model as bundle.
-						b=true;if(func?.Invoke(fn)??true){paths.Add(Path.GetFullPath(fn).FixPath());}
+						b=true;if(func?.Invoke(fn)??true){paths.Add(fn.GetFilePath());}
 					}else {list.Add(fn);}
 				}
 				if(!b) {string it;for(int i=0,imax=list?.Count??0;i<imax;++i) {
-					it=list[i];if(func?.Invoke(it)??true){paths.Add(Path.GetFullPath(it).FixPath());}
+					it=list[i];if(func?.Invoke(it)??true){paths.Add(it.GetFilePath());}
 				}}
 			}
 			if(!b) {foreach(string dn in Directory.GetDirectories(thiz)) {
@@ -595,7 +599,7 @@ namespace YouSingStudio.Holograms {
 				if(paths==null) {paths=new List<string>();}
 				string it;for(;i<imax;++i) {
 					it=thiz[i].GetFullPath();if(File.Exists(it)) {
-						if(func?.Invoke(it)??true){paths.Add(Path.GetFullPath(it).FixPath());}
+						if(func?.Invoke(it)??true){paths.Add(it.GetFilePath());}
 					}else if(Directory.Exists(it)) {
 						it.UnpackPath(func,paths);
 					}
@@ -711,6 +715,11 @@ namespace YouSingStudio.Holograms {
 				thiz.anchoredPosition=Vector2.zero;
 				thiz.sizeDelta=Vector2.zero;
 			}
+		}
+
+		public static bool ContainsScreenPoint(this RectTransform thiz,Vector2 point,bool value=false) {
+			if(thiz!=null) {value=RectTransformUtility.RectangleContainsScreenPoint(thiz,point);}
+			return value;
 		}
 
 		  //

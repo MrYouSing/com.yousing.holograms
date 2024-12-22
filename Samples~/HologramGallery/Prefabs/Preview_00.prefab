@@ -210,12 +210,12 @@ MonoBehaviour:
   screen: {fileID: 3366926029357314496}
   wrap: 1
   duration: 1
+  actors:
+  - {fileID: 8799028093385948496}
+  - {fileID: 3866050476927834631}
   groups:
   - {fileID: 4919964611322786887}
   - {fileID: 7183162321383379397}
-  images:
-  - {fileID: 3466301039299045801}
-  - {fileID: 1377426036380519233}
   durationUI: {fileID: 5296601241752406298}
 --- !u!1 &1912310967163864219
 GameObject:
@@ -359,7 +359,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   display: -1
-  resolution: {x: 0, y: 0}
+  resolution: {x: 540, y: 960}
   canvas: {fileID: 8400000, guid: 225a6c9107f88d94087e234d358c7cb2, type: 2}
   material: {fileID: 0}
   quiltTexture: {fileID: 8400000, guid: 62e351ff4de16e94fbda9549b789fe46, type: 2}

@@ -19,6 +19,7 @@ namespace YouSingStudio.Holograms {
 		public Key[] keys;
 		public T[] values;
 
+		[System.NonSerialized]public int start;
 		[System.NonSerialized]protected bool m_Dirty;
 
 		#endregion Fields
@@ -26,24 +27,26 @@ namespace YouSingStudio.Holograms {
 		#region Unity Messages
 
 		protected virtual void Awake() {
+			start=index;
+			//
 			var sm=ShortcutManager.instance;
 			var tg=GetComponent<ToggleGroup>();
 			var op=(m_Dropdowns?.Length??0)>0?m_Dropdowns[0].options:null;
 			if(op!=null) {op.Clear();}
 			for(int i=0,imax=keys?.Length??0,icnt=m_Toggles?.Length??0;i<imax;++i) {
 				int n=i;T v=values[i];string s=v.ToString();
-				sm.Add(name+"."+s,()=>OnValueChanged(v),ShortcutManager.GetKeys(keys[i],modifiers));
+				sm.Add(name+"."+s,()=>OnIndexChanged(n),ShortcutManager.GetKeys(keys[i],modifiers));
 				if(string.IsNullOrEmpty(GetString(i))) {s=s.Tr();}else {s=GetString(i);}
 				SetText(i,s);BindToggle(i,(x)=>OnToggleChanged(n,x));
 				//
 				if(op!=null) {op.Add(new Dropdown.OptionData(s,GetSprite(i)));}
 				if(i<icnt&&m_Toggles[i]!=null) {m_Toggles[i].group=tg;}
 			}
-			BindDropdown(0,OnDropdownChanged);
+			BindDropdown(0,OnIndexChanged);
 		}
 
 		protected virtual void OnEnable() {
-			OnValueChanged(values[PlayerPrefs.GetInt(name,index)]);
+			OnIndexChanged(PlayerPrefs.GetInt(name,index));
 		}
 
 		protected virtual void Update() {
@@ -51,7 +54,7 @@ namespace YouSingStudio.Holograms {
 				m_Dirty=false;
 				//
 				for(int i=0,imax=keys?.Length??0;i<imax;++i) {
-					if(GetToggle(i)) {OnValueChanged(values[i]);return;}
+					if(GetToggle(i)) {OnIndexChanged(i);return;}
 				}
 			}
 		}
@@ -64,11 +67,11 @@ namespace YouSingStudio.Holograms {
 			if(isActiveAndEnabled) {
 				m_Dirty=true;
 			}else if(b) {
-				OnValueChanged(values[i]);
+				OnIndexChanged(i);
 			}
 		}
 
-		protected virtual void OnDropdownChanged(int i)=>OnValueChanged(values[i]);
+		protected virtual void OnIndexChanged(int i)=>OnValueChanged(values[index=i]);
 		public virtual T value=>index>=0?values[index]:default;
 
 		public override void OnValueChanged(T value) {

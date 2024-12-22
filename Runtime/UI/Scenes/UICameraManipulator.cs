@@ -6,6 +6,7 @@ namespace YouSingStudio.Holograms {
 	{
 		#region Fields
 
+		[Header("Camera")]
 		public Transform viewer;
 		[SerializeField]protected Object m_Plane;
 		[System.NonSerialized]public IPlane plane;
@@ -80,23 +81,13 @@ namespace YouSingStudio.Holograms {
 		}
 
 		protected override void UpdateTransform() {
+			if(!PrepareTransform(out var index,out var mouse)) {return;}
 			//
-			int type=(m_Action>>8)&0xFF;
-			int index=System.Array.IndexOf(types,type);
-			if(index<0) {return;}
-			//
-			SetCursor(0);
-			Vector3 mouse=Input.mousePosition-m_Mouse;
-			switch(index) {
-				case 1:mouse.y=0.0f;break;
-				case 2:mouse.x=0.0f;break;
-			}
 			switch(m_Action&0xFF) {
 				case 1:SetPosition(mouse.x,mouse.y);SetCursor(1);break;
 				case 2:SetRotation(-mouse.y,mouse.x,1);SetCursor(2);break;
 				case 4:ResetTarget();SetCursor(4);break;
 			}
-			//
 			if(IsScrolling(mouse.z)) {
 				SetFov(sensitivity.x*mouse.z);
 				SetCursor(3);

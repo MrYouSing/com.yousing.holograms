@@ -17,8 +17,10 @@ namespace YouSingStudio.Holograms {
 
 		public static Camera s_Camera;
 		public static float s_PlaneScale=1.0f;
+		public static bool s_AutoReset=false;
 
 		public Transform target;
+		public Transform stage;
 		[Tooltip("x:T\ny:R\nz:S\nw:Wheel")]
 		public Vector4 sensitivity=Vector4.one;
 		[Tooltip("x:T\ny:R")]
@@ -27,8 +29,6 @@ namespace YouSingStudio.Holograms {
 		public UIToggleButton[] modifiers;
 		public int[] types=new int[]{0,0};
 		public string[] cursors;
-		[Header("Misc")]// For resolving target role.
-		public Transform stage;
 
 		[System.NonSerialized]protected int m_Action=-1;
 		[System.NonSerialized]protected Pose m_Pose;
@@ -59,7 +59,7 @@ namespace YouSingStudio.Holograms {
 		}
 
 		protected virtual void OnDisable() {
-			if(didStart) {SetAction(-1);ResetTarget();}
+			if(didStart&&s_AutoReset) {SetAction(-1);ResetTarget();}
 		}
 
 		public virtual void OnPointerEnter(PointerEventData e) {
@@ -117,12 +117,27 @@ namespace YouSingStudio.Holograms {
 				target.SetLocalPositionAndRotation(m_Pose.position,m_Pose.rotation);
 				target.localScale=m_Scale;
 			}
+			// Re-Enter.
 			int a=m_Action;m_Action=-1;SetAction(a);
 		}
 
-		public virtual void TryResetTarget() {
+		public virtual void SpaceTarget() {
 			if(System.Array.IndexOf(types,GetModifiers(modifiers))>=0) {
 				ResetTarget();
+			}
+		}
+
+		public virtual void StartTarget() {
+			if(!didStart) {return;}
+			//
+			ResetTarget();
+		}
+
+		protected virtual bool IsScrolling(float value) {
+			if(!Mathf.Approximately(value,m_Scroll)) {
+				m_Scroll=Mathf.Lerp(m_Scroll,value,0.75f);return true;
+			}else {
+				m_Scroll=value;return false;
 			}
 		}
 
@@ -131,14 +146,6 @@ namespace YouSingStudio.Holograms {
 				if(m_Action>=0) {OnExit();}
 				m_Action=action;
 				if(m_Action>=0) {OnEnter();}
-			}
-		}
-
-		protected virtual bool IsScrolling(float value) {
-			if(!Mathf.Approximately(value,m_Scroll)) {
-				m_Scroll=Mathf.Lerp(m_Scroll,value,0.75f);return true;
-			}else {
-				m_Scroll=value;return false;
 			}
 		}
 
@@ -217,24 +224,28 @@ namespace YouSingStudio.Holograms {
 			target.rotation=q*m_R;
 		}
 
-		protected virtual void UpdateTransform() {
-			//
+		protected virtual bool PrepareTransform(out int index,out Vector3 mouse) {
 			int type=(m_Action>>8)&0xFF;
-			int index=System.Array.IndexOf(types,type);
-			if(index<0) {return;}
+			index=System.Array.IndexOf(types,type);
+			if(index<0||index>=3) {mouse=Vector3.zero;return false;}
 			//
 			SetCursor(0);
-			Vector3 mouse=Input.mousePosition-m_Mouse;
+			mouse=Input.mousePosition-m_Mouse;
 			switch(index) {
 				case 1:mouse.y=0.0f;break;
 				case 2:mouse.x=0.0f;break;
 			}
+			return true;
+		}
+
+		protected virtual void UpdateTransform() {
+			if(!PrepareTransform(out var index,out var mouse)) {return;}
+			//
 			switch(m_Action&0xFF) {
 				case 1:SetPosition(mouse.x,mouse.y);SetCursor(1);break;
 				case 2:SetRotation(mouse.y,-mouse.x,0);SetCursor(2);break;// Inverse
 				case 4:ResetTarget();SetCursor(4);break;
 			}
-			//
 			if(IsScrolling(mouse.z)) {
 			switch(index) {
 				case 0:

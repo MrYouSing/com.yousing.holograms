@@ -109,10 +109,12 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
-  - name: Open Model .obj
+  - name: $Open Model
     actors:
     - {fileID: 0}
     - {fileID: 0}
+  - name: Open Model .obj
+    actors:
     - {fileID: 6215117105822389243}
     behaviours: []
     onStart:
@@ -120,10 +122,34 @@ MonoBehaviour:
         m_Calls: []
     onShow:
       m_PersistentCalls:
-        m_Calls: []
+        m_Calls:
+        - m_Target: {fileID: 8458336726562584314}
+          m_TargetAssemblyTypeName: YouSingStudio.Holograms.MonoDirector, YouSingStudio.Holograms
+          m_MethodName: Activate
+          m_Mode: 5
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: $Open Model
+            m_BoolArgument: 0
+          m_CallState: 2
     onHide:
       m_PersistentCalls:
-        m_Calls: []
+        m_Calls:
+        - m_Target: {fileID: 8458336726562584314}
+          m_TargetAssemblyTypeName: YouSingStudio.Holograms.MonoDirector, YouSingStudio.Holograms
+          m_MethodName: Deactivate
+          m_Mode: 5
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: $Open Model
+            m_BoolArgument: 0
+          m_CallState: 2
     onOpen:
       m_PersistentCalls:
         m_Calls:
@@ -141,8 +167,6 @@ MonoBehaviour:
           m_CallState: 2
   - name: Open Model .ab;Open Model .unity
     actors:
-    - {fileID: 0}
-    - {fileID: 0}
     - {fileID: 3009754350609837993}
     behaviours: []
     onStart:
@@ -150,10 +174,34 @@ MonoBehaviour:
         m_Calls: []
     onShow:
       m_PersistentCalls:
-        m_Calls: []
+        m_Calls:
+        - m_Target: {fileID: 8458336726562584314}
+          m_TargetAssemblyTypeName: YouSingStudio.Holograms.MonoDirector, YouSingStudio.Holograms
+          m_MethodName: Activate
+          m_Mode: 5
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: $Open Model
+            m_BoolArgument: 0
+          m_CallState: 2
     onHide:
       m_PersistentCalls:
-        m_Calls: []
+        m_Calls:
+        - m_Target: {fileID: 8458336726562584314}
+          m_TargetAssemblyTypeName: YouSingStudio.Holograms.MonoDirector, YouSingStudio.Holograms
+          m_MethodName: Deactivate
+          m_Mode: 5
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: $Open Model
+            m_BoolArgument: 0
+          m_CallState: 2
     onOpen:
       m_PersistentCalls:
         m_Calls:
@@ -171,8 +219,6 @@ MonoBehaviour:
           m_CallState: 2
   - name: Open Model .gltf;Open Model .glb
     actors:
-    - {fileID: 0}
-    - {fileID: 0}
     - {fileID: 7502198169500674435}
     behaviours: []
     onStart:
@@ -180,10 +226,34 @@ MonoBehaviour:
         m_Calls: []
     onShow:
       m_PersistentCalls:
-        m_Calls: []
+        m_Calls:
+        - m_Target: {fileID: 8458336726562584314}
+          m_TargetAssemblyTypeName: YouSingStudio.Holograms.MonoDirector, YouSingStudio.Holograms
+          m_MethodName: Activate
+          m_Mode: 5
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: $Open Model
+            m_BoolArgument: 0
+          m_CallState: 2
     onHide:
       m_PersistentCalls:
-        m_Calls: []
+        m_Calls:
+        - m_Target: {fileID: 8458336726562584314}
+          m_TargetAssemblyTypeName: YouSingStudio.Holograms.MonoDirector, YouSingStudio.Holograms
+          m_MethodName: Deactivate
+          m_Mode: 5
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: $Open Model
+            m_BoolArgument: 0
+          m_CallState: 2
     onOpen:
       m_PersistentCalls:
         m_Calls:
@@ -201,8 +271,6 @@ MonoBehaviour:
           m_CallState: 2
   - name: Open Sketchfab
     actors:
-    - {fileID: 0}
-    - {fileID: 0}
     - {fileID: 5707191106331736883}
     behaviours: []
     onStart:
@@ -210,10 +278,34 @@ MonoBehaviour:
         m_Calls: []
     onShow:
       m_PersistentCalls:
-        m_Calls: []
+        m_Calls:
+        - m_Target: {fileID: 8458336726562584314}
+          m_TargetAssemblyTypeName: YouSingStudio.Holograms.MonoDirector, YouSingStudio.Holograms
+          m_MethodName: Activate
+          m_Mode: 5
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: $Open Model
+            m_BoolArgument: 0
+          m_CallState: 2
     onHide:
       m_PersistentCalls:
-        m_Calls: []
+        m_Calls:
+        - m_Target: {fileID: 8458336726562584314}
+          m_TargetAssemblyTypeName: YouSingStudio.Holograms.MonoDirector, YouSingStudio.Holograms
+          m_MethodName: Deactivate
+          m_Mode: 5
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: $Open Model
+            m_BoolArgument: 0
+          m_CallState: 2
     onOpen:
       m_PersistentCalls:
         m_Calls:

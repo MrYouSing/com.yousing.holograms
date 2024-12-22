@@ -1,3 +1,4 @@
+// TODO: Quilt viewer Management????
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -16,8 +17,10 @@ namespace YouSingStudio.Holograms {
 		public WrapMode wrap;
 		public float duration=1.0f;
 		[Header("UI")]
+		[Tooltip("[0]:Quilt\n[1]:General")]
+		public GameObject[] actors;
+		[Tooltip("[0]:Quilt\n[1]:General")]
 		public CanvasGroup[] groups;
-		public RawImage[] images;
 		public GameObject durationUI;
 
 		[System.NonSerialized]protected float m_Time;
@@ -71,12 +74,12 @@ namespace YouSingStudio.Holograms {
 		}
 
 		protected virtual void SetActive(byte value) {
-			for(int i=0,imax=images?.Length??0;i<imax;++i) {
+			for(int i=0,imax=actors?.Length??0;i<imax;++i) {
 				if((value&(1<<i))!=0) {
-					images[i].enabled=true;
+					actors[i].SetActive(true);
 					groups[i].SetActive(true);
 				}else {
-					images[i].enabled=false;
+					actors[i].SetActive(false);
 					groups[i].SetActive(false);
 				}
 			}
@@ -96,7 +99,7 @@ namespace YouSingStudio.Holograms {
 		}
 
 		public virtual void SetParent(Transform p) {
-			images[0].transform.SetParent(p,false);
+			actors[0].transform.SetParent(p,false);
 		}
 
 		public virtual void SetWrap(WrapMode value) {
