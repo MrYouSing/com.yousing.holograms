@@ -1216,6 +1216,38 @@ PrefabInstance:
       propertyPath: m_Plane
       value: 
       objectReference: {fileID: 873960009}
+    - target: {fileID: 265197843698503319, guid: 58b12bda410d78e469d43ec2eed7570d, type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 265197843698503319, guid: 58b12bda410d78e469d43ec2eed7570d, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 265197843698503319, guid: 58b12bda410d78e469d43ec2eed7570d, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 265197843698503319, guid: 58b12bda410d78e469d43ec2eed7570d, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 265197843698503319, guid: 58b12bda410d78e469d43ec2eed7570d, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 594
+      objectReference: {fileID: 0}
+    - target: {fileID: 265197843698503319, guid: 58b12bda410d78e469d43ec2eed7570d, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 1056
+      objectReference: {fileID: 0}
+    - target: {fileID: 265197843698503319, guid: 58b12bda410d78e469d43ec2eed7570d, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.90909094
+      objectReference: {fileID: 0}
+    - target: {fileID: 265197843698503319, guid: 58b12bda410d78e469d43ec2eed7570d, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.90909094
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

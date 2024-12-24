@@ -170,6 +170,9 @@ namespace YouSingStudio.Holograms {
 
 		protected virtual void OnMessage(string color) {
 			context.GetForm(OAuthBehaviour.k_Type_Error,s_Form);
+			//
+			if(s_Form[0]=="$(ShowLogin)") {SetLogin(true);return;}
+			//
 			if(login!=null) {
 				string str=string.IsNullOrEmpty(color)?s_Form[0]:$"<color=#{color}>{s_Form[0]}</color>";
 				login.SetText(1,str);

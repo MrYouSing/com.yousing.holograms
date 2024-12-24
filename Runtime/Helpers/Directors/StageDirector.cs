@@ -76,8 +76,8 @@ namespace YouSingStudio.Holograms {
 		[System.Serializable]
 		public class Stage {
 			public string name;
-			public List<GameObject> actors;
-			public List<Behaviour> behaviours;
+			public List<GameObject> actors=null;
+			public List<Behaviour> behaviours=null;
 // <!-- Macro.Patch Stage
 			public UnityEvent onStart=null;
 			public UnityEvent onShow=null;

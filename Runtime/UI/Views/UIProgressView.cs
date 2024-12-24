@@ -1,3 +1,75 @@
+/* <!-- Macro.Define DeclareStruct_00
+		public partial class $(Table.Name):IProgress {{
+ Macro.End --> */
+/* <!-- Macro.Define DeclareStruct_01
+			public {0} {1};
+ Macro.End --> */
+/* <!-- Macro.Define DeclareStruct_02
+
+			public virtual void Reset() {{
+ Macro.End --> */
+/* <!-- Macro.Define DeclareStruct_03
+				{1}={2};
+ Macro.End --> */
+/* <!-- Macro.Define DeclareStruct_04
+			}}
+		}}
+
+ Macro.End --> */
+/* <!-- Macro.Table DeclareStruct
+DeclareStruct_00,
+DeclareStruct_01
+DeclareStruct_02,
+DeclareStruct_03
+DeclareStruct_04,
+ Macro.End --> */
+/* <!-- Macro.Define DeclareGet_00
+		public static IProgress Get(
+ Macro.End --> */
+/* <!-- Macro.Define DeclareGet_01
+			{3},{0} {1}={2}
+ Macro.End --> */
+/* <!-- Macro.Define DeclareGet_02
+		) {{
+			return new $(Table.Name){{
+ Macro.End --> */
+/* <!-- Macro.Define DeclareGet_03
+				{3},{1}={1}
+ Macro.End --> */
+/* <!-- Macro.Define DeclareGet_04
+			}};
+		}}
+ Macro.End --> */
+/* <!-- Macro.Table DeclareGet
+DeclareGet_00,
+DeclareGet_01
+DeclareGet_02,
+DeclareGet_03
+DeclareGet_04,
+ Macro.End --> */
+
+/* <!-- Macro.Table DelegateProgress
+System.Func<string>,name,null,#,
+System.Func<float>,value,null,,
+System.Func<string>,text,null,,
+System.Action,dispose,null,,
+ Macro.End --> */
+/* <!-- Macro.Table WebRequestProgress
+UnityWebRequest,www,null,#,
+AsyncOperation,ao,null,,
+ulong,size,0,,
+ Macro.End --> */
+
+/* <!-- Macro.BatchCall DeclareStruct DelegateProgress
+ Macro.End --> */
+/* <!-- Macro.BatchCall DeclareGet DelegateProgress
+ Macro.End --> */
+/* <!-- Macro.Replace
+#&#44;, 
+ Macro.End --> */
+/* <!-- Macro.Patch
+,AutoGen
+ Macro.End --> */
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -11,6 +83,35 @@ namespace YouSingStudio.Holograms {
 	public class UIProgressView
 		:MonoBehaviour
 	{
+// <!-- Macro.Patch AutoGen
+		public partial class DelegateProgress:IProgress {
+			public System.Func<string> name;
+			public System.Func<float> value;
+			public System.Func<string> text;
+			public System.Action dispose;
+
+			public virtual void Reset() {
+				name=null;
+				value=null;
+				text=null;
+				dispose=null;
+			}
+		}
+
+		public static IProgress Get(
+			 System.Func<string> name=null
+			,System.Func<float> value=null
+			,System.Func<string> text=null
+			,System.Action dispose=null
+		) {
+			return new DelegateProgress{
+				 name=name
+				,value=value
+				,text=text
+				,dispose=dispose
+			};
+		}
+// Macro.Patch -->
 		#region Nested Types
 
 		public interface IProgress
@@ -19,6 +120,17 @@ namespace YouSingStudio.Holograms {
 			string name{get;}
 			float value{get;}
 			string text{get;}
+		}
+
+		public partial class DelegateProgress
+		{
+			string IProgress.name=>name?.Invoke()??null;
+			float IProgress.value=>value?.Invoke()??-1.0f;
+			string IProgress.text=>text?.Invoke()??null;
+			public virtual void Dispose() {
+				dispose?.Invoke();
+				Reset();
+			}
 		}
 
 		public class WebRequestProgress

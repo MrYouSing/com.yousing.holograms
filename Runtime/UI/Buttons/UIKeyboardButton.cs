@@ -31,6 +31,9 @@ namespace YouSingStudio.Holograms {
 		}
 
 		protected virtual void Update() {
+			var sm=Private.ShortcutManager.s_Instance;
+			if(sm!=null&&(sm.locks?.Count??0)>0) {return;}
+			//
 			bool b=false;
 			for(int i=0,imax=keys?.Length??0;i<imax;++i) {
 				if(Input.GetKey(keys[i])) {b=true;break;}

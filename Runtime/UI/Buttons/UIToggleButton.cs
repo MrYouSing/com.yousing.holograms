@@ -66,6 +66,8 @@ namespace YouSingStudio.Holograms {
 		}
 
 		protected virtual void Update() {
+			var sm=Private.ShortcutManager.s_Instance;
+			if(sm!=null&&(sm.locks?.Count??0)>0) {return;}
 			//
 			bool b=false;
 			for(int i=0,imax=m_Keys?.Length??0;i<imax;++i) {

@@ -292,6 +292,7 @@ namespace Sketchfab {
 		protected virtual void AddTask(SketchfabTask task) {
 			if(task==null) {return;}task.context=this;
 			if(m_Logged>0) {task.Run();return;}
+			else {ShowLogin();}
 			//
 			if(m_Tasks==null) {m_Tasks=new List<SketchfabTask>();}
 			m_Tasks.Add(task);
@@ -434,6 +435,13 @@ namespace Sketchfab {
 				}
 				m_Logged=i;
 			}
+		}
+
+		protected virtual void ShowLogin() {
+			string tmp=m_Message;
+				m_Message="$(ShowLogin)";
+				InvokeEvent(k_Type_Error);
+			m_Message=tmp;
 		}
 
 		public override void Login() {

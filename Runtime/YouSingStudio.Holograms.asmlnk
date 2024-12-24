@@ -1,0 +1,15 @@
+{"assemblies":[{
+	"name":"Dummiesman.OBJImport",
+	"type":"Dummiesman.OBJLoader",
+	"define":"DUMMIESMAN_OBJ_IMPORT"
+},{
+	"name":"TriLibCore.Runtime",
+	"type":"TriLibCore.AssetLoader",
+	"define":"TRI_LIB_CORE",
+	"file":".."
+},{
+	"name":"TriLibCore.Editor",
+	"type":"TriLibCore.Editor.AssetLoaderOptionsEditor",
+	"text":",\n\t\"references\":[\"TriLibCore.Runtime\"],\n\t\"includePlatforms\":[\"Editor\"]\n"
+}]
+}

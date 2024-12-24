@@ -5,5 +5,11 @@
 	],
 	"includePlatforms": [
 		"Editor"
+	],
+	"versionDefines": [
+		{
+			"name": "com.yousing.editor",
+			"define": "YOUSING_EDITOR"
+		}
 	]
 }

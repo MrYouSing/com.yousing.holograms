@@ -3,6 +3,8 @@
 	"references": [
 		"Siccity.GLTFUtility",
 		"glTFast",
+		"Dummiesman.OBJImport",
+		"TriLibCore.Runtime",
 		"LookingGlass"
 	],
 	"allowUnsafeCode": true,

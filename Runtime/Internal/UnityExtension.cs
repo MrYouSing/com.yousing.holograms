@@ -35,6 +35,8 @@ using System.Runtime.CompilerServices;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.EventSystems;
 using UnityEngine.Pool;
 using UnityEngine.UI;
 using UnityEngine.Video;
@@ -657,6 +659,15 @@ namespace YouSingStudio.Holograms {
 			}
 		}
 
+		public static T AddMissingComponent<T>(this Component thiz) where T:Component {
+			T tmp=null;
+			if(thiz!=null) {
+				tmp=thiz.GetComponent<T>();
+				if(tmp==null) {tmp=thiz.gameObject.AddComponent<T>();}
+			}
+			return tmp;
+		}
+
 		public static T NewActor<T>(this Component thiz,string key) where T:Component {
 			GameObject go=new GameObject(key);
 			if(thiz!=null) {go.transform.SetParent(thiz.transform,false);}
@@ -720,6 +731,16 @@ namespace YouSingStudio.Holograms {
 		public static bool ContainsScreenPoint(this RectTransform thiz,Vector2 point,bool value=false) {
 			if(thiz!=null) {value=RectTransformUtility.RectangleContainsScreenPoint(thiz,point);}
 			return value;
+		}
+
+		public static void AddTrigger(this EventTrigger thiz,EventTriggerType type,UnityAction<BaseEventData> action) {
+			if(thiz!=null&&action!=null) {
+				EventTrigger.Entry e;var tmp=thiz.triggers;
+				int i=tmp.FindIndex(x=>x.eventID==type);
+				if(i>=0) {e=tmp[i];}
+				else {e=new EventTrigger.Entry();tmp.Add(e);}
+				e.callback.AddListener(action);
+			}
 		}
 
 		  //

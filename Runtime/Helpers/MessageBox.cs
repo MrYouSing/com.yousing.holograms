@@ -22,6 +22,40 @@ Progress,
 		}}
 
  Macro.End --> */
+/* <!-- Macro.Include
+../UI/Views/UIProgressView.cs
+ Macro.End --> */
+/* <!-- Macro.Define DeclareProgress_00
+		public static GameObject ShowProgress(
+			 string style
+ Macro.End --> */
+/* <!-- Macro.Define DeclareProgress_01
+			,{0} {1}={2}
+ Macro.End --> */
+/* <!-- Macro.Define DeclareProgress_02
+		) {{
+			UIProgressView tmp=Show<UIProgressView>(style,s_Style_Progress);
+			if(tmp!=null) {{
+				tmp.Set(UIProgressView.Get(
+ Macro.End --> */
+/* <!-- Macro.Define DeclareProgress_03
+					{3},{1}:{1}
+ Macro.End --> */
+/* <!-- Macro.Define DeclareProgress_04
+				));
+				return Show(tmp.gameObject);
+			}}
+			return null;
+		}}
+
+ Macro.End --> */
+/* <!-- Macro.Table DeclareProgress
+DeclareProgress_00,
+DeclareProgress_01
+DeclareProgress_02,
+DeclareProgress_03
+DeclareProgress_04,
+ Macro.End --> */
 
 /* <!-- Macro.Call  Messages
 		public static string s_Caption_{0}="{0}";
@@ -33,7 +67,12 @@ Info,
 Warning,
 Error,
  Macro.End --> */
+/* <!-- Macro.BatchCall DeclareProgress DelegateProgress
+ Macro.End --> */
+/* <!-- Macro.BatchCall DeclareProgress WebRequestProgress
+ Macro.End --> */
 /* <!-- Macro.Replace
+#&#44;, 
 LogInfo,Log
  Macro.End --> */
 /* <!-- Macro.Patch
@@ -111,6 +150,44 @@ namespace YouSingStudio.Holograms {
 			return null;
 		}
 
+		public static GameObject ShowProgress(
+			 string style
+			,System.Func<string> name=null
+			,System.Func<float> value=null
+			,System.Func<string> text=null
+			,System.Action dispose=null
+		) {
+			UIProgressView tmp=Show<UIProgressView>(style,s_Style_Progress);
+			if(tmp!=null) {
+				tmp.Set(UIProgressView.Get(
+					 name:name
+					,value:value
+					,text:text
+					,dispose:dispose
+				));
+				return Show(tmp.gameObject);
+			}
+			return null;
+		}
+
+		public static GameObject ShowProgress(
+			 string style
+			,UnityWebRequest www=null
+			,AsyncOperation ao=null
+			,ulong size=0
+		) {
+			UIProgressView tmp=Show<UIProgressView>(style,s_Style_Progress);
+			if(tmp!=null) {
+				tmp.Set(UIProgressView.Get(
+					 www:www
+					,ao:ao
+					,size:size
+				));
+				return Show(tmp.gameObject);
+			}
+			return null;
+		}
+
 // Macro.Patch -->
 		#region Fields
 
@@ -171,10 +248,10 @@ namespace YouSingStudio.Holograms {
 			return null;
 		}
 
-		public static GameObject ShowProgress(string style,UnityWebRequest www,AsyncOperation ao,ulong size=0) {
+		public static GameObject ShowProgress(string style,string key,System.Func<float> func,System.Action action=null) {
 			UIProgressView tmp=Show<UIProgressView>(style,s_Style_Progress);
 			if(tmp!=null) {
-				tmp.Set(UIProgressView.Get(www,ao,size));
+				tmp.Set(UIProgressView.Get(name:()=>key,value:func,dispose:action));
 				return Show(tmp.gameObject);
 			}
 			return null;

@@ -57,6 +57,7 @@ Button(Set,Button
 /* <!-- Macro.Patch
 ,Start
  Macro.End --> */
+using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using UnityEngine.Video;
@@ -141,6 +142,7 @@ namespace YouSingStudio.Holograms {
 
 		[System.NonSerialized]protected bool m_Jump;
 		[System.NonSerialized]protected float m_Time;
+		[System.NonSerialized]protected List<ShortcutBehaviour> m_Shortcuts;
 
 		#endregion Fields
 
@@ -155,6 +157,11 @@ namespace YouSingStudio.Holograms {
 			BindSlider(k_Progress,SetProgress);
 			BindSlider(k_Volume,SetVolume);
 // Macro.Patch -->
+			if(m_Shortcuts==null) {
+				m_Shortcuts=new List<ShortcutBehaviour>();
+				this.GetComponentsInChildren(true,m_Shortcuts);
+			}
+			//
 			if(canvas==null) {canvas=GetComponent<CanvasGroup>();}
 			SetActive(false);
 		}
@@ -186,6 +193,10 @@ namespace YouSingStudio.Holograms {
 
 		protected virtual void SetActive(bool value) {
 			canvas.SetActive(value);
+			//
+			ShortcutBehaviour it;for(int i=0,imax=m_Shortcuts?.Count??0;i<imax;++i) {
+				it=m_Shortcuts[i];if(it!=null) {it.enabled=value;}
+			}
 		}
 
 		protected virtual void UpdateControls() {

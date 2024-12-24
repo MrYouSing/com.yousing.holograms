@@ -21,7 +21,7 @@ namespace YouSingStudio.Holograms {
 		public UnityEngine.Video.Video3DLayout layout=UnityEngine.Video.Video3DLayout.SideBySide3D;
 		public MediaPlayer player;
 		public StageDirector director;
-		public string[] filters=new string[]{
+		public List<string> filters=new List<string>{
 			// Image
 			".jpg",
 			".jpeg",
@@ -55,7 +55,7 @@ namespace YouSingStudio.Holograms {
 					if(fn.EndsWith(s_Whitelist[i],UnityExtension.k_Comparison)) {return false;}
 				}
 				//
-				for(int i=0,imax=filters?.Length??0;i<imax;++i) {
+				for(int i=0,imax=filters?.Count??0;i<imax;++i) {
 					if(path.EndsWith(filters[i],UnityExtension.k_Comparison)) {return true;}
 				}
 			}

@@ -49,8 +49,21 @@ namespace YouSingStudio.Holograms {
 
 		#region Methods
 
-		public override Vector3 ParseQuilt()=>quiltTexture!=null?base.ParseQuilt():new Vector3(8.0f,5.0f,0.5625f);
-		public override Vector4 PreferredSize()=>quiltTexture!=null?base.PreferredSize():new Vector4(4320.0f,4800.0f,8.0f,5.0f);
+		public override Vector3 ParseQuilt() {
+			bool play=true;
+#if UNITY_EDITOR
+			if(!UnityEditor.EditorApplication.isPlaying) {play=false;}
+#endif
+			return play&&quiltTexture!=null?base.ParseQuilt():new Vector3(8.0f,5.0f,0.5625f);
+		}
+
+		public override Vector4 PreferredSize() {
+			bool play=true;
+#if UNITY_EDITOR
+			if(!UnityEditor.EditorApplication.isPlaying) {play=false;}
+#endif
+			return play&&quiltTexture!=null?base.PreferredSize():new Vector4(4320.0f,4800.0f,8.0f,5.0f);
+		}
 
 		public override bool IsPresent() {
 			var sdk=OpenStageAiSdk.instance;

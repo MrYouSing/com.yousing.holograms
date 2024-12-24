@@ -29,12 +29,7 @@ namespace YouSingStudio.Holograms {
 		}
 
 		public override Manifest LoadManifest(string path) {
-			Manifest tmp=base.LoadManifest(path);
-			if(tmp==null) {
-				tmp=new Manifest{
-					R=new Vector3(0.0f,180.0f,0.0f),
-					S=new Vector3(float.NaN,float.NaN,float.NaN)
-				};
+			if(this.CreateManifest(path,out var tmp,base.LoadManifest)) {
 			}
 			return tmp;
 		}
@@ -42,15 +37,10 @@ namespace YouSingStudio.Holograms {
 		protected override async void InternalLoad() {
 			if(!File.Exists(m_Path)) {return;}
 			//
-			Model m=new Model();m.path=m_Path;
-			m.manifest=LoadManifest(m.path);
+			Model m=this.CreateModel(m_Path,null);
 #if ENABLE_GLTF_UTILITY
-			string txt="Loading "+Path.GetFileNameWithoutExtension(m_Path);
-			MessageBox.ShowInfo("Prefab/Model_Loading",txt,null,MessageBox.Clear);
-			Importer.LoadFromFileAsync(m.path,import,(x,c)=>{
-				MessageBox.Clear();
-				LoadGltfModel(m,x,c);
-			});
+			this.ShowBusyDialog(m_Path);
+			Importer.LoadFromFileAsync(m.path,import,(x,c)=>LoadGltfModel(m,x,c));
 #elif ENABLE_GLTFAST
 			var tmp=new GltfImport();m.onDispose+=tmp.Dispose;
 			string fn=Path.GetFullPath(m.path).FixPath();
@@ -64,6 +54,7 @@ namespace YouSingStudio.Holograms {
 #endif
 #if ENABLE_GLTF_UTILITY
 		protected virtual void LoadGltfModel(Model m,GameObject x,AnimationClip[] c) {
+			this.HideBusyDialog();
 			// Fix transform.
 			Transform t=x.transform;Quaternion q=t.rotation;
 			if(q!=Quaternion.identity) {

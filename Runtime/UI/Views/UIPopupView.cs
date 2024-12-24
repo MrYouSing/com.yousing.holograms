@@ -24,6 +24,7 @@ namespace YouSingStudio.Holograms {
 
 		[System.NonSerialized]protected bool m_Active;
 		[System.NonSerialized]protected float m_Time=-1.0f;
+		[System.NonSerialized]protected bool m_Click;
 		[System.NonSerialized]protected CanvasGroup m_Canvas;
 		[System.NonSerialized]protected GameObject m_ButtonV;
 		[System.NonSerialized]protected RectTransform m_ButtonT;
@@ -46,8 +47,16 @@ namespace YouSingStudio.Holograms {
 		}
 
 		public virtual void OnPointerClick(PointerEventData e) {
+			if(!m_Click) {return;}
+			//
 			int mask=m_Active?hide:show;
 			if((mask&(1<<(int)e.button))!=0) {SetActive(!m_Active);}
+		}
+
+		public virtual void OnPointerClick(BaseEventData e) {
+			bool tmp=m_Click;
+				m_Click=true;OnPointerClick((PointerEventData)e);
+			m_Click=tmp;
 		}
 
 		#endregion Unity Messages
@@ -114,6 +123,8 @@ namespace YouSingStudio.Holograms {
 				m_ButtonV=button.gameObject;
 				m_ButtonT=button.transform as RectTransform;
 			}
+			//
+			m_Click=m_ButtonT==transform;
 		}
 
 		public virtual void SetButton(bool value) {

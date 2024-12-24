@@ -183,6 +183,8 @@ namespace YouSingStudio.Private {
 		}
 
 		public virtual Shortcut Add(string key,System.Action action,params Key[] keys) {
+			if((keys?.Length??0)==0) {return null;}
+			//
 			Shortcut shortcut=Shortcut.Obtain();
 				shortcut.name=key;
 				shortcut.keys=keys;

@@ -37,10 +37,12 @@ namespace YouSingStudio.Holograms {
 					it.onClick.AddListener(Hide);
 				}
 			}
-			SetButton(button);
+			it=button;button=null;SetButton(it);
 		}
 
 		public override void OnPointerClick(PointerEventData e) {
+			if(!m_Click) {return;}
+			//
 			if((show&(1<<(int)e.button))!=0) {SetActive(!m_Active);}
 			else if(button!=null) {button.OnPointerClick(e);}
 		}
@@ -84,10 +86,11 @@ namespace YouSingStudio.Holograms {
 		}
 
 		public override void SetButton(Button value) {
+			if(value==button) {return;}
 			if(button!=null) {button.transform.SetParent(content,false);}
 			button=value;
 			if(button!=null) {button.transform.SetParent(main,false);}
-			base.SetButton(button);
+			base.SetButton(button);m_Click=true;
 			//
 			int i=0,imax=m_Buttons?.Length??0;
 			Transform it;for(;i<imax;++i) {

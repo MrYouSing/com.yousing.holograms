@@ -99,7 +99,7 @@ namespace YouSingStudio.Holograms {
 				if(s.y*s.z==0.0f) {s.y=s.z=s.x;}t.localScale=s;
 			}
 			//
-			this.InvokeEvent();
+			if(isActiveAndEnabled) {this.InvokeEvent();}
 		}
 
 		public virtual void Unload() {
