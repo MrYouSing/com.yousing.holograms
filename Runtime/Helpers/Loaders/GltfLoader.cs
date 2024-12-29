@@ -23,9 +23,9 @@ namespace YouSingStudio.Holograms {
 
 		#region Methods
 
-		protected override void Start() {
+		protected override System.Collections.IEnumerator Start() {
 			this.SetRealName();this.LoadSettings(name);
-			base.Start();
+			yield return base.Start();
 		}
 
 		public override Manifest LoadManifest(string path) {
@@ -55,17 +55,16 @@ namespace YouSingStudio.Holograms {
 #if ENABLE_GLTF_UTILITY
 		protected virtual void LoadGltfModel(Model m,GameObject x,AnimationClip[] c) {
 			this.HideBusyDialog();
-			// Fix transform.
-			Transform t=x.transform;Quaternion q=t.rotation;
-			if(q!=Quaternion.identity) {
-				q=q*Quaternion.AngleAxis(180.0f,Vector3.right);
-				m.manifest.R=(q*Quaternion.Euler(m.manifest.R)).eulerAngles;
-			}
 			// Import animations.
 			int i=0,imax=c?.Length??0;if(imax>0) {
 				var a=x.AddComponent<Animation>();AnimationClip it;string key;// Rename clips.
 				for(;i<imax;++i) {it=c[i];key=$"{i}:{it.name}";it.name=key;a.AddClip(it,key);}
 				a.wrapMode=WrapMode.Loop;a.clip=c[0];
+			}
+			// Fix transform.
+			Transform t=x.transform;Quaternion q=t.rotation;
+			if(q!=Quaternion.identity) {
+				this.RebaseTransform(ref t,imax>0);
 			}
 			// Disable unused components
 			using(ListPool<Camera>.Get(out var list)) {
@@ -73,7 +72,7 @@ namespace YouSingStudio.Holograms {
 				for(i=0,imax=list.Count;i<imax;++i) {list[i].enabled=false;}
 			}
 			//
-			LoadModel(m,x);
+			LoadModel(m,t.gameObject);
 		}
 #endif
 		#endregion Methods

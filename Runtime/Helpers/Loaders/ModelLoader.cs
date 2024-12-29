@@ -16,6 +16,8 @@ namespace YouSingStudio.Holograms {
 			//
 			public string style;// PBR or Toon
 			public string json;
+
+			[System.NonSerialized]public Model context;
 		}
 
 		public class Model:System.IDisposable {
@@ -45,8 +47,8 @@ namespace YouSingStudio.Holograms {
 
 		public Transform container;
 		[SerializeField]protected string m_Path;
-		[System.NonSerialized]public System.Action onUnload=null;
 
+		[System.NonSerialized]protected bool m_DidStart;
 		[System.NonSerialized]protected Manifest m_Manifest;
 		[System.NonSerialized]protected GameObject m_Actor;
 
@@ -54,7 +56,8 @@ namespace YouSingStudio.Holograms {
 
 		#region Unity Messages
 
-		protected virtual void Start() {
+		protected virtual System.Collections.IEnumerator Start() {
+			yield return null;m_DidStart=true;// TODO: Lazy MonoBehaviour
 			if(!string.IsNullOrEmpty(m_Path)) {Load(m_Path);}
 		}
 
@@ -75,7 +78,7 @@ namespace YouSingStudio.Holograms {
 
 		public virtual void Load(string path) {
 			if(m_Actor!=null) {Unload();}
-			m_Path=path;if(string.IsNullOrEmpty(m_Path)||!didStart) {return;}
+			m_Path=path;if(string.IsNullOrEmpty(m_Path)||!m_DidStart) {return;}
 			//
 			if(s_Models.TryGetValue(m_Path.GetFilePath(),out var tmp)&&tmp!=null) {
 				Load(tmp.prefab,tmp.manifest);
@@ -104,7 +107,6 @@ namespace YouSingStudio.Holograms {
 
 		public virtual void Unload() {
 			if(m_Actor!=null) {GameObject.Destroy(m_Actor);}
-			onUnload?.Invoke();
 			//
 			m_Manifest=null;m_Actor=null;
 		}
@@ -129,6 +131,7 @@ namespace YouSingStudio.Holograms {
 			//
 			if(prefab.scene.IsValid()) {Hide(prefab);}model.prefab=prefab;
 			if(model.manifest!=null) {
+				model.manifest.context=model;
 			}
 			s_Models[model.path.GetFilePath()]=model;Load(model.prefab,model.manifest);
 		}

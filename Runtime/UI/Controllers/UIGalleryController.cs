@@ -47,6 +47,7 @@ namespace YouSingStudio.Holograms {
 			this.LoadSettings(name);
 			//
 			MonoCamera.s_AllowDummy=true;
+			UITransformManipulator.s_AutoReset=true;
 			ImageConverter.settings.download=UnityExtension.Path_Combine(paths[0],"Downloads");
 			TextureManager.instance.SetupFormats();
 			//
@@ -110,6 +111,16 @@ namespace YouSingStudio.Holograms {
 			int i=m_Paths.IndexOf(path);
 			if(i<0&&CanPlay(path)) {i=Add(path);}
 			if(i>=0) {Play(i);}
+		}
+
+		protected override void OnSketchfab(string path) {
+			path=path.GetFilePath();
+			//
+			int i=m_Paths.IndexOf(path);
+			if(i<0&&CanPlay(path)) {i=Add(path);}
+			if(i>=0) {selector.Highlight(i);}
+			//
+			base.OnSketchfab(path);
 		}
 
 		public virtual void Play() {

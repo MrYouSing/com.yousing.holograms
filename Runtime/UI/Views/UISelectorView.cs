@@ -14,6 +14,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 using YouSingStudio.Private;
 using Key=UnityEngine.KeyCode;
@@ -24,9 +25,20 @@ namespace YouSingStudio.Holograms {
 	{
 		#region Fields
 
-		public Transform container;
+		/// <summary>
+		/// <seealso cref="ScrollRect.content"/>
+		/// </summary>
+		[FormerlySerializedAs("container")]
+		public Transform content;
 		public GameObject prefab;
+		/// <summary>
+		/// <seealso cref="ScrollRect.viewport"/>
+		/// </summary>
+		public RectTransform viewport;
+		[Tooltip("x:Scale\ny:Padding\nz:Min\nw:Max")]
+		public Vector4 size;
 		public Transform arrow;
+		public int depth=-1;
 		public bool loop=true;
 		public Key[] keys=new Key[4];
 
@@ -52,8 +64,8 @@ namespace YouSingStudio.Holograms {
 			sm.Add(name+".PageUp",PageUp,keys[i]);++i;
 			sm.Add(name+".PageDown",PageDown,keys[i]);++i;
 // Macro.Patch -->
-			m_Scroll=container.GetComponentInParent<ScrollRect>();
-			m_Layout=container.GetComponent<GridLayoutGroup>();
+			m_Scroll=content.GetComponentInParent<ScrollRect>();
+			m_Layout=content.GetComponent<GridLayoutGroup>();
 			if(m_Layout!=null) {m_Page=m_Layout.constraintCount;}
 		}
 
@@ -64,6 +76,7 @@ namespace YouSingStudio.Holograms {
 		public virtual void Render(IList<string> list) {
 			m_Index=-1;m_Count=0;
 			m_Views.Render(list,RenderView,CreateView);
+			UpdateViewport();
 			if(m_Scroll!=null) {
 				m_Scroll.normalizedPosition=Vector2.up;
 			}
@@ -93,10 +106,11 @@ namespace YouSingStudio.Holograms {
 
 		public virtual void Highlight(int index) {
 			m_Index=index;
+			if(m_Index<0) {UpdateArrow(null);return;}
 			//
 			var es=EventSystem.current;// Avoid space key to submit.
 			if(es!=null) {es.SetSelectedGameObject(null);}
-			if(arrow!=null) {arrow.SetParent(m_Views[m_Index].transform,false);}
+			UpdateArrow(m_Views[m_Index].transform);
 			UpdateScroll();
 		}
 
@@ -114,6 +128,25 @@ namespace YouSingStudio.Holograms {
 
 		public virtual void PageDown() {
 			Select(m_Index+m_Page);
+		}
+
+		protected virtual void UpdateViewport() {
+			if(viewport!=null) {
+				RectTransform.Axis a=m_Layout.constraint==GridLayoutGroup.Constraint.FixedRowCount
+					?RectTransform.Axis.Horizontal:RectTransform.Axis.Vertical;
+				float f=Mathf.Ceil(m_Count/(float)m_Page)*size.x+size.y;
+				if(size.z!=size.w) {f=Mathf.Clamp(f,size.z,size.w);}
+				viewport.SetSizeWithCurrentAnchors(a,f);
+			}
+		}
+
+		protected virtual void UpdateArrow(Transform parent) {
+			if(arrow==null) {return;}
+			arrow.SetParent(parent,false);
+			//
+			if(parent!=null&&depth>=0) {
+				arrow.SetSiblingIndex(depth);
+			}
 		}
 
 		protected virtual void UpdateScroll() {
@@ -135,7 +168,7 @@ namespace YouSingStudio.Holograms {
 
 		protected virtual GameObject CreateView() {
 			GameObject view=GameObject.Instantiate(prefab);
-			view.transform.SetParent(container,false);
+			view.transform.SetParent(content,false);
 			//
 			int i=m_Views.Count;
 			if(!(onCreate?.Invoke(view,i)??false)) {

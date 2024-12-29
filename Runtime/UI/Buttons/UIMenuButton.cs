@@ -79,6 +79,8 @@ namespace YouSingStudio.Holograms {
 				enabled=true;
 				m_Time=Time.time;
 				if(view!=null) {view.SetActive(true);}
+				//
+				onActive?.Invoke(m_Active);
 			}else {
 				m_Active=!value;
 				base.SetActive(value,instant);

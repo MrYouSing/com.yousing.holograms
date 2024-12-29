@@ -6,18 +6,8 @@ ShaderVariantCollection:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Gltf
+  m_Name: Variants_Gltf
   m_Shaders:
-  - first: {fileID: 4800000, guid: 8a8e7b0f99f56f14a972776049eef9f7, type: 3}
-    second:
-      variants:
-      - keywords: 
-        passType: 0
-  - first: {fileID: 4800000, guid: 2d7e2c54a09de0446a3e3bbbc799c2d3, type: 3}
-    second:
-      variants:
-      - keywords: 
-        passType: 0
   - first: {fileID: 4800000, guid: d28fc76bfd3057e4c8f1c6f0b91590c8, type: 3}
     second:
       variants:
@@ -36,6 +26,8 @@ ShaderVariantCollection:
       variants:
       - keywords: DIRECTIONAL
         passType: 4
+      - keywords: DIRECTIONAL LIGHTPROBE_SH
+        passType: 4
       - keywords: POINT
         passType: 5
       - keywords: 
@@ -47,8 +39,6 @@ ShaderVariantCollection:
         passType: 4
       - keywords: DIRECTIONAL LIGHTPROBE_SH
         passType: 4
-      - keywords: DIRECTIONAL
-        passType: 5
       - keywords: POINT
         passType: 5
       - keywords: 
@@ -62,6 +52,8 @@ ShaderVariantCollection:
         passType: 4
       - keywords: DIRECTIONAL LIGHTPROBE_SH
         passType: 4
+      - keywords: DIRECTIONAL
+        passType: 5
       - keywords: POINT
         passType: 5
       - keywords: 
@@ -134,3 +126,13 @@ ShaderVariantCollection:
         passType: 10
       - keywords: 
         passType: 11
+  - first: {fileID: 4800000, guid: 8a8e7b0f99f56f14a972776049eef9f7, type: 3}
+    second:
+      variants:
+      - keywords: 
+        passType: 0
+  - first: {fileID: 4800000, guid: 2d7e2c54a09de0446a3e3bbbc799c2d3, type: 3}
+    second:
+      variants:
+      - keywords: 
+        passType: 0

@@ -456,6 +456,9 @@ namespace Sketchfab {
 		}
 
 		protected override void OnLogin() {
+			SetString(".Username",texts[0]);
+			SetString(".Password",texts[1]);
+			//
 			var p=m_Logger.getCurrentSession();
 				displayName=p?.displayName??m_DisplayName;
 				avatarIcon=p?.avatar??m_AvatarIcon;

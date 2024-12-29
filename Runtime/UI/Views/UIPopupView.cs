@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -18,10 +19,12 @@ namespace YouSingStudio.Holograms {
 		public Button button;
 		public GameObject view;
 		public RectTransform content;
+		public List<RectTransform> rects;
 		[Header("Animation")]
 		public Vector2 duration=Vector2.right;
 		public AnimationCurve curve=AnimationCurve.Linear(0.0f,0.0f,1.0f,1.0f);
 
+		[System.NonSerialized]public System.Action<bool> onActive=null;
 		[System.NonSerialized]protected bool m_Active;
 		[System.NonSerialized]protected float m_Time=-1.0f;
 		[System.NonSerialized]protected bool m_Click;
@@ -67,6 +70,9 @@ namespace YouSingStudio.Holograms {
 			if(content!=null) {
 				if(content.ContainsScreenPoint(point,false)) {return false;}
 				if(m_ButtonT.ContainsScreenPoint(point,false)) {return false;}
+				for(int i=0,imax=rects?.Count??0;i<imax;++i) {
+					if(rects[i].ContainsScreenPoint(point,false)) {return false;}
+				}
 			}
 			return true;
 		}
@@ -98,6 +104,8 @@ namespace YouSingStudio.Holograms {
 			return true;
 		}
 
+		public virtual bool GetActive()=>m_Active;
+
 		public virtual void SetActive(bool value,bool instant=false) {
 			if(value==m_Active) {return;}
 			m_Active=value;
@@ -112,6 +120,8 @@ namespace YouSingStudio.Holograms {
 				m_Time=Time.time;
 				if(view!=null) {view.SetActive(true);}
 			}
+			//
+			onActive?.Invoke(m_Active);
 		}
 
 		public virtual void Show()=>SetActive(true);

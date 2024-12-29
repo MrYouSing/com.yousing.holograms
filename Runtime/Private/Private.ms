@@ -2,6 +2,7 @@
 true
  Macro.End --> */
 /* <!-- Macro.Table Replace
+.Events {,$(Namespace)
 .IO {,$(Namespace)
 .InputExtensions {,$(Namespace)
 .UI {,$(Namespace)
@@ -10,14 +11,14 @@ using UnityEngine;,using UnityEngine;using YouSingStudio.Holograms;
 using YouSingStudio.Events;,
  Macro.End --> */
 
-//<!-- Macro.File ScriptableView.cs
+//<!-- Macro.File ActiveTrigger.cs
 /* <!-- Macro.Copy File
-:Packages/com.yousing.ui/Runtime/Internal/$(GeneratedFileName).cs
+:Packages/com.yousing.events/Runtime/Modules/TriggerModule/$(GeneratedFileName).cs
  Macro.End --> */
 /* <!-- Macro.Replace Replace
  Macro.End --> */
 /* <!-- Macro.Replace
-Events.,
+MonoTrigger,MonoBehaviour
  Macro.End --> */
 // Macro.End -->
 
@@ -120,6 +121,25 @@ OAuthAPI.Se,//
 OAuthAPI.k_Type_,k_Type_
 TextureAPI.,RenderingExtension.
 icon.SaveFile(fn),File.WriteAllBytes(fn&#44;icon.EncodeToPNG())
+ Macro.End --> */
+// Macro.End -->
+
+//<!-- Macro.File SnapshotManager.cs
+/* <!-- Macro.Copy File
+:Packages/com.yousing.io/Runtime/Modules/SceneModule/$(GeneratedFileName).cs
+ Macro.End --> */
+/* <!-- Macro.Replace Replace
+ Macro.End --> */
+// Macro.End -->
+
+//<!-- Macro.File ScriptableView.cs
+/* <!-- Macro.Copy File
+:Packages/com.yousing.ui/Runtime/Internal/$(GeneratedFileName).cs
+ Macro.End --> */
+/* <!-- Macro.Replace Replace
+ Macro.End --> */
+/* <!-- Macro.Replace
+Events.,
  Macro.End --> */
 // Macro.End -->
 

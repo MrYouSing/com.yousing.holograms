@@ -1291,8 +1291,6 @@ MonoBehaviour:
   - .glb
   paths:
   - Holograms
-  - $(StreamingAssets)/Holograms
-  - $(AppData)/Roaming/3DGallery/downloads/
   selector: {fileID: 0}
   player: {fileID: 0}
   director: {fileID: 0}

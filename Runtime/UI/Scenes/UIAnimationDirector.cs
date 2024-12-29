@@ -5,7 +5,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace YouSingStudio.Holograms {
-	public class UIAnimationController
+	public class UIAnimationDirector
 		:MonoBehaviour
 	{
 		#region Nested Types
@@ -13,7 +13,7 @@ namespace YouSingStudio.Holograms {
 		public class Listener
 			:MonoBehaviour
 		{
-			public UIAnimationController context;
+			public UIAnimationDirector context;
 			public virtual void OnLoopPointReached() {
 				if(context!=null) {context.OnLoopPointReached();}
 			}
@@ -61,7 +61,7 @@ namespace YouSingStudio.Holograms {
 			if(speed==null) {speed=GetComponentInChildren<UIFloatSelector>();}
 			if(selector==null) {selector=GetComponentInChildren<UISelectorView>();}
 			//
-			if(popup!=null) {m_PopupV=popup.gameObject;}
+			if(popup!=null) {m_PopupV=popup.gameObject;popup.onActive+=OnPopupChanged;}
 			if(wrap!=null) {wrap.onValueChanged+=OnWrapChanged;}
 			if(speed!=null) {speed.onValueChanged+=OnSpeedChanged;}
 			if(selector!=null) {selector.onSelect+=Play;}
@@ -169,7 +169,7 @@ namespace YouSingStudio.Holograms {
 		public virtual void Play(int index) {
 			if(index>=0&&index<animations.Count) {
 				m_Index=index;string key=animations[m_Index];
-				if(selector!=null) {selector.Highlight(m_Index);}
+				if(selector!=null&&(popup==null||popup.GetActive())) {selector.Highlight(m_Index);}// TODO: ToExtension????
 				//
 				if(animation!=null) {
 					animation.Play(key);
@@ -226,6 +226,7 @@ namespace YouSingStudio.Holograms {
 			var tmp=animationState;
 			if(tmp!=null) {
 				t=tmp.time;d=tmp.length;b=tmp.speed>0.0f;
+				t=Mathf.Clamp(t,0.0f,d);
 			}else {
 				return;
 			}
@@ -271,6 +272,12 @@ namespace YouSingStudio.Holograms {
 			Load(model.GetActor());
 			Render();
 			Play(0);
+		}
+
+		protected virtual void OnPopupChanged(bool value) {
+			if(value) {
+				if(selector!=null) {selector.Highlight(m_Index);}
+			}
 		}
 
 		protected virtual void OnClipLoaded(AnimationClip clip) {

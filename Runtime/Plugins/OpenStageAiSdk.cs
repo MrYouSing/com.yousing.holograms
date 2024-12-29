@@ -95,9 +95,10 @@ public class OpenStageAiSdk
 	}
 
 	protected override void Start() {
-		LoadDeviceConfig();OnDeviceUpdated();
+		if(!portable) {enabled=false;}
 		//
-		base.Start();
+		LoadDeviceConfig();OnDeviceUpdated();
+		if(enabled) {base.Start();}
 	}
 
 	protected virtual void OnDestroy() {
@@ -257,15 +258,17 @@ public class OpenStageAiSdk
 		}
 		if((features&Feature.OfficialSDK)!=0) {
 			// Cleanup
-			enabled=false;
 			hardwareSN="null";
-			displayName="已接入官方SDK";
+			displayName="已发现平台软件";
 			avatarIcon=m_AvatarIcon;
 			//
+#if ENABLE_IL2CPP
+#else
 			var client=GetComponent<PipeClient>();
 			if(client==null) {gameObject.AddComponent<PipeClient>();}
 			PipeClient.eventObj.MyEvent+=OnDeviceUpdated;
 			OnDeviceUpdated(null,PipeClient.deviceConfig);
+#endif
 		}
 	}
 
@@ -279,9 +282,6 @@ public class OpenStageAiSdk
 				SetString(".DeviceConfig",deviceConfig);
 				//
 				OnDeviceUpdated();
-				// Fire a fake event to update ui.
-				displayName=jo["deviceNumber"]?.Value<string>()??"已获取设备参数";
-				InvokeEvent(k_Type_Login);
 			}else {
 				Log("Pass the invalid confg.");
 			}
@@ -314,13 +314,19 @@ public class OpenStageAiSdk
 			if(m_OnDeviceUpdated==null) {Log(deviceConfig);}
 			else {m_OnDeviceUpdated.Invoke(deviceConfig);}
 			//
+			JObject jo=JObject.Parse(deviceConfig);
 			if((features&Feature.SaveDeviceJson)!=0) {
 				string fn="deviceConfig.json";
-				JToken jt=JObject.Parse(deviceConfig).SelectToken("deviceNumber");
+				JToken jt=jo.SelectToken("deviceNumber");
 				if(jt!=null) {fn=jt.Value<string>()+".json";}
 				File.WriteAllText(fn,deviceConfig);
 			}
-			if((features&Feature.SaveDeviceQR)!=0) {}// TODO: QRCode for mobile????
+			if((features&Feature.SaveDeviceQR)!=0) {// TODO: QRCode for mobile????
+			}
+			if(true) {// Fire a fake event to update ui.
+				displayName=jo["deviceNumber"]?.Value<string>()??"已获取设备参数";
+				InvokeEvent(k_Type_Login);
+			}
 		}
 	}
 

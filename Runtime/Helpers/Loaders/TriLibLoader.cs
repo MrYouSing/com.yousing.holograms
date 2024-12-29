@@ -15,10 +15,10 @@ namespace YouSingStudio.Holograms {
 
 		#region Unity Messages
 #if TRI_LIB_CORE
-		protected override void Start() {
+		protected override System.Collections.IEnumerator Start() {
 			this.AddToStage(extensions);
 			//
-			base.Start();
+			yield return base.Start();
 		}
 #endif
 		#endregion Unity Messages

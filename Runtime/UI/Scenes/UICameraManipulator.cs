@@ -34,7 +34,19 @@ namespace YouSingStudio.Holograms {
 
 		public override void ResetTarget() {
 			base.ResetTarget();
-			ResetFov();
+			SetFov(m_Start.z);
+		}
+
+		public override void Save(Private.SnapshotManager.Snapshot value) {
+			if(target!=null&&value!=null) {
+				SaveSnapshot(value,"Camera.",target,GetFov());
+			}
+		}
+
+		public override void Load(Private.SnapshotManager.Snapshot value) {
+			if(target!=null&&value!=null) {
+				LoadSnapshot(value,"Camera.",target,GetFov(),SetFov);
+			}
 		}
 
 		public override string Info(string fmt="0.000") {
@@ -71,13 +83,13 @@ namespace YouSingStudio.Holograms {
 		}
 
 		protected virtual void SetFov(float value) {
-			if(plane!=null) {plane.size=m_V/ToScale(value);}
-			else if(viewer!=null) {viewer.localPosition=new Vector3(0.0f,0.0f,m_V+value);}
+			if(plane!=null) {plane.size=value;}
+			else if(viewer!=null) {viewer.localPosition=new Vector3(0.0f,0.0f,value);}
 		}
 
-		protected virtual void ResetFov() {
-			if(plane!=null) {plane.size=m_Start.z;}
-			else if(viewer!=null) {viewer.localPosition=new Vector3(0.0f,0.0f,m_Start.z);}
+		protected virtual void MoveFov(float value) {
+			if(plane!=null) {plane.size=m_V/ToScale(value);}
+			else if(viewer!=null) {viewer.localPosition=new Vector3(0.0f,0.0f,m_V+value);}
 		}
 
 		protected override void UpdateTransform() {
@@ -89,7 +101,7 @@ namespace YouSingStudio.Holograms {
 				case 4:ResetTarget();SetCursor(4);break;
 			}
 			if(IsScrolling(mouse.z)) {
-				SetFov(sensitivity.x*mouse.z);
+				MoveFov(sensitivity.x*mouse.z);
 				SetCursor(3);
 			}
 		}

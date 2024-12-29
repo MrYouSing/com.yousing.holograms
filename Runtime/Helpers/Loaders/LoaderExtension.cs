@@ -3,6 +3,7 @@ using System.IO;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Pool;
 
 namespace YouSingStudio.Holograms {
 	using static ModelLoader;
@@ -41,6 +42,24 @@ namespace YouSingStudio.Holograms {
 			//
 			if(prefab!=null) {thiz.LoadModel(model,prefab);}
 			return model;
+		}
+
+		public static void RebaseTransform(this ModelLoader thiz,ref Transform value,bool dummy) {
+			if(value!=null) {
+				if(dummy) {
+					GameObject go=new GameObject(value.name+".Dummy");Transform t=go.transform;
+					value.SetParent(t,false);value=t;
+				}else {
+					using(ListPool<Transform>.Get(out var list)) {
+						foreach(Transform c in value) {if(c!=null) {c.SetParent(null,true);list.Add(c);}}
+						//
+						value.SetPositionAndRotation(Vector3.zero,Quaternion.identity);
+						value.localScale=Vector3.one;
+						//
+						for(int i=0,imax=list.Count;i<imax;++i) {list[i].SetParent(value,true);}
+					}
+				}
+			}
 		}
 
 		public static void AddToStage(this ModelLoader thiz,params string[] extensions) {

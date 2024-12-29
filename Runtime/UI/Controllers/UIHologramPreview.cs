@@ -1,4 +1,3 @@
-// TODO: Quilt viewer Management????
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -17,11 +16,10 @@ namespace YouSingStudio.Holograms {
 		public WrapMode wrap;
 		public float duration=1.0f;
 		[Header("UI")]
+		public Transform quilt;
 		[Tooltip("[0]:Quilt\n[1]:General")]
-		public GameObject[] actors;
-		[Tooltip("[0]:Quilt\n[1]:General")]
-		public CanvasGroup[] groups;
 		public GameObject durationUI;
+		public Private.ActiveTrigger[] triggers;
 
 		[System.NonSerialized]protected float m_Time;
 		[System.NonSerialized]protected WrapMode m_Wrap;
@@ -74,13 +72,10 @@ namespace YouSingStudio.Holograms {
 		}
 
 		protected virtual void SetActive(byte value) {
-			for(int i=0,imax=actors?.Length??0;i<imax;++i) {
-				if((value&(1<<i))!=0) {
-					actors[i].SetActive(true);
-					groups[i].SetActive(true);
-				}else {
-					actors[i].SetActive(false);
-					groups[i].SetActive(false);
+			Private.ActiveTrigger it;
+			for(int i=0,imax=triggers?.Length??0;i<imax;++i) {
+				it=triggers[i];if(it!=null) {
+					it.InvokeEvent((value&(1<<i))!=0);
 				}
 			}
 		}
@@ -98,8 +93,8 @@ namespace YouSingStudio.Holograms {
 			else {UpdateSlider();}
 		}
 
-		public virtual void SetParent(Transform p) {
-			actors[0].transform.SetParent(p,false);
+		public virtual void SetQuilt(Transform p) {
+			if(quilt!=null) {quilt.SetParent(p,false);}
 		}
 
 		public virtual void SetWrap(WrapMode value) {

@@ -649,12 +649,21 @@ namespace YouSingStudio.Holograms {
 				string it;int imax=s_SettingPaths?.Length??0,i=path.IndexOf('.')>=0?imax:0;
 				for(;i<imax;++i) {
 					it=string.Format(s_SettingPaths[i],path).GetFullPath();
-					if(File.Exists(it)) {JsonConvert.PopulateObject(File.ReadAllText(it),thiz);return;}
+					//
+					if(File.Exists(it)) {
+						it=File.ReadAllText(it);
+						if(!string.IsNullOrEmpty(it)) {JsonConvert.PopulateObject(it,thiz);}
+						return;
+					}
 				}
 				JObject jo=GetSettings();if(jo!=null)  {
 					path=path.Replace(' ','_');JToken jt=jo.SelectToken(path);
 					if(jt==null) {jo.SelectToken(thiz.GetType().Name);}
-					if(jt!=null) {JsonConvert.PopulateObject(jt.ToString(),thiz);}
+					if(jt!=null) {
+						it=jt.ToString();
+						if(!string.IsNullOrEmpty(it)) {JsonConvert.PopulateObject(it,thiz);}
+						return;
+					}
 				}
 			}
 		}

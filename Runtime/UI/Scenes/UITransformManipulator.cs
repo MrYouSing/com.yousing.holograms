@@ -12,6 +12,7 @@ namespace YouSingStudio.Holograms {
 		,IPointerExitHandler
 		,IPointerDownHandler
 		,IPointerUpHandler
+		,SnapshotManager.IActor
 	{
 		#region Fields
 
@@ -104,6 +105,18 @@ namespace YouSingStudio.Holograms {
 			return Mathf.Min(Screen.width,Screen.height)/1080.0f;
 		}
 
+		public static void SaveSnapshot(SnapshotManager.Snapshot thiz,string key,Transform value,float scale) {
+			thiz.SetVector(key+"T",value.localPosition);
+			thiz.SetVector(key+"R",value.localRotation.eulerAngles);
+			thiz.SetFloat(key+"S",scale);
+		}
+
+		public static void LoadSnapshot(SnapshotManager.Snapshot thiz,string key,Transform value,float scale,System.Action<float> action) {
+			value.localPosition=thiz.GetVector(key+"T",value.localPosition);
+			value.localRotation=Quaternion.Euler(thiz.GetVector(key+"R",value.localRotation.eulerAngles));
+			action?.Invoke(thiz.GetFloat(key+"S",scale));
+		}
+
 		public virtual void SetTarget(Transform value) {
 			target=value;
 			if(target!=null) {
@@ -131,6 +144,18 @@ namespace YouSingStudio.Holograms {
 			if(!didStart) {return;}
 			//
 			ResetTarget();
+		}
+
+		public virtual void Save(SnapshotManager.Snapshot value) {
+			if(target!=null&&value!=null) {
+				SaveSnapshot(value,"Transform.",target,target.localScale.x);
+			}
+		}
+
+		public virtual void Load(SnapshotManager.Snapshot value) {
+			if(target!=null&&value!=null) {
+				LoadSnapshot(value,"Transform.",target,target.localScale.x,(x)=>target.localScale=Vector3.one*x);
+			}
 		}
 
 		protected virtual bool IsScrolling(float value) {
@@ -252,11 +277,11 @@ namespace YouSingStudio.Holograms {
 					target.localScale=m_S*ToScale(sensitivity.z*mouse.z);
 					SetCursor(3);
 				break;
-				case 2:
+				case 1:
 					SetPosition(scrolling.x*mouse.z);
 					SetCursor(5);
 				break;
-				case 1:
+				case 2:
 					SetRotation(scrolling.y*mouse.z);
 					SetCursor(6);
 				break;

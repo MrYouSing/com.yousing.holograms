@@ -154,8 +154,11 @@ namespace YouSingStudio.Holograms {
 						ulong b=www.uploadedBytes;
 						if(b>a) {a=b;}
 						//
+						ulong s=size;float f=value;
+						if(s==0&&f>=0.1f) {s=(ulong)(a/f);}
+						//
 						if(a<=0) {return "Unknown";}
-						else if(size>0) {return a.ToByteSize()+"/"+size.ToByteSize();}
+						else if(s>0) {return a.ToByteSize()+"/"+s.ToByteSize();}
 						else {return a.ToByteSize();}
 					}
 					return null;
