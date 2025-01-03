@@ -3,7 +3,7 @@ using UnityEngine.UI;
 using YouSingStudio.Private;
 
 namespace YouSingStudio.Holograms {
-	public class UIAccountView
+	public class UIAccountController
 		:MonoBehaviour
 	{
 		#region Fields
@@ -19,8 +19,8 @@ namespace YouSingStudio.Holograms {
 		public bool phone=true;
 		public bool silent=true;
 		public Text text;
-		public RawImage image;
-		public GameObject logo;
+		public RawImage rawImage;
+		public Image image;
 
 		[System.NonSerialized]protected float m_Time=-1.0f;
 
@@ -87,15 +87,18 @@ namespace YouSingStudio.Holograms {
 			if(context==null||!context.enabled) {value=false;}
 			if(login!=null) {login.gameObject.SetActive(value);}
 			//
-			var sm=ShortcutManager.s_Instance;if(sm==null) {return;}
-			if(value) {sm.Lock(this);}else {sm.Unlock(this);}
+			this.LockShortcuts(value);
 		}
 
 		public virtual void Render() {
 			if(context!=null) {
 				if(text!=null) {text.text=context.displayName;}
-				if(image!=null) {image.texture=context.avatarIcon;}
-				if(logo!=null) {logo.SetActive(context.authorized);}
+				if(rawImage!=null) {rawImage.texture=context.avatarIcon;}
+				if(image!=null) {
+					Sprite tmp=context.statusIcon;
+					if(tmp!=null) {image.sprite=tmp;image.enabled=tmp!=null;}
+					else {image.enabled=context.authorized&&image.sprite!=null;}
+				}
 				//
 				if(login!=null) {
 					login.SetText(0,context.displayName);

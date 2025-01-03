@@ -129,6 +129,11 @@ namespace YouSingStudio.Holograms {
 			base.PlayVideo(path);
 		}
 
+		protected override void OnAspectUpdated() {
+			UpdateMaterial();
+			UpdateTransform();
+		}
+
 		public override void Render(Texture value)=>Render(m_Path,value,null);
 
 		protected override void Init() {
@@ -220,14 +225,8 @@ namespace YouSingStudio.Holograms {
 			if(depth==null) {
 				depth=texture;m_Size.x/=2;
 				if(layout==Video3DLayout.No3D) {layout=Video3DLayout.SideBySide3D;}
-				material.Set(_MainTex,layout.GetRect(0));
-				material.Set(_Depth,layout.GetRect(1));
-			}else {
-				material.Set(_MainTex,Vector2.zero,Vector2.one);
-				material.Set(_Depth,Vector2.zero,Vector2.one);
 			}
-			texture.wrapMode=TextureWrapMode.Clamp;material.SetTexture(_MainTex,texture);
-			depth.wrapMode=TextureWrapMode.Clamp;material.SetTexture(_Depth,depth);
+			UpdateMaterial();
 			if(renderer!=null) {renderer.enabled=true;}
 			//
 			LoadVector(m_Path);
@@ -246,6 +245,18 @@ namespace YouSingStudio.Holograms {
 			}
 		}
 
+		public virtual void UpdateMaterial() {
+			if(depth==texture) {
+				material.Set(_MainTex,layout.GetRect(0));
+				material.Set(_Depth,layout.GetRect(1));
+			}else {
+				material.Set(_MainTex,Vector2.zero,Vector2.one);
+				material.Set(_Depth,Vector2.zero,Vector2.one);
+			}
+			texture.wrapMode=TextureWrapMode.Clamp;material.SetTexture(_MainTex,texture);
+			depth.wrapMode=TextureWrapMode.Clamp;material.SetTexture(_Depth,depth);
+		}
+
 		public virtual void UpdateMesh() {
 			if(!m_IsInited) {Init();}
 			//
@@ -257,7 +268,7 @@ namespace YouSingStudio.Holograms {
 			renderer.Set(m);
 		}
 
-		public override void UpdateTransform() {
+		public virtual void UpdateTransform() {
 			if(!m_IsInited) {Init();}
 			//
 			float f;if(camera!=null) {// Fit width and height.
@@ -291,7 +302,7 @@ namespace YouSingStudio.Holograms {
 			m_Renderer.localScale=new Vector3(f,1.0f,1.0f);
 			if(v.x*v.y<=f) {// Inside Fit.
 				m_Vector=Vector2.zero;
-			}else {// Outside Fit.
+			}else if(material!=null) {// Outside Fit.
 				Vector2 u=new Vector2(f,1.0f);
 				Vector2 w=material.GetTextureScale(_MainTex);
 				//

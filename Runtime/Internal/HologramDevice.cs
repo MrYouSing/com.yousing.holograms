@@ -67,6 +67,7 @@ namespace YouSingStudio.Holograms {
 		[System.NonSerialized]public System.Action onPreRender=null;
 		[System.NonSerialized]public System.Action onPostRender=null;
 		[System.NonSerialized]protected bool m_IsInited;
+		[System.NonSerialized]protected int m_Display;
 
 		#endregion Fields
 
@@ -117,8 +118,19 @@ namespace YouSingStudio.Holograms {
 		// https://docs.unity3d.com/Manual/execution-order.html
 		protected virtual void SetRenderEvent(bool value) {
 #if UNITY_EDITOR
-			Application.onBeforeRender-=Render;
-			if(m_IsInited&&value) {Application.onBeforeRender+=Render;}
+			Application.onBeforeRender-=OnRender;m_RenderCount=-1;
+			if(m_IsInited&&value) {Application.onBeforeRender+=OnRender;}
+		}
+
+		[System.NonSerialized]protected int m_RenderCount;
+
+		protected virtual void OnRender() {
+			int n=Time.frameCount;
+			if(n!=m_RenderCount) {
+				m_RenderCount=n;
+				//
+				Render();
+			}
 		}
 #else
 			++m_RenderId;
@@ -157,10 +169,19 @@ namespace YouSingStudio.Holograms {
 			return true;
 		}
 
+		public virtual void FromJson(string json) {
+			JsonUtility.FromJsonOverwrite(json,this);
+		}
+
+		public virtual string ToJson() {
+			return null;
+		}
+
 		public virtual void Init() {
 			if(m_IsInited) {return;}
 			m_IsInited=true;
 			//
+			m_Display=display;
 			this.LoadSettings(name);
 			//
 			if(resolution.sqrMagnitude==0) {

@@ -1,3 +1,26 @@
+/* <!-- Macro.Table Plane
+Vector3,m_Viewer,position,
+Quaternion,m_Viewer,rotation,
+float,camera,aspect,
+float,plane,size,
+ Macro.End --> */
+/* <!-- Macro.Call  Plane
+		{0} IPlane.{2} {{
+			get=>{1}.{2};
+			set {{
+				{1}.{2}=value;
+				OnPlaneDirty();
+			}}
+		}}
+
+ Macro.End --> */
+/* <!-- Macro.Replace
+plane.size,plane
+ Macro.End --> */
+
+/* <!-- Macro.Patch
+,AutoGen
+ Macro.End --> */
 using UnityEngine;
 
 namespace YouSingStudio.Holograms {
@@ -5,6 +28,40 @@ namespace YouSingStudio.Holograms {
 		:MonoCamera
 		,IPlane
 	{
+// <!-- Macro.Patch AutoGen
+		Vector3 IPlane.position {
+			get=>m_Viewer.position;
+			set {
+				m_Viewer.position=value;
+				OnPlaneDirty();
+			}
+		}
+
+		Quaternion IPlane.rotation {
+			get=>m_Viewer.rotation;
+			set {
+				m_Viewer.rotation=value;
+				OnPlaneDirty();
+			}
+		}
+
+		float IPlane.aspect {
+			get=>camera.aspect;
+			set {
+				camera.aspect=value;
+				OnPlaneDirty();
+			}
+		}
+
+		float IPlane.size {
+			get=>plane;
+			set {
+				plane=value;
+				OnPlaneDirty();
+			}
+		}
+
+// Macro.Patch -->
 		#region Fields
 
 		[Header("Multi-View")]
@@ -29,26 +86,6 @@ namespace YouSingStudio.Holograms {
 		#endregion Fields
 
 		#region Methods
-
-		Vector3 IPlane.position {
-			get=>m_Viewer.position;
-			set=>m_Viewer.position=value;
-		}
-
-		Quaternion IPlane.rotation {
-			get=>m_Viewer.rotation;
-			set=>m_Viewer.rotation=value;
-		}
-
-		float IPlane.aspect {
-			get=>camera.aspect;
-			set=>camera.aspect=value;
-		}
-
-		float IPlane.size {
-			get=>plane;
-			set=>plane=value;
-		}
 #if UNITY_EDITOR
 		protected override void InternalDrawGizmos(bool selected) {
 			bool d=false;
@@ -130,6 +167,8 @@ namespace YouSingStudio.Holograms {
 			m_RT1.Free();m_RT0=m_RT1=null;
 		}
 
+		// Math & Geometry
+
 		protected virtual Rect ScreenRect(int x,int y,float w,float h) {
 			//y=device.quiltSize.y-1-y;
 			return new Rect(x*w,y*h,w,h);
@@ -157,6 +196,12 @@ namespace YouSingStudio.Holograms {
 			Transform t=focus!=null?focus:transform;
 			return t.TransformPoint(v);
 		}
+
+		public virtual void OnPlaneDirty() {
+			m_Viewer.position=GetCameraPoint();
+		}
+
+		// Rendering
 
 		public virtual void Render() {
 			if(!isActiveAndEnabled||device==null||camera==null) {return;}

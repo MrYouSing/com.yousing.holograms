@@ -8,6 +8,7 @@ You can get the device config by three steps:
 #define _DEBUG
 #endif
 using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Ports;
 using System.Runtime.InteropServices;
@@ -39,12 +40,18 @@ public class OpenStageAiSdk
 	#region Fields
 
 	public static OpenStageAiSdk s_Instance;
+	public static List<string> s_Configs=new List<string>{
+		"deviceConfig.json",
+		"$(Appdata)/Roaming/3DGallery/screen_params.json",
+	};
 
 	[HideInInspector]public string phone;
 	[HideInInspector]public string password;
 	public Feature features;
 	public string hardwareSN;
+	public Sprite[] sprites;
 
+	[System.NonSerialized]public int configType;
 	[System.NonSerialized]public string deviceConfig;
 	[System.NonSerialized]protected System.Action<string> m_OnDeviceUpdated=null;
 	[System.NonSerialized]protected AsyncTask m_Task;
@@ -277,8 +284,15 @@ public class OpenStageAiSdk
 			JObject jo=JObject.FromObject(e.config);
 			jo["sdkType"]="OfficialSDK";
 			if(!string.IsNullOrEmpty(jo["deviceId"]?.Value<string>())) {
+				// Fixed NonSerialized.
+				var d=e.config;var o=new DeviceData();
+				var tmp=d.GetType().GetProperties();
+				for(int i=0,imax=tmp?.Length??0;i<imax;++i) {
+					var it=tmp[i];if(Equals(it.GetValue(d),it.GetValue(o))) {jo.Remove(it.Name);}
+				}
+				//
 				Log($"Load {e.type} config from official sdk.");
-				deviceConfig=jo.ToString();// TODO : 4th Priority.
+				deviceConfig=jo.ToString();configType=2;// TODO : Lowest Priority.
 				SetString(".DeviceConfig",deviceConfig);
 				//
 				OnDeviceUpdated();
@@ -301,12 +315,13 @@ public class OpenStageAiSdk
 	protected virtual void LoadDeviceConfig() {
 		if(!string.IsNullOrEmpty(deviceConfig)) {return;}
 		//
-		deviceConfig=GetString(".DeviceConfig",deviceConfig);// TODO : 3rd Priority.
-		string fn="deviceConfig.json";// TODO : 1st Priority.
-		if(!File.Exists(fn)) {
-			fn=Path.Combine(Path.GetDirectoryName(settingsPath),"3DGallery/screen_params.json");// TODO : 2nd Priority.
+		deviceConfig=GetString(".DeviceConfig",deviceConfig);configType=1;// TODO : Normal Priority.
+		string fn=null;int i=0,imax=s_Configs.Count;
+		for(;i<imax;++i) {
+			fn=s_Configs[i].GetFullPath();
+			if(File.Exists(fn)) {configType=4+i;break;}// TODO : Highest Priority.
 		}
-		if(File.Exists(fn)) {deviceConfig=File.ReadAllText(fn);}
+		if(i<imax) {deviceConfig=File.ReadAllText(fn);}
 	}
 
 	protected virtual void OnDeviceUpdated() {
@@ -364,6 +379,13 @@ public class OpenStageAiSdk
 	}
 
 	// WebRequest Methods
+
+	public override Sprite statusIcon {
+		get {
+			int cnt=sprites?.Length??-1;
+			return cnt>0?sprites[Mathf.Clamp(configType,0,cnt-1)]:null;
+		}
+	}
 
 	public override void SetForm(int type,string[] table) {
 		switch(type) {
@@ -448,7 +470,7 @@ public class OpenStageAiSdk
 			JObject jo=JObject.Parse(text);
 			if(IsSuccess(jo.SelectToken(texts[k_Offset_OnLogin])?.Value<string>())) {
 				JToken jt=jo.SelectToken("result");jt["sdkType"]="CustomSDK";
-				deviceConfig=jt.ToString();// TODO : 4th Priority.
+				deviceConfig=jt.ToString();configType=3;// TODO : Lowest Priority.
 				SetString(".DeviceConfig",deviceConfig);
 				//
 				OnDeviceUpdated();

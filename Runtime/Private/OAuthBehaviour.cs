@@ -236,6 +236,8 @@ namespace YouSingStudio.Private {
 
 		public virtual Texture avatarIcon{get;set;}
 
+		public virtual Sprite statusIcon{get;}
+
 		public virtual int GetForm(int type,string[] table) {
 			int n=-1;
 			switch(type) {

@@ -10,6 +10,7 @@ PageDown,
 /* <!-- Macro.Patch
 ,Start
  Macro.End --> */
+// TODO: Pages or Loop????
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -31,6 +32,7 @@ namespace YouSingStudio.Holograms {
 		[FormerlySerializedAs("container")]
 		public Transform content;
 		public GameObject prefab;
+		public int capacity=-1;
 		/// <summary>
 		/// <seealso cref="ScrollRect.viewport"/>
 		/// </summary>
@@ -57,7 +59,10 @@ namespace YouSingStudio.Holograms {
 		#region Unity Messages
 
 		protected virtual void Start() {
-			var sm=ShortcutManager.instance;int i=0;
+			int i=capacity-m_Views.Count;
+			while(i-->0) {m_Views.Add(CreateView());}
+			//
+			var sm=ShortcutManager.instance;i=0;
 // <!-- Macro.Patch Start
 			sm.Add(name+".Prev",Prev,keys[i]);++i;
 			sm.Add(name+".Next",Next,keys[i]);++i;

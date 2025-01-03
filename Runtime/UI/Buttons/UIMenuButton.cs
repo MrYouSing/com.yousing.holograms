@@ -25,16 +25,19 @@ namespace YouSingStudio.Holograms {
 		protected virtual void Start() {
 			//
 			if(button!=null&&buttons.IndexOf(button)<0) {
-				buttons.Add(button);
+				buttons.Insert(0,button);
 			}
+			int i=PlayerPrefs.GetInt(name,-1);
+			if(i>=0) {SetButton(buttons[i]);}
 			//
-			int i=0,imax=buttons.Count;
+			int imax=buttons.Count;
 			m_Buttons=new RectTransform[imax];
-			Button it;for(;i<imax;++i) {
+			Button it;for(i=0;i<imax;++i) {
 				it=buttons[i];
 				if(it!=null&&it.GetComponent<UIMenuButton>()==null) {
-					m_Buttons[i]=it.transform as RectTransform;
-					it.onClick.AddListener(Hide);
+					m_Buttons[i]=it.transform as RectTransform;Button b=it;
+					it.AddMissingComponent<EventTrigger>().AddTrigger(
+						EventTriggerType.PointerClick,(e)=>OnMenuClick(b,e));
 				}
 			}
 			it=button;button=null;SetButton(it);
@@ -44,7 +47,14 @@ namespace YouSingStudio.Holograms {
 			if(!m_Click) {return;}
 			//
 			if((show&(1<<(int)e.button))!=0) {SetActive(!m_Active);}
-			else if(button!=null) {button.OnPointerClick(e);}
+			else if(button!=null) {ExecuteEvents.Execute(button.gameObject,e,ExecuteEvents.pointerClickHandler);}
+		}
+
+		protected virtual void OnMenuClick(Button b,BaseEventData e) {
+			if(((PointerEventData)e).button==PointerEventData.InputButton.Right) {
+				int i=buttons.IndexOf(b);PlayerPrefs.SetInt(name,i);SetButton(b);
+			}
+			Hide();
 		}
 
 		#endregion Unity Messages
@@ -95,8 +105,10 @@ namespace YouSingStudio.Holograms {
 			base.SetButton(button);m_Click=true;
 			//
 			int i=0,imax=m_Buttons?.Length??0;
-			Transform it;for(;i<imax;++i) {
-				it=m_Buttons[i];if(it!=null) {it.SetAsLastSibling();}
+			RectTransform it;for(;i<imax;++i) {
+				it=m_Buttons[i];if(it!=null) {
+					it.SetAsLastSibling();it.ResetAnchor();
+				}
 			}
 		}
 

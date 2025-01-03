@@ -1314,6 +1314,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   container: {fileID: 8021878057469536707}
   prefab: {fileID: 4583432770310144017, guid: 3f646f728260aa44cbf1740586780aca, type: 3}
+  capacity: 50
   arrow: {fileID: 7702770675347967377}
   keys: 14010000130100001101000012010000
 --- !u!114 &1791248286151798845

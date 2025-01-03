@@ -95,7 +95,7 @@ LightmapSettings:
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
   m_LightingDataAsset: {fileID: 0}
-  m_LightingSettings: {fileID: 0}
+  m_LightingSettings: {fileID: 4890085278179872738, guid: fc72a598c053bae4fbadf30b0726de20, type: 2}
 --- !u!196 &4
 NavMeshSettings:
   serializedVersion: 2
@@ -120,6 +120,11 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!225 &182746991 stripped
+CanvasGroup:
+  m_CorrespondingSourceObject: {fileID: 152711898837899294, guid: 4ae7ea162d70fe74ab53dc44b6591cbb, type: 3}
+  m_PrefabInstance: {fileID: 702900428}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &256326716
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -871,7 +876,7 @@ PrefabInstance:
       objectReference: {fileID: 1187634092}
     - target: {fileID: 8458336726562584314, guid: 701fbf362907b864cab84d0d8f254d09, type: 3}
       propertyPath: stages.Array.data[2].onShow.m_PersistentCalls.m_Calls.Array.size
-      value: 2
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 8458336726562584314, guid: 701fbf362907b864cab84d0d8f254d09, type: 3}
       propertyPath: stages.Array.data[2].onShow.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
@@ -882,6 +887,10 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8458336726562584314, guid: 701fbf362907b864cab84d0d8f254d09, type: 3}
+      propertyPath: stages.Array.data[2].onShow.m_PersistentCalls.m_Calls.Array.data[2].m_Mode
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 8458336726562584314, guid: 701fbf362907b864cab84d0d8f254d09, type: 3}
       propertyPath: stages.Array.data[2].onShow.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 4779324583809802953}
@@ -890,11 +899,19 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 4779324583809802954}
     - target: {fileID: 8458336726562584314, guid: 701fbf362907b864cab84d0d8f254d09, type: 3}
+      propertyPath: stages.Array.data[2].onShow.m_PersistentCalls.m_Calls.Array.data[2].m_Target
+      value: 
+      objectReference: {fileID: 182746991}
+    - target: {fileID: 8458336726562584314, guid: 701fbf362907b864cab84d0d8f254d09, type: 3}
       propertyPath: stages.Array.data[2].onShow.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 8458336726562584314, guid: 701fbf362907b864cab84d0d8f254d09, type: 3}
       propertyPath: stages.Array.data[2].onShow.m_PersistentCalls.m_Calls.Array.data[1].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8458336726562584314, guid: 701fbf362907b864cab84d0d8f254d09, type: 3}
+      propertyPath: stages.Array.data[2].onShow.m_PersistentCalls.m_Calls.Array.data[2].m_CallState
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 8458336726562584314, guid: 701fbf362907b864cab84d0d8f254d09, type: 3}
@@ -906,6 +923,10 @@ PrefabInstance:
       value: StartTarget
       objectReference: {fileID: 0}
     - target: {fileID: 8458336726562584314, guid: 701fbf362907b864cab84d0d8f254d09, type: 3}
+      propertyPath: stages.Array.data[2].onShow.m_PersistentCalls.m_Calls.Array.data[2].m_MethodName
+      value: set_alpha
+      objectReference: {fileID: 0}
+    - target: {fileID: 8458336726562584314, guid: 701fbf362907b864cab84d0d8f254d09, type: 3}
       propertyPath: stages.Array.data[2].onShow.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
       value: YouSingStudio.Holograms.UICameraManipulator, YouSingStudio.Holograms
       objectReference: {fileID: 0}
@@ -914,11 +935,19 @@ PrefabInstance:
       value: YouSingStudio.Holograms.UITransformManipulator, YouSingStudio.Holograms
       objectReference: {fileID: 0}
     - target: {fileID: 8458336726562584314, guid: 701fbf362907b864cab84d0d8f254d09, type: 3}
+      propertyPath: stages.Array.data[2].onShow.m_PersistentCalls.m_Calls.Array.data[2].m_TargetAssemblyTypeName
+      value: UnityEngine.CanvasGroup, UnityEngine
+      objectReference: {fileID: 0}
+    - target: {fileID: 8458336726562584314, guid: 701fbf362907b864cab84d0d8f254d09, type: 3}
       propertyPath: stages.Array.data[2].onShow.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
       value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
     - target: {fileID: 8458336726562584314, guid: 701fbf362907b864cab84d0d8f254d09, type: 3}
       propertyPath: stages.Array.data[2].onShow.m_PersistentCalls.m_Calls.Array.data[1].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
+    - target: {fileID: 8458336726562584314, guid: 701fbf362907b864cab84d0d8f254d09, type: 3}
+      propertyPath: stages.Array.data[2].onShow.m_PersistentCalls.m_Calls.Array.data[2].m_Arguments.m_ObjectArgumentAssemblyTypeName
       value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
     m_RemovedComponents: []

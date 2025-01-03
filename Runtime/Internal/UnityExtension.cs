@@ -578,18 +578,18 @@ namespace YouSingStudio.Holograms {
 		public static string GetFilePath(this string thiz)=>Path.GetFullPath(thiz).FixPath();
 
 		internal static void UnpackPath(this string thiz,System.Func<string,bool> func,List<string> paths) {
-			bool b=false;
+			int n=0;
 			using(ListPool<string>.Get(out var list)) {
 				foreach(string fn in Directory.GetFiles(thiz,"*.*",SearchOption.TopDirectoryOnly)) {
 					if(IsModel(Path.GetExtension(fn))) {// Model as bundle.
-						b=true;if(func?.Invoke(fn)??true){paths.Add(fn.GetFilePath());}
+						++n;if(func?.Invoke(fn)??true){paths.Add(fn.GetFilePath());}
 					}else {list.Add(fn);}
 				}
-				if(!b) {string it;for(int i=0,imax=list?.Count??0;i<imax;++i) {
+				if(n==0) {string it;for(int i=0,imax=list?.Count??0;i<imax;++i) {
 					it=list[i];if(func?.Invoke(it)??true){paths.Add(it.GetFilePath());}
 				}}
 			}
-			if(!b) {foreach(string dn in Directory.GetDirectories(thiz)) {
+			if(n!=1) {foreach(string dn in Directory.GetDirectories(thiz)) {
 				dn.UnpackPath(func,paths);
 			}}
 		}
@@ -627,6 +627,28 @@ namespace YouSingStudio.Holograms {
 					for(int i=0,imax=tmp.Length;i<imax;++i) {thiz[tmp[i]]=value;}
 				}else {thiz[key]=value;}
 			}
+		}
+
+		// Events
+
+		public static void SetListener<T>(this System.Action<T> thiz,bool value) {
+			System.Type key=typeof(T);
+			if(!s_Events.TryGetValue(key,out var d)||d==null) {if(value) {d=thiz;}}
+			else {d=value?System.Delegate.Combine(d,thiz):System.Delegate.Remove(d,thiz);}
+			//
+			if(d==null) {s_Events.Remove(key);}
+			else {s_Events[key]=d;}
+		}
+
+		public static void InvokeEvent<T>(this T thiz) {
+			if(s_Events.TryGetValue(typeof(T),out var d)&&d!=null) {
+				((System.Action<T>)d)?.Invoke(thiz);
+			}
+		}
+
+		public static void LockShortcuts(this object thiz,bool value) {
+			var sm=Private.ShortcutManager.s_Instance;if(sm==null) {return;}
+			if(value) {sm.Lock(thiz);}else {sm.Unlock(thiz);}
 		}
 
 		//
@@ -690,21 +712,6 @@ namespace YouSingStudio.Holograms {
 			}
 		}
 
-		public static void SetListener<T>(this System.Action<T> thiz,bool value) {
-			System.Type key=typeof(T);
-			if(!s_Events.TryGetValue(key,out var d)||d==null) {if(value) {d=thiz;}}
-			else {d=value?System.Delegate.Combine(d,thiz):System.Delegate.Remove(d,thiz);}
-			//
-			if(d==null) {s_Events.Remove(key);}
-			else {s_Events[key]=d;}
-		}
-
-		public static void InvokeEvent<T>(this T thiz) {
-			if(s_Events.TryGetValue(typeof(T),out var d)&&d!=null) {
-				((System.Action<T>)d)?.Invoke(thiz);
-			}
-		}
-
 		  //
 
 		public static void SetLoop(this VideoPlayer thiz,bool value) {
@@ -723,6 +730,15 @@ namespace YouSingStudio.Holograms {
 				thiz.alpha=value?1.0f:0.0f;
 				thiz.blocksRaycasts=value;
 				thiz.interactable=value;
+			}
+		}
+
+		public static void ResetAnchor(this RectTransform thiz) {
+			if(thiz!=null) {
+				RectTransform p=thiz.parent as RectTransform;
+				Vector2 v=p!=null?p.pivot:(Vector2.one*0.5f);
+				thiz.anchorMin=v;thiz.anchorMax=v;thiz.pivot=v;
+				thiz.anchoredPosition=Vector2.zero;
 			}
 		}
 

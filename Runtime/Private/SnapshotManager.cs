@@ -1,5 +1,29 @@
 // Generated automatically by MacroCodeGenerator (from "Packages/com.yousing.holograms/Runtime/Private/Private.ms")
 
+/* <!-- Macro.Table Item
+Scene,Load,null,scenes,m_Scene.path=key;,
+Snapshot,Select,,scene.snapshots,m_Name=key;,
+ Macro.End --> */
+/* <!-- Macro.Call  Item
+		public virtual {0} New{0}()=>new {0}({2});
+		public virtual void {1}{0}(string key)=>{1}{0}(IndexOf{0}(key));
+
+		public virtual void Access{0}(int index) {{
+			if(index>=0&&index<{3}.Count) {{{1}{0}(index);}}
+			else {{Add{0}();}}
+		}}
+
+		public virtual void Access{0}(string key) {{
+			int index=IndexOf{0}(key);
+			if(index>=0) {{{1}{0}(index);}}
+			else {{{4}Add{0}();}}
+		}}
+
+ Macro.End --> */
+/* <!-- Macro.Patch
+,AutoGen
+ Macro.End --> */
+
 /* <!-- Macro.Table BaseTypes
 int,Int,
 float,Float,
@@ -26,9 +50,9 @@ Vector4,Vector,
 /* <!-- Macro.Patch
 ,Snapshot
  Macro.End --> */
-using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.IO;
+using Newtonsoft.Json;
 using UnityEngine;using YouSingStudio.Holograms;
 
 namespace YouSingStudio.Private {
@@ -39,6 +63,36 @@ namespace YouSingStudio.Private {
 	public class SnapshotManager
 		:MonoBehaviour
 	{
+// <!-- Macro.Patch AutoGen
+		public virtual Scene NewScene()=>new Scene(null);
+		public virtual void LoadScene(string key)=>LoadScene(IndexOfScene(key));
+
+		public virtual void AccessScene(int index) {
+			if(index>=0&&index<scenes.Count) {LoadScene(index);}
+			else {AddScene();}
+		}
+
+		public virtual void AccessScene(string key) {
+			int index=IndexOfScene(key);
+			if(index>=0) {LoadScene(index);}
+			else {m_Scene.path=key;AddScene();}
+		}
+
+		public virtual Snapshot NewSnapshot()=>new Snapshot();
+		public virtual void SelectSnapshot(string key)=>SelectSnapshot(IndexOfSnapshot(key));
+
+		public virtual void AccessSnapshot(int index) {
+			if(index>=0&&index<scene.snapshots.Count) {SelectSnapshot(index);}
+			else {AddSnapshot();}
+		}
+
+		public virtual void AccessSnapshot(string key) {
+			int index=IndexOfSnapshot(key);
+			if(index>=0) {SelectSnapshot(index);}
+			else {m_Name=key;AddSnapshot();}
+		}
+
+// Macro.Patch -->
 		#region Nested Types
 
 		public interface IActor {
@@ -152,6 +206,8 @@ namespace YouSingStudio.Private {
 
 		#region Fields
 
+		public static JsonConverter[] s_JsonConverters=null;
+
 		[SerializeField]protected string m_Path;
 		[SerializeField]protected Object[] m_Actors;
 
@@ -162,6 +218,7 @@ namespace YouSingStudio.Private {
 		[System.NonSerialized]public Snapshot snapshot;
 
 		[System.NonSerialized]protected Scene m_Scene;
+		[System.NonSerialized]protected string m_Name;
 
 		#endregion Fields
 
@@ -190,12 +247,6 @@ namespace YouSingStudio.Private {
 
 		#region Methods
 
-		// Shortcut APIs
-		public virtual Scene NewScene()=>new Scene(null);
-		public virtual Snapshot NewSnapshot()=>new Snapshot();
-		public virtual void LoadScene(string key)=>LoadScene(IndexOfScene(key));
-		public virtual void SelectSnapshot(string key)=>SelectSnapshot(IndexOfSnapshot(key));
-
 		// Document APIs
 
 		public virtual void LoadDocument(string path) {
@@ -206,13 +257,18 @@ namespace YouSingStudio.Private {
 			}
 		}
 
-		public virtual void SaveDocument(string path) {
+		public virtual void SaveDocument(string path,bool force=false) {
 			m_Path=path;
 			if(!string.IsNullOrEmpty(m_Path)) {
+				if(s_JsonConverters==null) {s_JsonConverters=new JsonConverter[]{new VectorMapConverter()};}
 				var tmp=new Document();tmp.scenes=scenes;
-				File.WriteAllText(m_Path,JsonConvert.SerializeObject(tmp,Formatting.Indented,new VectorMapConverter()));
+				string text=JsonConvert.SerializeObject(tmp,Formatting.Indented,s_JsonConverters);
+				if(!force&&File.Exists(m_Path)&&string.Equals(File.ReadAllText(m_Path),text)) {return;}
+				File.WriteAllText(m_Path,text);
 			}
 		}
+
+		public virtual string GetDocument()=>m_Path;
 
 		// Scene APIs
 
@@ -226,6 +282,14 @@ namespace YouSingStudio.Private {
 		public virtual void LoadScene(int index) {
 			Scene s=index>=0?scenes[index]:null;
 			if(s!=scene) {OnSceneLoaded(s);}
+		}
+
+		public virtual void AddScene() {
+			bool b=m_Scene!=scene;if(b) {scene=m_Scene;}
+			//
+			scenes.Add(scene);scene.context=this;m_Scene=NewScene();
+			//
+			if(b) {scene.index=-1;OnSceneLoaded(scene);}
 		}
 
 		public virtual void ResetScene() {
@@ -258,13 +322,17 @@ namespace YouSingStudio.Private {
 		}
 
 		public virtual void AddSnapshot() {
+			// New Scene?
 			int cnt=scene.snapshots.Count;
-			if(scene==m_Scene) {scenes.Add(scene);scene.context=this;m_Scene=NewScene();}
-			//
+			if(scene==m_Scene) {AddScene();}
+			// New Snapshot.
 			var tmp=NewSnapshot();
-			if(string.IsNullOrEmpty(tmp.name)) {tmp.name="Snapshot ("+cnt+")";}
+			if(string.IsNullOrEmpty(tmp.name)) {
+				tmp.name=!string.IsNullOrEmpty(m_Name)?m_Name:("Snapshot ("+cnt+")");
+			}
+			m_Name=null;
+			// Apply Snapshot.
 			scene.snapshots.Add(tmp);tmp.context=scene;
-			//
 			snapshot=tmp;SaveSnapshot();
 			scene.index=cnt;OnSceneLoaded(scene);
 		}
@@ -294,7 +362,7 @@ namespace YouSingStudio.Private {
 			if(scene.index<0) {
 				snapshot=null;
 			}else {
-				snapshot=scene.snapshots[scene.index];
+				snapshot=scene.snapshots[scene.index];LoadSnapshot();
 			}
 		}
 

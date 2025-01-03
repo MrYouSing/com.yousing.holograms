@@ -3,22 +3,11 @@ using UnityEngine;
 
 namespace YouSingStudio.Holograms {
 	public class Companion1Device
-		:HologramDevice
+		:LenticularDevice
 	{
 		#region Fields
 
-		public static readonly int _InputSize=Shader.PropertyToID("_InputSize");
-		public static readonly int _OutputSize=Shader.PropertyToID("_OutputSize");
-		public static readonly int _Arguments=Shader.PropertyToID("_Arguments");
-
-		[Header("Parameters")]
-		[JsonProperty("obliquity")]
-		public float slope;
-		[JsonProperty("lineNumber")]
-		public float interval;
-		[JsonProperty("deviation")]
-		public float x0;
-		[Header("Others")]
+		[Header("Companion One")]
 		public string deviceId;
 		public string deviceNumber;
 		public string sdkType;
@@ -49,6 +38,12 @@ namespace YouSingStudio.Holograms {
 
 		#region Methods
 
+		public virtual float obliquity{set=>slope=value;}
+		[JsonProperty("lineNumber")]
+		public virtual float interval{set=>pitch=value;}
+		[JsonProperty("deviation")]
+		public virtual float x0{set=>center=value;}
+
 		public override Vector3 ParseQuilt() {
 			bool play=true;
 #if UNITY_EDITOR
@@ -71,15 +66,6 @@ namespace YouSingStudio.Holograms {
 				return !string.IsNullOrEmpty(sdk.hardwareSN);
 			}
 			return FindDisplay(resolution)>=0;
-		}
-
-		protected override void InternalRender() {
-			if(material!=null) {
-				material.SetVector(_InputSize,new Vector4(quiltSize.x,quiltSize.y));
-				material.SetVector(_OutputSize,new Vector4(resolution.x,resolution.y));
-				material.SetVector(_Arguments,new Vector4(slope,interval,x0));
-			}
-			base.InternalRender();
 		}
 
 		public override void Init() {

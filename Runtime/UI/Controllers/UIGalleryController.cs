@@ -106,6 +106,7 @@ namespace YouSingStudio.Holograms {
 		}
 
 		public override void Play(string path) {
+			if(string.IsNullOrEmpty(path)) {return;}
 			path=path.GetFilePath();
 			//
 			int i=m_Paths.IndexOf(path);
@@ -114,6 +115,7 @@ namespace YouSingStudio.Holograms {
 		}
 
 		protected override void OnSketchfab(string path) {
+			if(string.IsNullOrEmpty(path)) {return;}
 			path=path.GetFilePath();
 			//
 			int i=m_Paths.IndexOf(path);
@@ -199,6 +201,9 @@ namespace YouSingStudio.Holograms {
 			//
 			if(!b&&preview*count.x*count.y>0.0f) {
 #if (UNITY_EDITOR_WIN||UNITY_STANDALONE_WIN)&&!NET_STANDARD
+#if UNITY_EDITOR
+				UnityEngine.Profiling.Profiler.BeginSample("LoadThumbnail");
+#endif
 				a=0.0f;int size=Mathf.ClosestPowerOfTwo((int)Mathf.Min(preview*count.x,preview*count.y));
 				Rect rect=count.ToPreview();
 				using(var bm=ShellThumbs.WindowsThumbnailProvider.GetThumbnail(
@@ -219,6 +224,9 @@ namespace YouSingStudio.Holograms {
 						path.SetQuilt(count);// Approximately
 					}
 				}
+#if UNITY_EDITOR
+				UnityEngine.Profiling.Profiler.EndSample();
+#endif
 #endif
 			}
 			//

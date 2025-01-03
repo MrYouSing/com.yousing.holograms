@@ -12,10 +12,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Sketchfab.Account
       objectReference: {fileID: 0}
-    - target: {fileID: 3024886821404478736, guid: 78647d6d944b725438d37f123014dd59, type: 3}
-      propertyPath: m_Texture
+    - target: {fileID: 1764611902223591550, guid: 78647d6d944b725438d37f123014dd59, type: 3}
+      propertyPath: m_Sprite
       value: 
-      objectReference: {fileID: 2800000, guid: a7b2b7a3a422a20439f65ff948001043, type: 3}
+      objectReference: {fileID: 21300000, guid: a7b2b7a3a422a20439f65ff948001043, type: 3}
     - target: {fileID: 4741179441196236692, guid: 78647d6d944b725438d37f123014dd59, type: 3}
       propertyPath: phone
       value: 0

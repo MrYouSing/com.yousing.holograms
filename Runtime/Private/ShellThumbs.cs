@@ -79,7 +79,7 @@ namespace ShellThumbs
 				hBitmap = GetHBitmap( Path.GetFullPath( fileName ), width, height, options );
 
 				// Original code returned the bitmap directly:
-				//   return GetBitmapFromHBitmap( hBitmap );
+				return Image.FromHbitmap( hBitmap );
 				// I'm making a clone first, so I can dispose of the original bitmap.
 				// The returned clone should be managed and not need disposing of. (I think...)
 				Bitmap thumbnail = GetBitmapFromHBitmap( hBitmap );

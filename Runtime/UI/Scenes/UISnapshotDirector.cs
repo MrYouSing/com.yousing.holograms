@@ -108,16 +108,14 @@ namespace YouSingStudio.Holograms {
 				m_FieldV.SetActive(true);
 			}
 			//
-			var sm=Private.ShortcutManager.s_Instance;
-			if(sm!=null) {sm.Lock(this);}
+			this.LockShortcuts(true);
 		}
 
 		protected virtual void UpdateText() {
 			if(field!=null) {m_FieldV.SetActive(false);}
 			if(text!=null) {text.text=snapshot!=null?snapshot.name:"None";}
 			//
-			var sm=Private.ShortcutManager.s_Instance;
-			if(sm!=null) {sm.Unlock(this);}
+			this.LockShortcuts(false);
 		}
 
 		// Events

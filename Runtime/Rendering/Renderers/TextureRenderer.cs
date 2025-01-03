@@ -78,7 +78,7 @@ namespace YouSingStudio.Holograms {
 			if(value!=aspect) {
 				aspect=value;
 			}
-			UpdateTransform();
+			OnAspectUpdated();
 		}
 
 		protected virtual void Init() {
@@ -110,10 +110,10 @@ namespace YouSingStudio.Holograms {
 			texture=value;
 			material.mainTexture=texture;
 			if(renderer!=null) {renderer.enabled=texture!=null;}
-			UpdateTransform();
+			OnAspectUpdated();
 		}
 
-		public virtual void UpdateTransform() {
+		protected virtual void OnAspectUpdated() {
 			if(!m_IsInited) {Init();}
 			//
 		}

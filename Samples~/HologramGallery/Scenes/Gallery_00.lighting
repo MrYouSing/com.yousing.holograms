@@ -1,0 +1,8 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!850595691 &4890085278179872738
+LightingSettings:
+  m_Name: Gallery_00
+  serializedVersion: 7
+  m_GIWorkflowMode: 0
+  m_RealtimeEnvironmentLighting: 1

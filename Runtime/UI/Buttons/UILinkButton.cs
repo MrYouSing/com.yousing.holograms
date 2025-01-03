@@ -12,6 +12,7 @@ namespace YouSingStudio.Holograms {
 		public static Dictionary<string,string> s_Links=null;
 
 		public string url;
+		public int button=1;
 
 		#endregion Fields
 
@@ -25,6 +26,8 @@ namespace YouSingStudio.Holograms {
 		}
 
 		public virtual void OnPointerClick(PointerEventData eventData) {
+			if((button&(1<<(int)eventData.button))==0) {return;}
+			//
 			if(!s_Links.TryGetValue(name,out var tmp)||string.IsNullOrEmpty(tmp)) {
 				tmp=url;
 			}

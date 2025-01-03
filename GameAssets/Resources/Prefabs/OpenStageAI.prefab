@@ -70,3 +70,11 @@ MonoBehaviour:
   password: 
   features: 7
   hardwareSN: 
+  sprites:
+  - {fileID: 0}
+  - {fileID: 1758726881, guid: 4ee05b666ba057241b8f79b4a13c7792, type: 3}
+  - {fileID: 609083944, guid: 4ee05b666ba057241b8f79b4a13c7792, type: 3}
+  - {fileID: -1608973226, guid: 4ee05b666ba057241b8f79b4a13c7792, type: 3}
+  - {fileID: -1557312465, guid: 4ee05b666ba057241b8f79b4a13c7792, type: 3}
+  - {fileID: -584589955, guid: 4ee05b666ba057241b8f79b4a13c7792, type: 3}
+  - {fileID: -1557312465, guid: 4ee05b666ba057241b8f79b4a13c7792, type: 3}

@@ -61,6 +61,9 @@ else if(asset is,if(asset is
  Macro.End --> */
 /* <!-- Macro.Replace Replace
  Macro.End --> */
+/* <!-- Macro.Replace
+//   return GetBitmapFromHBitmap(,return Image.FromHbitmap(
+ Macro.End --> */
 // Macro.End -->
 
 //<!-- Macro.File AsyncTask.cs
@@ -108,10 +111,10 @@ else if(asset is,if(asset is
 :Packages/com.yousing.io/Runtime/OS/$(GeneratedFileName).cs,0~29
  Macro.End --> */
 /* <!-- Macro.Copy File
-:Packages/com.yousing.io/Runtime/APIs/OAuthAPI.cs,54~58,64
+:Packages/com.yousing.io/Runtime/APIs/OAuthAPI.cs,55~59,65
  Macro.End --> */
 /* <!-- Macro.Copy File
-:Packages/com.yousing.io/Runtime/OS/$(GeneratedFileName).cs,30~300
+:Packages/com.yousing.io/Runtime/OS/$(GeneratedFileName).cs,30~302
  Macro.End --> */
 /* <!-- Macro.Replace Replace
  Macro.End --> */
