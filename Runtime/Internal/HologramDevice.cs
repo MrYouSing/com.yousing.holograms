@@ -29,7 +29,6 @@ Height,Forward,
 /* <!-- Macro.Patch
 ,UnityExtension
  Macro.End --> */
-using System.Collections;
 using System.IO;
 using System.Runtime.CompilerServices;
 using UnityEngine;
@@ -67,7 +66,6 @@ namespace YouSingStudio.Holograms {
 		[System.NonSerialized]public System.Action onPreRender=null;
 		[System.NonSerialized]public System.Action onPostRender=null;
 		[System.NonSerialized]protected bool m_IsInited;
-		[System.NonSerialized]protected int m_Display;
 
 		#endregion Fields
 
@@ -170,7 +168,7 @@ namespace YouSingStudio.Holograms {
 		}
 
 		public virtual void FromJson(string json) {
-			JsonUtility.FromJsonOverwrite(json,this);
+			Newtonsoft.Json.JsonConvert.PopulateObject(json,this);
 		}
 
 		public virtual string ToJson() {
@@ -181,7 +179,6 @@ namespace YouSingStudio.Holograms {
 			if(m_IsInited) {return;}
 			m_IsInited=true;
 			//
-			m_Display=display;
 			this.LoadSettings(name);
 			//
 			if(resolution.sqrMagnitude==0) {

@@ -758,6 +758,13 @@ namespace YouSingStudio.Holograms {
 			return value;
 		}
 
+		public static void SetOnClick(this Button thiz,UnityAction action) {
+			if(thiz!=null) {
+				thiz.onClick.RemoveAllListeners();
+				if(action!=null) {thiz.onClick.AddListener(action);}
+			}
+		}
+
 		public static void AddTrigger(this EventTrigger thiz,EventTriggerType type,UnityAction<BaseEventData> action) {
 			if(thiz!=null&&action!=null) {
 				EventTrigger.Entry e;var tmp=thiz.triggers;

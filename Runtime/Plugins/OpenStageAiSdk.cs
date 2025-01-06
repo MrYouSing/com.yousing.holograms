@@ -39,6 +39,8 @@ public class OpenStageAiSdk
 
 	#region Fields
 
+	public static readonly DeviceData k_Device=new DeviceData();
+
 	public static OpenStageAiSdk s_Instance;
 	public static List<string> s_Configs=new List<string>{
 		"deviceConfig.json",
@@ -285,10 +287,10 @@ public class OpenStageAiSdk
 			jo["sdkType"]="OfficialSDK";
 			if(!string.IsNullOrEmpty(jo["deviceId"]?.Value<string>())) {
 				// Fixed NonSerialized.
-				var d=e.config;var o=new DeviceData();
+				var d=e.config;
 				var tmp=d.GetType().GetProperties();
 				for(int i=0,imax=tmp?.Length??0;i<imax;++i) {
-					var it=tmp[i];if(Equals(it.GetValue(d),it.GetValue(o))) {jo.Remove(it.Name);}
+					var it=tmp[i];if(Equals(it.GetValue(d),it.GetValue(k_Device))) {jo.Remove(it.Name);}
 				}
 				//
 				Log($"Load {e.type} config from official sdk.");
@@ -328,11 +330,15 @@ public class OpenStageAiSdk
 		if(!string.IsNullOrEmpty(deviceConfig)) {
 			if(m_OnDeviceUpdated==null) {Log(deviceConfig);}
 			else {m_OnDeviceUpdated.Invoke(deviceConfig);}
-			//
-			JObject jo=JObject.Parse(deviceConfig);
+			// Parse json.
+			JObject jo=JObject.Parse(deviceConfig);JToken jt=jo.SelectToken("sdkType");
+			if(jt!=null&&string.Equals(jt.Value<string>(),"manual",UnityExtension.k_Comparison)) {
+				jo.Remove("sdkType");
+			}
+			// Implement features.
 			if((features&Feature.SaveDeviceJson)!=0) {
 				string fn="deviceConfig.json";
-				JToken jt=jo.SelectToken("deviceNumber");
+				jt=jo.SelectToken("deviceNumber");
 				if(jt!=null) {fn=jt.Value<string>()+".json";}
 				File.WriteAllText(fn,deviceConfig);
 			}
@@ -343,6 +349,13 @@ public class OpenStageAiSdk
 				InvokeEvent(k_Type_Login);
 			}
 		}
+	}
+
+	public virtual void LoadDeviceConfig(string text) {
+		deviceConfig=text;configType=1;// TODO: Manual Priority.
+		SetString(".DeviceConfig",deviceConfig);
+		//
+		OnDeviceUpdated();
 	}
 
 	public virtual void Find() {

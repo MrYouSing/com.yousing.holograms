@@ -52,7 +52,7 @@ namespace YouSingStudio.Samples {
 					}}
 					//
 					if((picker.mode&0x2)==0) {
-						list=SFB.StandaloneFileBrowser.OpenFilePanel(picker.title,Path.Combine(picker.path,picker.name),filters,(picker.mode&0x04)!=0);
+						list=SFB.StandaloneFileBrowser.OpenFilePanel(picker.title,picker.path,filters,(picker.mode&0x04)!=0);
 					}else {
 						tmp=SFB.StandaloneFileBrowser.SaveFilePanel(picker.title,picker.path,picker.name,filters);
 					}

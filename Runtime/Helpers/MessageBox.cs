@@ -228,14 +228,8 @@ namespace YouSingStudio.Holograms {
 			var btn=index<(view.m_Buttons?.Length??0)
 				?view.m_Buttons[index]:null;
 			if(btn!=null) {
-				btn.onClick.RemoveAllListeners();
-				if(action!=null) {
-					btn.onClick.AddListener(action);
-					//
-					btn.gameObject.SetActive(true);
-				}else {
-					btn.gameObject.SetActive(false);
-				}
+				btn.SetOnClick(action);
+				btn.gameObject.SetActive(action!=null);
 			}
 		}
 

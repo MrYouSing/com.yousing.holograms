@@ -75,8 +75,8 @@ namespace YouSingStudio.Holograms {
 					if(6<len) {// Close
 						Button btn=login.m_Buttons[6];
 						if(btn!=null) {
-							btn.onClick.RemoveAllListeners();
-							if(value) {btn.onClick.AddListener(()=>SetLogin(false));}
+							if(value) {btn.SetOnClick(()=>SetView(false));}
+							else {btn.SetOnClick(null);}
 						}
 					}
 				}
@@ -130,6 +130,10 @@ namespace YouSingStudio.Holograms {
 					if(!silent) {SetLogin(true);}
 				}
 			}
+		}
+
+		public virtual void SetView(bool value) {
+			if(value) {Render();}SetLogin(value);
 		}
 
 		public virtual void Login() {

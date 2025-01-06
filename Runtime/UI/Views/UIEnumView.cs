@@ -29,13 +29,12 @@ namespace YouSingStudio.Holograms {
 		protected virtual void Awake() {
 			start=index;
 			//
-			var sm=ShortcutManager.instance;
-			var tg=GetComponent<ToggleGroup>();
+			var sm=ShortcutManager.instance;var tg=GetComponent<ToggleGroup>();
 			var op=(m_Dropdowns?.Length??0)>0?m_Dropdowns[0].options:null;
-			if(op!=null) {op.Clear();}
+			if(op!=null) {op.Clear();}string key=name+".";
 			for(int i=0,imax=keys?.Length??0,icnt=m_Toggles?.Length??0;i<imax;++i) {
 				int n=i;T v=values[i];string s=v.ToString();
-				sm.Add(name+"."+s,()=>OnIndexChanged(n),ShortcutManager.GetKeys(keys[i],modifiers));
+				sm.Add(key+s,()=>OnIndexChanged(n),ShortcutManager.GetKeys(keys[i],modifiers));
 				if(string.IsNullOrEmpty(GetString(i))) {s=s.Tr();}else {s=GetString(i);}
 				SetText(i,s);BindToggle(i,(x)=>OnToggleChanged(n,x));
 				//
@@ -46,7 +45,8 @@ namespace YouSingStudio.Holograms {
 		}
 
 		protected virtual void OnEnable() {
-			OnIndexChanged(PlayerPrefs.GetInt(name,index));
+			string key=name;
+			if(!key.StartsWith('.')) {OnIndexChanged(PlayerPrefs.GetInt(key,index));}
 		}
 
 		protected virtual void Update() {
@@ -87,7 +87,9 @@ namespace YouSingStudio.Holograms {
 				SetToggleWithoutNotify(i,b);
 				if(b) {index=i;
 					SetDropdownWithoutNotify(0,index);
-					PlayerPrefs.SetInt(name,index);
+					//
+					string key=name;
+					if(!key.StartsWith('.')) {PlayerPrefs.SetInt(name,index);}
 				}
 			}
 		}

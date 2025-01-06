@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using UnityEngine;
 
 namespace YouSingStudio.Holograms {
@@ -68,12 +69,40 @@ namespace YouSingStudio.Holograms {
 			return FindDisplay(resolution)>=0;
 		}
 
-		public override void Init() {
-			if(m_IsInited) {return;}
-			base.Init();
+		protected override void FromJson(JObject jo) {
+			base.FromJson(jo);
+			//
+			jo.Remove(nameof(name));
+			jo[nameof(sdkType)]="manual";
+			JsonConvert.PopulateObject(jo.ToString(),this);
 			//
 			var sdk=OpenStageAiSdk.instance;
 			if(sdk!=null) {
+				jo["lineNumber"]=pitch;
+				jo["obliquity"]=slope;
+				jo["deviation"]=center;
+				//
+				jo[nameof(display)]=m_Display;
+				sdk.LoadDeviceConfig(jo.ToString());
+			}
+			jo.RemoveAll();
+		}
+
+		protected override void ToJson(JObject jo) {
+			base.ToJson(jo);
+			//
+			if(!string.IsNullOrEmpty(deviceNumber)) {jo[nameof(name)]=deviceNumber;}
+		}
+
+		public override void Init() {
+			if(m_IsInited) {return;}
+			//
+			var sdk=OpenStageAiSdk.instance;
+			if(sdk!=null) {
+				slope=OpenStageAiSdk.k_Device.slope;
+				interval=OpenStageAiSdk.k_Device.interval;
+				x0=OpenStageAiSdk.k_Device.x0;
+				//
 				sdk.onDeviceUpdated+=OnDeviceUpdated;
 			}
 			var app=MonoApplication.s_Instance;
@@ -81,6 +110,7 @@ namespace YouSingStudio.Holograms {
 				if(app.depth.sqrMagnitude==0.0f) {app.depth=new Vector2(.25f,.75f);}
 			}
 			//
+			base.Init();
 			if(material==null) {
 				material=new Material(Shader.Find("Hidden/C1_Blit"));
 			}
@@ -92,6 +122,7 @@ namespace YouSingStudio.Holograms {
 					JsonConvert.PopulateObject(text,this);
 				name=n;
 				if(string.IsNullOrEmpty(sdkType)) {sdkType="local";}
+				if(string.Equals(sdkType,"manual",UnityExtension.k_Comparison)) {return;}
 				Debug.Log($"Load {sdkType} settings : {text}");
 			}
 		}
