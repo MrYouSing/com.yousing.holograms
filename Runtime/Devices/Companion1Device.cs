@@ -69,6 +69,16 @@ namespace YouSingStudio.Holograms {
 			return FindDisplay(resolution)>=0;
 		}
 
+		public override void FromJson(string json) {
+			if(string.IsNullOrEmpty(json)) {
+				var sdk=OpenStageAiSdk.instance;
+				if(sdk!=null) {sdk.LoadDeviceConfig(json);}
+				return;
+			}
+			//
+			base.FromJson(json);
+		}
+
 		protected override void FromJson(JObject jo) {
 			base.FromJson(jo);
 			//

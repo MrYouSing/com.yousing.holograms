@@ -10,6 +10,7 @@ TempTexture2D,GetTemp2D();}if(false){}//
 #if (UNITY_EDITOR_WIN||UNITY_STANDALONE_WIN)&&!NET_STANDARD
 #define DOTNET_GDI_PLUS
 #endif
+using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using UnityEngine;
@@ -101,6 +102,7 @@ namespace YouSingStudio.Holograms {
 		public static FieldInfo s_RenderUIField;
 		public static object s_RenderUIEvent;
 		public static int s_RenderPipelines;
+		public static int s_RenderPipeline=-1;
 		public static RenderPipelineAsset[] s_RenderPipelineAssets;
 
 		#endregion Fields
@@ -108,6 +110,17 @@ namespace YouSingStudio.Holograms {
 		#region Methods
 
 		//
+
+		public static void Free(this Texture thiz) {
+			if(thiz!=null) {
+				if(thiz is RenderTexture rt) {RenderTexture.ReleaseTemporary(rt);}
+				else {Object.Destroy(thiz);}
+			}
+		}
+
+		public static void Free<T>(ref T thiz) where T:Texture {
+			thiz.Free();thiz=null;
+		}
 
 		public static Vector2Int GetSizeI(this Texture thiz) {
 			if(thiz!=null) {return new Vector2Int(thiz.width,thiz.height);}
@@ -119,6 +132,17 @@ namespace YouSingStudio.Holograms {
 		}
 
 		public static Texture2D NewTexture2D(int width,int height)=>NewTexture2D(width,height,false);
+
+		public static void SaveFile(this Texture2D thiz,string path) {
+			if(thiz!=null&&!string.IsNullOrEmpty(path)) {
+				byte[] tmp=null;
+				if(path.EndsWith(".png",UnityExtension.k_Comparison)) {tmp=thiz.EncodeToPNG();}
+				else if(path.EndsWith(".jpg",UnityExtension.k_Comparison)) {tmp=thiz.EncodeToJPG();}
+				else if(path.EndsWith(".tga",UnityExtension.k_Comparison)) {tmp=thiz.EncodeToTGA();}
+				else if(path.EndsWith(".exr",UnityExtension.k_Comparison)) {tmp=thiz.EncodeToEXR();}
+				File.WriteAllBytes(path,tmp);
+			}
+		}
 
 		public static bool IsNullOrEmpty(this RenderTexture thiz) {
 			if(thiz!=null) {
@@ -325,12 +349,17 @@ namespace YouSingStudio.Holograms {
 		}
 
 		public static void SetRenderPipeline(int index) {
+			if(s_RenderPipeline<0) {
+				s_RenderPipeline=GetRenderPipeline();
+			}
 			if(s_RenderPipelineAssets==null) {
 				s_RenderPipelineAssets=new RenderPipelineAsset[3]{null
 					,Resources.Load<RenderPipelineAsset>("Settings/RPAsset_URP")
 					,Resources.Load<RenderPipelineAsset>("Settings/RPAsset_HDRP")
 				};
 			}
+			//
+			if(index<0) {index=s_RenderPipeline;}
 			GraphicsSettings.renderPipelineAsset=s_RenderPipelineAssets[index];
 		}
 

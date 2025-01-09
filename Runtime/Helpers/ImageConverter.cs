@@ -57,6 +57,7 @@ namespace YouSingStudio.Holograms {
 #else
 				false;
 #endif
+			public bool background=true;
 			public string temporary;
 			public string download;
 			public string[] progresses;
@@ -69,16 +70,18 @@ namespace YouSingStudio.Holograms {
 		public class FFmpeg
 			:AsyncTask<FFmpeg>
 		{
-			public static FFmpeg Obtain(string path,string argument,System.Action<string,string> action) {
+			public static FFmpeg Obtain(string path,string argument,System.Action<string,string> action,System.Func<string,bool> func=null) {
 				FFmpeg tmp=(FFmpeg)Obtain();
 				tmp.delay=settings.taskWait;
-				tmp.path=path;tmp.argument=argument;tmp.action=action;
+				tmp.path=path;tmp.argument=argument;
+				tmp.action=action;tmp.func=func;
 				tmp.StartAsThread();return tmp;
 			}
 
 			public string path;
 			public string argument;
 			public System.Action<string,string> action;
+			public System.Func<string,bool> func;
 
 			protected virtual void GetOutput(out string tmp,out string ext) {
 				bool b=argument.EndsWith('"');int n=argument.Length;
@@ -99,7 +102,7 @@ namespace YouSingStudio.Holograms {
 #if UNITY_STANDALONE_WIN
 				if(Virtofy.IO.ProcessHelper.Start(
 					settings.ffmpeg,string.Format(argument,path,tmp),
-					Path.GetDirectoryName(Application.dataPath),true,
+					Path.GetDirectoryName(Application.dataPath),settings.background,
 					out uint p
 				)) {
 					Virtofy.IO.ProcessHelper.WaitForExit(p);
@@ -109,13 +112,16 @@ namespace YouSingStudio.Holograms {
 				Process p=new Process();var s=p.StartInfo;
 					s.FileName=settings.ffmpeg;
 					s.Arguments=string.Format(argument,path,tmp);
-					s.UseShellExecute=false;
-					s.CreateNoWindow=true;
+					if(settings.background) {
+						s.UseShellExecute=false;
+						s.CreateNoWindow=true;
+					}
 				p.Start();p.WaitForExit();
 #endif
 				if(!string.IsNullOrEmpty(ext)) {tmp+=ext;}
+				bool b=func?.Invoke(tmp)??File.Exists(tmp);
 				//
-				if(id!=i||!File.Exists(tmp)) {
+				if(id!=i||!b) {
 					OnKill();
 				}else {
 					if(settings.debug) {Debug.Log("FFmpeg uses "+((System.Environment.TickCount-tc)/1000f)+"s.");}

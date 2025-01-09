@@ -203,7 +203,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   slider: {fileID: 5308175869839723878}
-  field: {fileID: 5836983631903131935}
+  field: {fileID: 2937336412121806283}
   format: ({0}/{1})
   texts:
   - {fileID: 0}
@@ -2595,19 +2595,19 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 9187001922030040726}
     m_Modifications:
-    - target: {fileID: 611209306591907290, guid: 8e22d9908e516c8489be99010cd171ad, type: 3}
+    - target: {fileID: 8194811856701813006, guid: 8e22d9908e516c8489be99010cd171ad, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 7689182929736209977}
-    - target: {fileID: 611209306591907290, guid: 8e22d9908e516c8489be99010cd171ad, type: 3}
+    - target: {fileID: 8194811856701813006, guid: 8e22d9908e516c8489be99010cd171ad, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
       value: OnSliderChanged
       objectReference: {fileID: 0}
-    - target: {fileID: 611209306591907290, guid: 8e22d9908e516c8489be99010cd171ad, type: 3}
+    - target: {fileID: 8194811856701813006, guid: 8e22d9908e516c8489be99010cd171ad, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
       value: YouSingStudio.Holograms.UIHologramPreview, YouSingStudio.Holograms
       objectReference: {fileID: 0}
-    - target: {fileID: 611209306591907290, guid: 8e22d9908e516c8489be99010cd171ad, type: 3}
+    - target: {fileID: 8194811856701813006, guid: 8e22d9908e516c8489be99010cd171ad, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_FloatArgument
       value: -1
       objectReference: {fileID: 0}
@@ -2670,6 +2670,17 @@ PrefabInstance:
       addedObject: {fileID: 675718676475522230}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8e22d9908e516c8489be99010cd171ad, type: 3}
+--- !u!114 &2937336412121806283 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 9076215198624901450, guid: 8e22d9908e516c8489be99010cd171ad, type: 3}
+  m_PrefabInstance: {fileID: 6140291154968501377}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d199490a83bb2b844b9695cbf13b01ef, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!224 &3410793665634748455 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 8818928235339388070, guid: 8e22d9908e516c8489be99010cd171ad, type: 3}
@@ -2684,17 +2695,6 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 67db9e8f0e2ae9c40bc1e2b64352a6b4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &5836983631903131935 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 303874183937775006, guid: 8e22d9908e516c8489be99010cd171ad, type: 3}
-  m_PrefabInstance: {fileID: 6140291154968501377}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d199490a83bb2b844b9695cbf13b01ef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!224 &6321736333926856202 stripped

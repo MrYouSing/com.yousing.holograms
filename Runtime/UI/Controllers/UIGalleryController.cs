@@ -199,7 +199,12 @@ namespace YouSingStudio.Holograms {
 				}
 			}
 			//
-			if(!b&&preview*count.x*count.y>0.0f) {
+			if(b) {
+				b=false;// Fallback.
+			}else {
+				if(File.Exists(path)) {b=preview*count.x*count.y>0.0f;}
+			}
+			if(b) {
 #if (UNITY_EDITOR_WIN||UNITY_STANDALONE_WIN)&&!NET_STANDARD
 #if UNITY_EDITOR
 				UnityEngine.Profiling.Profiler.BeginSample("LoadThumbnail");

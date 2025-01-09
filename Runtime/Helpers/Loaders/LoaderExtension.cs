@@ -74,7 +74,8 @@ namespace YouSingStudio.Holograms {
 						StringBuilder sb=new StringBuilder(key).Append(' ').Append(extensions[0]);
 						for(i=1;i<imax;++i) {sb.Append(';').Append(key).Append(' ').Append(extensions[i]);}
 						//
-						var s=new StageDirector.Stage();s.name=sb.ToString();key="$"+key;
+						var s=new StageDirector.Stage();key="$"+key;
+						s.name=sb.ToString();s.SetActive(false);
 						s.onShow=new UnityEvent();s.onShow.AddListener(()=>sd.Activate(key));
 						s.onHide=new UnityEvent();s.onHide.AddListener(()=>sd.Deactivate(key));
 						s.onOpen=new UnityEvent<string>();s.onOpen.AddListener(thiz.Load);

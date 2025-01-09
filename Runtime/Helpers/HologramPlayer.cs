@@ -38,6 +38,13 @@ namespace YouSingStudio.Holograms {
 			".fbx",
 		};
 
+		[System.NonSerialized]protected bool m_Dirty;
+		[System.NonSerialized]protected string m_Path;
+		[System.NonSerialized]protected string m_Last;
+		[System.NonSerialized]protected HologramDevice m_Device;
+		[System.NonSerialized]protected RenderTexture m_DstRT;
+		[System.NonSerialized]protected Texture2D m_Src2D;
+		[System.NonSerialized]protected Texture2D m_Dst2D;
 		[System.NonSerialized]protected WaitForEndOfFrame m_WaitEof;
 
 		#endregion Fields
@@ -82,30 +89,6 @@ namespace YouSingStudio.Holograms {
 			return false;
 		}
 
-		/// <summary>
-		/// <seealso cref="ScreenCapture.CaptureScreenshot(string)"/>
-		/// </summary>
-		public virtual void Screenshot(string path) {
-			if(string.IsNullOrEmpty(path)) {return;}
-			if(path=="*") {
-				path=System.DateTime.Now.ToString("yyyyMMddHHmmss")+Random.Range(0,10000).ToString("0000");
-				path=Path.Combine("Screenshots",path);
-			}
-			StopCoroutine("ScreenshotDelayed");StartCoroutine(ScreenshotDelayed(path));
-		}
-
-		protected virtual IEnumerator ScreenshotDelayed(string path) {
-			var d=player!=null?player.device:null;if(d==null) {yield break;}
-			if(m_WaitEof==null) {m_WaitEof=new WaitForEndOfFrame();}
-			yield return m_WaitEof;d.Screenshot(path);
-			// For C1 devices.
-			if(ImageConverter.FFmpegSupported()) {
-				string fn=path+"_quilt.png";if(File.Exists(fn)) {
-					ImageConverter.ImageToVideo(Path.GetFullPath(fn),d.quiltTexture.GetSizeI(),path+".mp4");
-				}
-			}
-		}
-
 		protected virtual void InternalPlay(string path) {
 			TextureType type=path.ToTextureType(texture);
 			switch(type) {
@@ -131,12 +114,13 @@ namespace YouSingStudio.Holograms {
 		}
 
 		protected virtual void InternalPlay(string stage,string path) {
+			m_Path=path;
 			if(!string.IsNullOrEmpty(stage)) {
 				if(player!=null) {player.Stop();}// Stop the other.
-				if(director!=null) {director.Open(stage,path);}
+				if(director!=null) {director.Open(stage,m_Path);}
 			}else {
 				if(director!=null) {director.Set("Open Media");}// Stop the other.
-				if(player!=null) {player.Play(path);}
+				if(player!=null) {player.Play(m_Path);}
 			}
 		}
 
@@ -144,6 +128,82 @@ namespace YouSingStudio.Holograms {
 			TextureType.Model.InvokeEvent();
 			InternalPlay("Open Sketchfab",path);
 		}
+
+		// Capture Methods
+
+		/// <summary>
+		/// <seealso cref="ScreenCapture.CaptureScreenshot(string)"/>
+		/// </summary>
+		public virtual void Screenshot(string path) {
+			if(string.IsNullOrEmpty(path)) {return;}
+			if(path=="*") {
+				path=System.DateTime.Now.ToString("yyyyMMddHHmmss")+Random.Range(0,10000).ToString("0000");
+				path=Path.Combine("Screenshots",path);
+			}
+			StopCoroutine("ScreenshotDelayed");StartCoroutine(ScreenshotDelayed(path));
+		}
+
+		protected virtual IEnumerator ScreenshotDelayed(string path) {
+			var d=player!=null?player.device:null;if(d==null) {yield break;}
+			if(m_WaitEof==null) {m_WaitEof=new WaitForEndOfFrame();}
+			yield return m_WaitEof;d.Screenshot(path);
+			// For C1 devices.
+			if(ImageConverter.FFmpegSupported()) {
+				string fn=path+"_quilt.png";if(File.Exists(fn)) {
+					ImageConverter.ImageToVideo(Path.GetFullPath(fn),d.quiltTexture.GetSizeI(),path+".mp4");
+				}
+			}
+		}
+
+		public virtual void BeginCapture(HologramDevice device) {
+			m_Last=m_Path;
+			//
+			m_Device=device;
+			if(m_Device!=null) {
+				m_Device.onPostRender-=OnCapture;
+				m_Device.onPostRender+=OnCapture;
+				m_DstRT=m_Device.canvas;
+			}
+			if(m_DstRT!=null) {
+				bool b=false;
+				m_Src2D=RenderingExtension.NewTexture2D(1,1,b);
+				m_Dst2D=RenderingExtension.NewTexture2D(m_DstRT.width,m_DstRT.height,b);
+			}
+		}
+
+		public virtual IEnumerator OnCapture(string path) {
+			if(m_Dst2D==null||!File.Exists(path)) {yield break;}
+			//
+			m_Src2D.LoadImage(File.ReadAllBytes(path));
+			path="Temp"+path.GetFileExtension();
+			TextureManager.instance.Set(path,m_Src2D);
+			//
+			m_Dirty=true;InternalPlay(path);
+			if(m_Dirty) {m_Device.Render();}
+		}
+
+		public virtual void OnCapture() {
+			if(!m_Dirty) {return;}
+			//
+			var tmp=m_DstRT.Begin();
+				m_Dst2D.ReadPixels(new Rect(0,0,m_Dst2D.width,m_Dst2D.height),0,0);m_Dst2D.Apply();
+			m_DstRT.End(tmp);
+			m_Dirty=false;
+		}
+
+		public virtual void EndCapture() {
+			m_Path=m_Last;
+			m_Device.onPostRender-=OnCapture;
+			//
+			m_Dirty=false;m_Last=null;
+			m_Device=null;m_DstRT=null;
+			RenderingExtension.Free(ref m_Src2D);
+			RenderingExtension.Free(ref m_Dst2D);
+			//
+			Play(m_Path);
+		}
+
+		public virtual Texture2D GetCapture()=>m_Dirty?null:m_Dst2D;
 
 		#endregion Methods
 	}

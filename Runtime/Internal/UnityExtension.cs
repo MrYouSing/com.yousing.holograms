@@ -475,6 +475,10 @@ namespace YouSingStudio.Holograms {
 			return $"{thiz.x}x{thiz.y}a{thiz.z}";
 		}
 
+		public static string ToQuilt_LKG(this Vector3 thiz) {
+			return $"_qs{thiz.x}x{thiz.y}a{-thiz.z}";
+		}
+
 		public static Rect ToPreview(this Vector3 thiz) {
 			float dw=1.0f/thiz.x,dh=1.0f/thiz.y;
 			int w=(int)thiz.x,i=(int)(thiz.x*thiz.y);i=i.GetMiddle();
@@ -571,6 +575,33 @@ namespace YouSingStudio.Holograms {
 			for(int i=0;i<cnt;++i) {
 				if(System.Array.IndexOf(s_InvalidPathChars,pch[i])>=0) {pch[i]='_';}
 			}}}
+			return thiz;
+		}
+
+		public static string GetDirectoryName(this string thiz) {
+			int i=thiz?.LastIndexOfAny(k_Split_Dir)??-1;
+			if(i>=0) {thiz=thiz.Substring(0,i);}
+			return thiz;
+		}
+
+		public static string GetFileName(this string thiz) {
+			int i=thiz?.LastIndexOfAny(k_Split_Dir)??-2;
+			if(i>=-1) {++i;
+				int j=thiz.IndexOf('_',i);
+				if(j<0) {j=thiz.LastIndexOf('.');}
+				if(j<0) {j=thiz.Length;}
+				thiz=thiz.Substring(i,j-i);
+			}
+			return thiz;
+		}
+
+		public static string GetFileExtension(this string thiz) {
+			int i=thiz?.LastIndexOfAny(k_Split_Dir)??-2;
+			if(i>=-1) {++i;
+				int j=thiz.IndexOf('_',i);
+				if(j<0) {j=thiz.LastIndexOf('.');}
+				if(j>=0) {thiz=thiz.Substring(j);}
+			}
 			return thiz;
 		}
 
@@ -690,6 +721,18 @@ namespace YouSingStudio.Holograms {
 			}
 		}
 
+		public static T Clone<T>(this T thiz,bool unity=false) where T:class {
+			if(thiz==null) {return thiz;}
+			//
+			if(unity) {
+				return JsonUtility.FromJson<T>
+					(JsonUtility.ToJson(thiz));
+			}else {
+				return JsonConvert.DeserializeObject<T>
+					(JsonConvert.SerializeObject(thiz));
+			}
+		}
+
 		public static T AddMissingComponent<T>(this Component thiz) where T:Component {
 			T tmp=null;
 			if(thiz!=null) {
@@ -760,8 +803,11 @@ namespace YouSingStudio.Holograms {
 
 		public static void SetOnClick(this Button thiz,UnityAction action) {
 			if(thiz!=null) {
-				thiz.onClick.RemoveAllListeners();
-				if(action!=null) {thiz.onClick.AddListener(action);}
+				var tmp=thiz.onClick;tmp.RemoveAllListeners();
+				for(int i=0,imax=tmp.GetPersistentEventCount();i<imax;++i) {
+					tmp.SetPersistentListenerState(i,UnityEventCallState.Off);
+				}
+				if(action!=null) {tmp.AddListener(action);}
 			}
 		}
 

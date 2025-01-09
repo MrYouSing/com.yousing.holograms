@@ -25,11 +25,11 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4741179441196236692, guid: 78647d6d944b725438d37f123014dd59, type: 3}
-      propertyPath: m_Login
+      propertyPath: m_View
       value: Prefabs/Sketchfab.Login
       objectReference: {fileID: 0}
     - target: {fileID: 4741179441196236692, guid: 78647d6d944b725438d37f123014dd59, type: 3}
-      propertyPath: m_Context
+      propertyPath: m_Model
       value: Prefabs/Sketchfab
       objectReference: {fileID: 0}
     - target: {fileID: 5583822299935385612, guid: 78647d6d944b725438d37f123014dd59, type: 3}

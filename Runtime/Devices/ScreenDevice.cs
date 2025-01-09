@@ -55,7 +55,11 @@ namespace YouSingStudio.Holograms {
 		}
 
 		public override void Screenshot(string path,int mask=-1) {
-			base.Screenshot(path,mask&0x1);
+			if(canvas==null) {return;}
+			// TODO: ColorFormat
+			Texture2D tex=RenderingExtension.NewTexture2D(canvas.width,canvas.height);
+				canvas.ToTexture2D(tex).SaveFile(path);
+			tex.Free();
 		}
 
 		#endregion Methods

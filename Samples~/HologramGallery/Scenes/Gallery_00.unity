@@ -216,6 +216,7 @@ MonoBehaviour:
   m_Assets:
   - {fileID: 2800000, guid: f5c621ec4777a8146a1cc48df9a3059d, type: 3}
   - {fileID: 2800000, guid: dded259ea7199c84a878bee9fbe60610, type: 3}
+  - {fileID: 2800000, guid: 2ebcc2a42dc83174abcb9c2d9bf48282, type: 3}
 --- !u!1 &501348111
 GameObject:
   m_ObjectHideFlags: 0

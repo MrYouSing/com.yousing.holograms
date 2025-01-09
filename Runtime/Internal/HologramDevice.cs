@@ -168,6 +168,7 @@ namespace YouSingStudio.Holograms {
 		}
 
 		public virtual void FromJson(string json) {
+			if(string.IsNullOrEmpty(json)) {return;}
 			Newtonsoft.Json.JsonConvert.PopulateObject(json,this);
 		}
 
@@ -226,16 +227,16 @@ namespace YouSingStudio.Holograms {
 				else {tmp=(quiltTexture as RenderTexture).ToTexture2D(tmp);}
 				//
 				Vector3 v=ParseQuilt();if(v.z>0.0f) {
-					if((mask&0x4)!=0) {File.WriteAllBytes($"{path}_quilt.png",tmp.EncodeToPNG());}
+					if((mask&0x4)!=0) {tmp.SaveFile($"{path}_quilt.png");}
 					ImageConverter.FlipQuiltY(tmp,(int)v.y);
 				}else {
 					v.z*=-1.0f;
 				}
-				File.WriteAllBytes($"{path}_qs{v.x}x{v.y}a{v.z.ToString("0.00")}.png",tmp.EncodeToPNG());
+				tmp.SaveFile($"{path}_qs{v.x}x{v.y}a{v.z.ToString("0.00")}.png");
 			}
 			if((mask&0x1)!=0&&canvas!=null) {
 				tmp=canvas.ToTexture2D(tmp);
-				File.WriteAllBytes($"{path}_raw.png",tmp.EncodeToPNG());
+				tmp.SaveFile($"{path}_raw.png");
 			}
 			if(del) {Texture2D.Destroy(tmp);}
 		}

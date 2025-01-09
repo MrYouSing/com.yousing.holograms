@@ -161,7 +161,7 @@ namespace YouSingStudio.Holograms {
 
 		//
 
-		protected virtual void FitStage(Manifest manifest,GameObject actor) {
+		protected virtual void FitStage(Manifest manifest,GameObject actor,int axis) {
 			Transform t=actor.transform;t.rotation=Quaternion.Euler(manifest.R);
 			Bounds a=actor.GetBounds();manifest.T=-a.center;
 			if(MonoApplication.s_Instance!=null) {
@@ -169,18 +169,24 @@ namespace YouSingStudio.Holograms {
 				if(b.size.sqrMagnitude!=0.0f) {
 					Vector3 p=t.InverseTransformPoint(a.center);
 					Vector3 s=a.size;int n=0;
-					if(true) {// Clamp : Inside
-						if(s.y>s.x) {n=1;}
-						if(s.z>s.y) {n=2;}
-					}else {// Free : Outside
-						if(s.y<s.x) {n=1;}
-						if(s.z<s.y) {n=2;}
+					switch(axis) {
+						case -1:// Clamp : Inside
+							if(s.y>s.x) {n=1;}
+							if(s.z>s.y) {n=2;}
+						break;
+						case -2:// Free : Outside
+							if(s.y<s.x) {n=1;}
+							if(s.z<s.y) {n=2;}
+						break;
+						default:n=axis;break;
 					}
 					manifest.S=Vector3.one*(b.size[n]/s[n]);
 					manifest.T=b.center-Matrix4x4.TRS(t.position,t.rotation,manifest.S).MultiplyPoint3x4(p);
 				}
 			}
 		}
+
+		protected virtual void FitStage(Manifest manifest,GameObject actor)=>FitStage(manifest,actor,-1);
 
 		#endregion Methods
 	}

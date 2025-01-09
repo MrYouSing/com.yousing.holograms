@@ -337,7 +337,7 @@ public class OpenStageAiSdk
 			}
 			// Implement features.
 			if((features&Feature.SaveDeviceJson)!=0) {
-				string fn="deviceConfig.json";
+				string fn=s_Configs[0].GetFullPath();
 				jt=jo.SelectToken("deviceNumber");
 				if(jt!=null) {fn=jt.Value<string>()+".json";}
 				File.WriteAllText(fn,deviceConfig);
@@ -352,6 +352,13 @@ public class OpenStageAiSdk
 	}
 
 	public virtual void LoadDeviceConfig(string text) {
+		//
+		if(string.IsNullOrEmpty(text)) {
+			string fn=s_Configs[0].GetFullPath();
+			if(File.Exists(fn)) {File.Delete(fn);}
+			return;
+		}
+		//
 		deviceConfig=text;configType=1;// TODO: Manual Priority.
 		SetString(".DeviceConfig",deviceConfig);
 		//

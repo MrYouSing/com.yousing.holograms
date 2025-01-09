@@ -24,6 +24,7 @@ namespace YouSingStudio.Holograms {
 		#region Fields
 
 		public new Animation animation;
+		public Animator animator;
 		public List<string> animations=new List<string>();
 		[Header("UI")]
 		// Button
@@ -43,6 +44,11 @@ namespace YouSingStudio.Holograms {
 		[System.NonSerialized]public System.IProgress<string> progress;
 		[System.NonSerialized]protected bool m_IsPlaying;
 		[System.NonSerialized]protected int m_Index;
+		/// <summary>
+		/// 0x0:Default<br/>0x1:Current<br/>0x2:Wait
+		/// </summary>
+		[System.NonSerialized]protected byte m_State;
+		[System.NonSerialized]protected int m_Hash;
 		[System.NonSerialized]protected bool m_IsJumping;
 		[System.NonSerialized]protected GameObject m_PopupV;
 		[System.NonSerialized]protected GameObject m_SliderV;
@@ -81,9 +87,8 @@ namespace YouSingStudio.Holograms {
 		}
 
 		protected virtual void Update() {
-			if(animation!=null&&m_Index>=0) {
-				UpdateSlider();
-			}
+			if(m_Hash!=0) {UpdateAnimator();}
+			if(m_Index>=0) {UpdateSlider();}
 		}
 
 		protected virtual void OnDestroy() {
@@ -99,10 +104,21 @@ namespace YouSingStudio.Holograms {
 			get=>animation!=null&&m_Index>=0?animation[animations[m_Index]]:null;
 		}
 
+		public virtual AnimatorStateInfo animatorState {
+			get {
+				if(animator!=null) {
+					if(animator.IsInTransition(0)) {return animator.GetNextAnimatorStateInfo(0);}
+					else {return animator.GetCurrentAnimatorStateInfo(0);}
+				}
+				return default;
+			}
+		}
+
 		public virtual void Clear() {
 			//
 			Popup(false);
 			animation=null;
+			animator=null;
 			progress=null;
 			animations.Clear();
 			Button(null,null);
@@ -110,9 +126,11 @@ namespace YouSingStudio.Holograms {
 			if(m_SliderV!=null) {m_SliderV.SetActive(false);}
 			if(time!=null) {time.text=null;}
 			SetPlay(0);
-			//selector
+			//
 			m_IsPlaying=false;
 			m_Index=-1;
+			m_State=0x0;
+			m_Hash=0;
 		}
 
 		public virtual void Load(GameObject actor) {
@@ -133,6 +151,19 @@ namespace YouSingStudio.Holograms {
 				}
 				return;
 			}
+			animator=actor.GetComponentInChildren<Animator>();
+			if(animator!=null) {
+				Popup(true);
+				//
+				var tmp=animator.parameters;AnimatorControllerParameter it;
+				for(int i=0,imax=tmp?.Length??0;i<imax;++i) {
+					it=tmp[i];if(it.type==AnimatorControllerParameterType.Trigger) {
+						animations.Add(it.name);
+					}
+				}
+				return;
+			}
+			//
 			progress=actor.GetComponentInChildren<System.IProgress<string>>();
 			if(progress!=null) {
 				Popup(true);
@@ -175,33 +206,44 @@ namespace YouSingStudio.Holograms {
 					animation.Play(key);
 					var tmp=animationState;if(tmp!=null) {tmp.speed=1.0f;}
 				}
+				if(animator!=null) {
+					//
+					if(m_Index==0&&m_Hash==0) {
+						m_Hash=animatorState.shortNameHash;
+					}
+					animator.enabled=true;animator.speed=1.0f;m_State=0x0;
+					//
+					if(m_Index>0&&animatorState.shortNameHash!=m_Hash) {
+						animator.SetTrigger(animations[0]);m_State=0x2;
+					}
+					animator.SetTrigger(key);
+				}
 				if(progress!=null) {
 					progress.Report(key);
 				}
 				//
 				m_IsPlaying=true;
 				Button(key,null);
-				OnSpeedChanged(speed!=null?speed.value:1.0f);
+				OnSpeedChanged(GetSpeed(false));
 			}
 		}
 
 		public virtual void Stop() {
 			if(animation!=null) {animation.Stop();}
+			if(animator!=null) {animator.enabled=false;}
 			if(progress!=null) {progress.Report(null);}
 		}
 
 		public virtual void Resume() {
 			if(m_Index<0) {return;}
 			//
-			var tmp=animationState;
-			if(tmp!=null) {tmp.speed=speed!=null?speed.value:1.0f;}
+			SetSpeed(GetSpeed(false));
 		}
 
 		public virtual void Pause() {
 			if(m_Index<0) {return;}
 			//
-			var tmp=animationState;
-			if(tmp!=null) {tmp.speed=0.0f;}
+			SetSpeed(0.0f);
 		}
 
 		public virtual void Seek(float position) {
@@ -209,6 +251,23 @@ namespace YouSingStudio.Holograms {
 			//
 			var tmp=animationState;
 			if(tmp!=null) {tmp.time=position;}
+		}
+
+		protected virtual float GetSpeed(bool realtime) {
+			if(realtime) {
+				var tmp=animationState;
+				if(tmp!=null) {return tmp.speed;}
+				else if(animator!=null) {return animator.speed;}
+				return 0.0f;
+			}else {
+				return speed!=null?speed.value:1.0f;
+			}
+		}
+
+		protected virtual void SetSpeed(float value) {
+			var tmp=animationState;
+			if(tmp!=null) {tmp.speed=value;}
+			else if(animator!=null) {animator.speed=value;}
 		}
 
 		// Timeline
@@ -220,6 +279,29 @@ namespace YouSingStudio.Holograms {
 			}
 		}
 
+		protected virtual void UpdateAnimator() {
+			if(animator==null||!animator.isActiveAndEnabled||animator.speed==0.0f) {return;}
+			//
+			var si=animatorState;
+			bool a=si.shortNameHash==m_Hash,b=false;
+			if(!animator.IsInTransition(0)) {
+				//
+				if(!a&&m_State==0x0&&si.normalizedTime>=0.5f) {
+					m_State=0x1;return;
+				}
+				//
+				if(m_Index==0) {b=si.normalizedTime>=1.0f;}
+				else if(m_State==0x1&&a) {b=true;}
+				else if(si.loop) {b=si.normalizedTime>=1.0f;}
+			}else {
+				switch(m_State) {
+					case 0x2:if(a) {m_State=0x0;}break;
+				}
+			}
+			//
+			if(b) {OnLoopPointReached();}
+		}
+
 		protected virtual void UpdateSlider() {
 			//
 			float t=0.0f,d=1.0f;bool b=false;
@@ -227,6 +309,10 @@ namespace YouSingStudio.Holograms {
 			if(tmp!=null) {
 				t=tmp.time;d=tmp.length;b=tmp.speed>0.0f;
 				t=Mathf.Clamp(t,0.0f,d);
+			}else if(animator!=null) {
+				var si=animatorState;d=si.length;b=animator.speed>0.0f;
+				if(float.IsInfinity(d)||!b) {SetPlay(0x2);return;}
+				t=d*Mathf.Repeat(si.normalizedTime,1.0f);
 			}else {
 				return;
 			}
@@ -296,16 +382,13 @@ namespace YouSingStudio.Holograms {
 		}
 
 		protected virtual void OnWrapChanged(WrapMode value) {
-			if(!m_IsPlaying) {OnLoopPointReached();}
+			if(m_Index>=0&&!m_IsPlaying) {OnLoopPointReached();}
 		}
 
 		protected virtual void OnSpeedChanged(float value) {
 			if(m_Index<0) {return;}
 			//
-			var tmp=animationState;
-			if(tmp!=null&&tmp.speed!=0.0f) {// Not Paused.
-				tmp.speed=value;
-			}
+			if(GetSpeed(true)!=0.0f) {SetSpeed(value);}
 			if(progress!=null) {
 				((System.IProgress<float>)progress)?.Report(value);
 			}
@@ -317,10 +400,12 @@ namespace YouSingStudio.Holograms {
 		protected virtual void OnLoopPointReached() {
 			m_IsPlaying=false;
 			//
-			if(animation!=null) {
+			bool a=animation!=null,b=animator!=null;
+			if(a||b) {
 				if(wrap!=null) {
 					switch(wrap.value) {
 						case WrapMode.ClampForever:
+							if(b) {Pause();}
 						return;
 						case WrapMode.Loop:
 							Stop();Play(m_Index);

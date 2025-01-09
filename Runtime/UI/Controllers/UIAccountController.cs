@@ -4,17 +4,13 @@ using YouSingStudio.Private;
 
 namespace YouSingStudio.Holograms {
 	public class UIAccountController
-		:MonoBehaviour
+		:UIBaseController<OAuthBehaviour>
 	{
 		#region Fields
 
 		public const int k_Wait=3;
 		public static readonly string[] s_Form=new string[4];
 
-		public OAuthBehaviour context;
-		[SerializeField]protected string m_Context;
-		public ScriptableView login;
-		[SerializeField]protected string m_Login;
 		[Header("UI")]
 		public bool phone=true;
 		public bool silent=true;
@@ -28,26 +24,14 @@ namespace YouSingStudio.Holograms {
 
 		#region Unity Messages
 
-		protected virtual void Start() {
-			this.CheckInstance(m_Context,ref context);
-			this.CheckInstance(m_Login,ref login);
-			SetEvents(true);
-			SetLogin(false);
-			if(context!=null) {Render();}
-		}
-
-		protected virtual void OnDestroy() {
-			SetEvents(false);
-		}
-
 		protected virtual void Update() {
-			if(m_Time>=0.0f&&login!=null) {
+			if(m_Time>=0.0f&&view!=null) {
 				float t=Time.realtimeSinceStartup-m_Time;
 				if(t>=0.0f) {
 					m_Time=-1.0f;
-					login.SetActive(k_Wait,false);
+					view.SetActive(k_Wait,false);
 				}else {
-					login.SetText(3,$"Wait {(int)-t}s.");
+					view.SetText(3,$"Wait {(int)-t}s.");
 				}
 			}
 		}
@@ -56,7 +40,16 @@ namespace YouSingStudio.Holograms {
 
 		#region Methods
 
-		public virtual void SetEvents(bool value) {
+		protected override void InitView() {
+			base.InitView();
+			//
+			SetLogin(false);
+			if(model!=null) {Render();}
+		}
+
+		protected override void SetEvents(bool value) {
+			var context=model;var login=view;
+			//
 			if(context!=null) {
 				context.SetEvent(OAuthBehaviour.k_Type_Register,Render,value);
 				context.SetEvent(OAuthBehaviour.k_Type_Login,Render,value);
@@ -84,13 +77,15 @@ namespace YouSingStudio.Holograms {
 		}
 
 		public virtual void SetLogin(bool value) {
-			if(context==null||!context.enabled) {value=false;}
-			if(login!=null) {login.gameObject.SetActive(value);}
+			if(model==null||!model.enabled) {value=false;}
+			if(view!=null) {view.gameObject.SetActive(value);}
 			//
 			this.LockShortcuts(value);
 		}
 
-		public virtual void Render() {
+		public override void Render() {
+			var context=model;var login=view;
+			//
 			if(context!=null) {
 				if(text!=null) {text.text=context.displayName;}
 				if(rawImage!=null) {rawImage.texture=context.avatarIcon;}
@@ -132,58 +127,58 @@ namespace YouSingStudio.Holograms {
 			}
 		}
 
-		public virtual void SetView(bool value) {
+		public override void SetView(bool value) {
 			if(value) {Render();}SetLogin(value);
 		}
 
 		public virtual void Login() {
-			if(context!=null&&login!=null) {
-				bool b=login.GetActive(0);
-				s_Form[0]=login.GetInputField(b?0:2);
-				s_Form[1]=!b?null:login.GetInputField(1);
-				s_Form[2]=b?null:login.GetInputField(3);
-				context.SetForm(OAuthBehaviour.k_Type_Login,s_Form);context.Login();
+			if(model!=null&&view!=null) {
+				bool b=view.GetActive(0);
+				s_Form[0]=view.GetInputField(b?0:2);
+				s_Form[1]=!b?null:view.GetInputField(1);
+				s_Form[2]=b?null:view.GetInputField(3);
+				model.SetForm(OAuthBehaviour.k_Type_Login,s_Form);model.Login();
 			}
 		}
 
 		public virtual void Logout() {
-			if(context!=null&&login!=null) {
+			if(model!=null&&view!=null) {
 				if(true) {// TODO: Clean the password.
-				context.GetForm(OAuthBehaviour.k_Type_Login,s_Form);
-					s_Form[1]=null;PlayerPrefs.DeleteKey(context.name+".Password");
-				context.SetForm(OAuthBehaviour.k_Type_Login,s_Form);
+				model.GetForm(OAuthBehaviour.k_Type_Login,s_Form);
+					s_Form[1]=null;PlayerPrefs.DeleteKey(model.name+".Password");
+				model.SetForm(OAuthBehaviour.k_Type_Login,s_Form);
 				}
 				//
-				context.Logout();
+				model.Logout();
 			}
 		}
 
 		public virtual void Verify() {
-			if(context!=null&&login!=null) {
-				s_Form[0]=login.GetInputField(2);
+			if(model!=null&&view!=null) {
+				s_Form[0]=view.GetInputField(2);
 				s_Form[1]="login";
-				context.SetForm(OAuthBehaviour.k_Type_Verify,s_Form);context.Verify();
+				model.SetForm(OAuthBehaviour.k_Type_Verify,s_Form);model.Verify();
 			}
 		}
 
 		protected virtual void OnVerify() {
 			OnMessage(null);
-			if(login!=null) {
-			if(login.GetGameObject(k_Wait)!=null) {
-				login.SetActive(k_Wait,true);
+			if(view!=null) {
+			if(view.GetGameObject(k_Wait)!=null) {
+				view.SetActive(k_Wait,true);
 				m_Time=Time.realtimeSinceStartup+60.0f;
 			}}
 		}
 
 		protected virtual void OnMessage(string color) {
-			context.GetForm(OAuthBehaviour.k_Type_Error,s_Form);
+			model.GetForm(OAuthBehaviour.k_Type_Error,s_Form);
 			//
 			if(s_Form[0]=="$(ShowLogin)") {SetLogin(true);return;}
 			//
-			if(login!=null) {
+			if(view!=null) {
 				string str=string.IsNullOrEmpty(color)?s_Form[0]:$"<color=#{color}>{s_Form[0]}</color>";
-				login.SetText(1,str);
-				login.SetText(2,str);
+				view.SetText(1,str);
+				view.SetText(2,str);
 			}
 		}
 

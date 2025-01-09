@@ -76,6 +76,7 @@ namespace YouSingStudio.Holograms {
 		}
 
 		public override void FromJson(string json) {
+			if(string.IsNullOrEmpty(json)) {return;}
 			if(!m_IsInited) {Init();}
 			//
 			JObject jo=JObject.Parse(json);

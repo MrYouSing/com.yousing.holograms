@@ -49,10 +49,9 @@ namespace YouSingStudio.Holograms {
 			//
 			foreach(var it in assets.Values) {
 				if(it==null||System.Array.IndexOf(m_Assets,it)>=0) {}
-				else if(it is RenderTexture rt) {rt.Free();}
-				else {Texture.Destroy(it);}
+				else {it.Free();}
 			}
-			assets.Clear();
+			assets.Clear();m_IsInited=false;
 		}
 
 		public virtual string ToIconKey(string ext) {
