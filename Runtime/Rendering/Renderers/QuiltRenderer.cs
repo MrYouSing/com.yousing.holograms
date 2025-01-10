@@ -10,6 +10,7 @@ namespace YouSingStudio.Holograms {
 		#region Fields
 
 		public const float k_AspectError=0.005f;
+		public static float s_SliderValue=0.0f;
 
 		public Texture source;
 		public Material material;
@@ -264,7 +265,7 @@ namespace YouSingStudio.Holograms {
 			if(mesh==null||!m_Vectors.TryGetValue(mesh.name,out m_Vector)) {
 				m_Vector=Vector2.zero;
 			}
-			m_Value=-1024.0f;Value=0.0f;
+			m_Value=-1024.0f;Value=s_SliderValue;
 		}
 
 		Vector2 ISlider.Range=>new Vector2(-1.0f,1.0f);

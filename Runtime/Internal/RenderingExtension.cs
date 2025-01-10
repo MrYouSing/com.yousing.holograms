@@ -1,5 +1,5 @@
 /* <!-- Macro.Copy File
-:Packages/com.yousing.io/Runtime/APIs/TextureAPI.cs,169,345~354,359~374,479~503,516~529
+:Packages/com.yousing.io/Runtime/APIs/TextureAPI.cs,144~153,169,345~354,359~374,479~503,516~529
  Macro.End --> */
 /* <!-- Macro.Replace
 TempTexture2D,GetTemp2D();}if(false){}//
@@ -14,6 +14,7 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
 using UnityEngine.Video;
 #if DOTNET_GDI_PLUS
@@ -26,6 +27,16 @@ using Graphics=UnityEngine.Graphics;
 namespace YouSingStudio.Holograms {
 	public static partial class RenderingExtension {
 // <!-- Macro.Patch AutoGen
+		public static GraphicsFormat ToStandard(this GraphicsFormat thiz) {
+			string key=thiz.ToString();var com=System.StringComparison.OrdinalIgnoreCase;
+			if(key.IndexOf("_SRGB",com)>=0) {return GraphicsFormat.R8G8B8A8_SRGB;}
+			if(key.IndexOf("_UNorm",com)>=0) {return GraphicsFormat.R8G8B8A8_UNorm;}
+			if(key.IndexOf("_SNorm",com)>=0) {return GraphicsFormat.R8G8B8A8_SNorm;}
+			if(key.IndexOf("_UInt",com)>=0) {return GraphicsFormat.R8G8B8A8_UInt;}
+			if(key.IndexOf("_SInt",com)>=0) {return GraphicsFormat.R8G8B8A8_SInt;}
+			return thiz;
+		}
+
 		public static int[] s_Bitmap;
 		public static void LoadBitmap<T>(this Texture2D thiz,T[] bitmap,int width,int height,TextureFormat format=TextureFormat.RGBA32) {
 			if(thiz!=null&&bitmap!=null) {
@@ -129,6 +140,10 @@ namespace YouSingStudio.Holograms {
 
 		public static Texture2D NewTexture2D(int width,int height,bool linear) {
 			return new Texture2D(width,height,TextureFormat.RGBA32,false,linear) ;
+		}
+
+		public static Texture2D NewTexture2D(int width,int height,GraphicsFormat format) {
+			return new Texture2D(width,height,format,0,TextureCreationFlags.None) ;
 		}
 
 		public static Texture2D NewTexture2D(int width,int height)=>NewTexture2D(width,height,false);

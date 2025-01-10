@@ -28,10 +28,10 @@ DeclareKeys_3,
 true
  Macro.End --> */
 /* <!-- Macro.Define Bind
-			Bind$(Table.Name)(k_{0},{0},$(Bind));
+			Bind$(Table.Name)(k_{0},{0},true);
  Macro.End --> */
 /* <!-- Macro.Define BindSet
-			Bind$(Table.Name)(k_{0},Set{0},$(Bind));
+			Bind$(Table.Name)(k_{0},Set{0},true);
  Macro.End --> */
 
 /* <!-- Macro.Define GetSet
@@ -41,6 +41,13 @@ true
 				var tmp=m_{0}s[index];if(tmp!=null) {{return tmp.{2};}}
 			}}
 			return default;//{1}
+		}}
+
+		public virtual bool Get{0}(int index,ref {1} value) {{
+			if($(InRange.Begin)m_{0}s$(InRange.End)) {{
+				var tmp=m_{0}s[index];if(tmp!=null) {{value=tmp.{2};return true;}}
+			}}
+			return false;
 		}}
 
 		public virtual void Set{0}(int index,{1} value) {{
@@ -100,6 +107,11 @@ Button
 			if($(InRange.Begin)m_{0}s$(InRange.End)) return m_{0}s[index];
 			return default;//{0}
 		}}
+
+		public virtual bool Get{0}(int index,ref {0} value) {{
+			if($(InRange.Begin)m_{0}s$(InRange.End)) {{value=m_{0}s[index];return true;}}
+			return false;
+		}}
  Macro.End --> */
 /* <!-- Macro.Call GetSet GetSet
  Macro.End --> */
@@ -154,9 +166,19 @@ namespace YouSingStudio.Private {
 			return default;//string
 		}
 
+		public virtual bool GetString(int index,ref string value) {
+			if(index>=0&&index<(m_Strings?.Length??0)) {value=m_Strings[index];return true;}
+			return false;
+		}
+
 		public virtual Sprite GetSprite(int index) {
 			if(index>=0&&index<(m_Sprites?.Length??0)) return m_Sprites[index];
 			return default;//Sprite
+		}
+
+		public virtual bool GetSprite(int index,ref Sprite value) {
+			if(index>=0&&index<(m_Sprites?.Length??0)) {value=m_Sprites[index];return true;}
+			return false;
 		}
 
 		public virtual Texture GetTexture(int index) {
@@ -164,9 +186,19 @@ namespace YouSingStudio.Private {
 			return default;//Texture
 		}
 
+		public virtual bool GetTexture(int index,ref Texture value) {
+			if(index>=0&&index<(m_Textures?.Length??0)) {value=m_Textures[index];return true;}
+			return false;
+		}
+
 		public virtual GameObject GetGameObject(int index) {
 			if(index>=0&&index<(m_GameObjects?.Length??0)) return m_GameObjects[index];
 			return default;//GameObject
+		}
+
+		public virtual bool GetGameObject(int index,ref GameObject value) {
+			if(index>=0&&index<(m_GameObjects?.Length??0)) {value=m_GameObjects[index];return true;}
+			return false;
 		}
 
 		public virtual string GetText(int index) {
@@ -174,6 +206,13 @@ namespace YouSingStudio.Private {
 				var tmp=m_Texts[index];if(tmp!=null) {return tmp.text;}
 			}
 			return default;//string
+		}
+
+		public virtual bool GetText(int index,ref string value) {
+			if(index>=0&&index<(m_Texts?.Length??0)) {
+				var tmp=m_Texts[index];if(tmp!=null) {value=tmp.text;return true;}
+			}
+			return false;
 		}
 
 		public virtual void SetText(int index,string value) {
@@ -195,6 +234,13 @@ namespace YouSingStudio.Private {
 			return default;//Sprite
 		}
 
+		public virtual bool GetImage(int index,ref Sprite value) {
+			if(index>=0&&index<(m_Images?.Length??0)) {
+				var tmp=m_Images[index];if(tmp!=null) {value=tmp.sprite;return true;}
+			}
+			return false;
+		}
+
 		public virtual void SetImage(int index,Sprite value) {
 			if(index>=0&&index<(m_Images?.Length??0)) {
 				var tmp=m_Images[index];if(tmp!=null) {tmp.sprite=value;}
@@ -212,6 +258,13 @@ namespace YouSingStudio.Private {
 				var tmp=m_RawImages[index];if(tmp!=null) {return tmp.texture;}
 			}
 			return default;//Texture
+		}
+
+		public virtual bool GetRawImage(int index,ref Texture value) {
+			if(index>=0&&index<(m_RawImages?.Length??0)) {
+				var tmp=m_RawImages[index];if(tmp!=null) {value=tmp.texture;return true;}
+			}
+			return false;
 		}
 
 		public virtual void SetRawImage(int index,Texture value) {
@@ -242,6 +295,13 @@ namespace YouSingStudio.Private {
 			return default;//bool
 		}
 
+		public virtual bool GetToggle(int index,ref bool value) {
+			if(index>=0&&index<(m_Toggles?.Length??0)) {
+				var tmp=m_Toggles[index];if(tmp!=null) {value=tmp.isOn;return true;}
+			}
+			return false;
+		}
+
 		public virtual void SetToggle(int index,bool value) {
 			if(index>=0&&index<(m_Toggles?.Length??0)) {
 				var tmp=m_Toggles[index];if(tmp!=null) {tmp.isOn=value;}
@@ -259,6 +319,13 @@ namespace YouSingStudio.Private {
 				var tmp=m_Sliders[index];if(tmp!=null) {return tmp.value;}
 			}
 			return default;//float
+		}
+
+		public virtual bool GetSlider(int index,ref float value) {
+			if(index>=0&&index<(m_Sliders?.Length??0)) {
+				var tmp=m_Sliders[index];if(tmp!=null) {value=tmp.value;return true;}
+			}
+			return false;
 		}
 
 		public virtual void SetSlider(int index,float value) {
@@ -280,6 +347,13 @@ namespace YouSingStudio.Private {
 			return default;//int
 		}
 
+		public virtual bool GetDropdown(int index,ref int value) {
+			if(index>=0&&index<(m_Dropdowns?.Length??0)) {
+				var tmp=m_Dropdowns[index];if(tmp!=null) {value=tmp.value;return true;}
+			}
+			return false;
+		}
+
 		public virtual void SetDropdown(int index,int value) {
 			if(index>=0&&index<(m_Dropdowns?.Length??0)) {
 				var tmp=m_Dropdowns[index];if(tmp!=null) {tmp.value=value;}
@@ -297,6 +371,13 @@ namespace YouSingStudio.Private {
 				var tmp=m_InputFields[index];if(tmp!=null) {return tmp.text;}
 			}
 			return default;//string
+		}
+
+		public virtual bool GetInputField(int index,ref string value) {
+			if(index>=0&&index<(m_InputFields?.Length??0)) {
+				var tmp=m_InputFields[index];if(tmp!=null) {value=tmp.text;return true;}
+			}
+			return false;
 		}
 
 		public virtual void SetInputField(int index,string value) {

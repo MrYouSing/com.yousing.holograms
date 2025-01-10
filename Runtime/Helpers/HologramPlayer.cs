@@ -165,9 +165,9 @@ namespace YouSingStudio.Holograms {
 				m_DstRT=m_Device.canvas;
 			}
 			if(m_DstRT!=null) {
-				bool b=false;
-				m_Src2D=RenderingExtension.NewTexture2D(1,1,b);
-				m_Dst2D=RenderingExtension.NewTexture2D(m_DstRT.width,m_DstRT.height,b);
+				var f=m_DstRT.graphicsFormat.ToStandard();
+				m_Src2D=RenderingExtension.NewTexture2D(1,1,f);
+				m_Dst2D=RenderingExtension.NewTexture2D(m_DstRT.width,m_DstRT.height,f);
 			}
 		}
 

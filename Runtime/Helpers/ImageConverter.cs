@@ -15,6 +15,7 @@ FFmpeg,
 /* <!-- Macro.Patch
 ,AutoGen
  Macro.End --> */
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using Newtonsoft.Json.Linq;
@@ -128,6 +129,39 @@ namespace YouSingStudio.Holograms {
 					//
 					OnEvent(()=>action?.Invoke(path,tmp),true);
 					OnFFmpegConvert(path);base.OnComplete();
+				}
+			}
+		}
+
+		public class Stream {
+			public string type;
+			public string encoder;
+			public float framerate;
+			public string bitrate;
+
+			public Stream(string line) {
+				string[] csv=line.Split(UnityExtension.k_Split_Tag,System.StringSplitOptions.None);
+				string it;int imax=csv?.Length??0;if(imax<=2) {return;}
+				//
+				type=csv[2];int j=type.IndexOf("(");if(j<0) {j=type.Length;}
+				int i=type.LastIndexOf(":",j);i+=1;encoder=type.Substring(i,j-i).Trim();
+				if(type.IndexOf("video",UnityExtension.k_Comparison)>=0) {type="video";}
+				else if(type.IndexOf("audio",UnityExtension.k_Comparison)>=0) {type="audio";}
+				//
+				for(i=3;i<imax;++i) {
+					it=csv[i];
+					if(string.IsNullOrEmpty(bitrate)) {
+						j=it.IndexOf(" kb/s",UnityExtension.k_Comparison);
+						if(j>=0) {bitrate=it.Substring(0,j)+"K";}
+					}
+					if(framerate==0.0f) {
+						j=it.IndexOf(" fps",UnityExtension.k_Comparison);
+						if(j>=0) {float.TryParse(it.Substring(0,j),out framerate);}
+						else {
+							j=it.IndexOf(" Hz",UnityExtension.k_Comparison);
+							if(j>=0) {float.TryParse(it.Substring(0,j),out framerate);}
+						}
+					}
 				}
 			}
 		}
@@ -336,6 +370,34 @@ namespace YouSingStudio.Holograms {
 			}else {
 				return null;
 			}
+		}
+
+		public static string[] GetFFmpegLogs() {
+			if(!s_IsInited) {Init();}
+			//
+			return Directory.GetFiles(Path.GetDirectoryName(Application.dataPath),"ffmpeg-*.log",SearchOption.TopDirectoryOnly);
+		}
+
+		public static void BeginStreams() {
+			if(!s_IsInited) {Init();}
+			//
+			System.Array.ForEach(GetFFmpegLogs(),File.Delete);
+		}
+
+		public static void EndStreams(List<Stream> streams) {
+			if(!s_IsInited) {Init();}
+			//
+			string[] tmp=GetFFmpegLogs();int i,imax=tmp?.Length??0;
+			if(imax<=0) {return;}string path=tmp[imax-1];
+			//
+			tmp=File.ReadAllLines(path);string it;Stream s;
+			for(i=0,imax=tmp?.Length??0;i<imax;++i) {
+				it=tmp[i];if(it.StartsWith("  Stream #")) {
+					s=new Stream(it);
+					if(!string.IsNullOrEmpty(s.type)) {streams.Add(s);}
+				}
+			}
+			File.Delete(path);
 		}
 
 		public static string GetDownloadPath() {
