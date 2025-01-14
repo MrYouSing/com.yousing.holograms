@@ -26,8 +26,9 @@ namespace YouSingStudio.Holograms {
 			if(button==null) {button=GetComponent<Button>();}
 		}
 
-		protected virtual void OnDisable() {
+		protected virtual void OnEnable() {
 			m_IsDown=false;
+			button.SetPressed(false);
 		}
 
 		protected virtual void Update() {
@@ -42,13 +43,13 @@ namespace YouSingStudio.Holograms {
 			if(b!=m_IsDown) {
 				m_IsDown=b;
 				if(button!=null) {
-					var cb=button.colors;b=false;
+					b=false;
 					if(m_IsDown) {
 						b=trigger;
-						button.targetGraphic.CrossFadeColor(cb.pressedColor,cb.fadeDuration,false,false);
+						button.SetPressed(true);
 					}else {
 						b=!trigger;
-						button.targetGraphic.CrossFadeColor(cb.normalColor,cb.fadeDuration,false,false);
+						button.SetPressed(false);
 					}
 					if(b) {button.onClick?.Invoke();}
 				}

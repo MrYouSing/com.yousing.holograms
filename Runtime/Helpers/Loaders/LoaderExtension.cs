@@ -11,6 +11,7 @@ namespace YouSingStudio.Holograms {
 	public static partial class LoaderExtension {
 		#region Fields
 
+		public static string s_Msg_Busying="Prefabs/Busying_00";
 		public static string s_Txt_Busying="{0} is loading {1}";
 
 		#endregion Fields
@@ -90,8 +91,7 @@ namespace YouSingStudio.Holograms {
 		}
 
 		public static void ShowBusyDialog(this ModelLoader thiz,string path) {
-			MessageBox.ShowInfo(
-				"Prefabs/Model_Busying",
+			MessageBox.ShowInfo(s_Msg_Busying,
 				string.Format(s_Txt_Busying,thiz.name,Path.GetFileName(path)),
 				null,()=>{thiz.gameObject.SetActive(false);MessageBox.Clear();}
 			);

@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.12731749, g: 0.13414757, b: 0.1210787, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028378, g: 0.22571412, b: 0.30692285, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -388,6 +388,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 2179732307321863555, guid: 92b0f73f4d8ed4944bd12941befc63cb, type: 3}
   m_PrefabInstance: {fileID: 588709184}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &588709186 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3248367441154516447, guid: 92b0f73f4d8ed4944bd12941befc63cb, type: 3}
+  m_PrefabInstance: {fileID: 588709184}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 61cc12c73eba0f64eb24b4b127f344b2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &601289558
 GameObject:
   m_ObjectHideFlags: 0
@@ -951,7 +962,8 @@ PrefabInstance:
       propertyPath: stages.Array.data[2].onShow.m_PersistentCalls.m_Calls.Array.data[2].m_Arguments.m_ObjectArgumentAssemblyTypeName
       value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 5076131365765909782, guid: 701fbf362907b864cab84d0d8f254d09, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
@@ -1278,6 +1290,18 @@ PrefabInstance:
       propertyPath: m_LocalScale.y
       value: 0.90909094
       objectReference: {fileID: 0}
+    - target: {fileID: 1467944364428891556, guid: 58b12bda410d78e469d43ec2eed7570d, type: 3}
+      propertyPath: view
+      value: 
+      objectReference: {fileID: 588709186}
+    - target: {fileID: 1467944364428891556, guid: 58b12bda410d78e469d43ec2eed7570d, type: 3}
+      propertyPath: 'targets.Array.data[0]'
+      value: 
+      objectReference: {fileID: 1476873889}
+    - target: {fileID: 1467944364428891556, guid: 58b12bda410d78e469d43ec2eed7570d, type: 3}
+      propertyPath: 'targets.Array.data[1]'
+      value: 
+      objectReference: {fileID: 873960012}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

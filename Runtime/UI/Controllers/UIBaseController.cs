@@ -28,9 +28,13 @@ namespace YouSingStudio.Holograms {
 
 		#region Methods
 
+		public virtual void ShowView()=>SetView(true);
+		public virtual void HideView()=>SetView(false);
+		public virtual void ToggleView()=>SetView(!(view!=null&&view.isActiveAndEnabled));
+
 		protected virtual void InitView() {
 			if(view==null) {this.CheckInstance(m_View,ref view);}
-			if(view!=null) {m_Actor=view.gameObject;SetEvents(true);}
+			if(view!=null) {SetEvents(true);}
 		}
 
 		protected virtual void ExitView() {
@@ -38,10 +42,11 @@ namespace YouSingStudio.Holograms {
 		}
 
 		protected virtual void SetEvents(bool value) {
-			if(view!=null) {
+			int cnt=view!=null?(view.m_Buttons?.Length??0):0;
+			if(0<cnt) {
 				var btn=view.m_Buttons[0];
 				if(btn!=null) {
-					if(value) {btn.SetOnClick(()=>SetView(false));}
+					if(value) {btn.SetOnClick(HideView);}
 					else {btn.SetOnClick(null);}
 				}
 			}
@@ -49,9 +54,11 @@ namespace YouSingStudio.Holograms {
 
 		public virtual void SetView(bool value) {
 			int n=view!=null?(view.didStart?0x2:0x1):0x0;
-			if(n==0x1&&m_Actor!=null) {m_Actor.SetActive(value);}
+			if(m_Actor==null&&n!=0) {m_Actor=view.gameObject;}
+			//
+			if(n==0x1) {m_Actor.SetActive(value);}
 				if(value) {Render();}
-			if(n==0x2&&m_Actor!=null) {m_Actor.SetActive(value);}
+			if(n==0x2) {m_Actor.SetActive(value);}
 			//
 			this.LockShortcuts(value);
 		}

@@ -113,8 +113,7 @@ namespace YouSingStudio.Holograms {
 			m_Index=index;
 			if(m_Index<0) {UpdateArrow(null);return;}
 			//
-			var es=EventSystem.current;// Avoid space key to submit.
-			if(es!=null) {es.SetSelectedGameObject(null);}
+			UnityExtension.BlurUI();
 			UpdateArrow(m_Views[m_Index].transform);
 			UpdateScroll();
 		}

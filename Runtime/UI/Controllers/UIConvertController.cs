@@ -71,6 +71,7 @@ namespace YouSingStudio.Holograms {
 
 		#region Fields
 
+		public bool background;
 		public VideoPlayer video;
 		public HologramPlayer player;
 		public UIHologramPreview preview;
@@ -137,14 +138,7 @@ namespace YouSingStudio.Holograms {
 			if(aspect==null) {aspect=FindAnyObjectByType<UIAspectSlider>(e);}
 			//
 			if(view!=null) {
-				int i=0,imax=view.m_Sliders?.Length??0;
-				if(m_Sliders==null&&imax>0) {
-					m_Sliders=new UISliderView[imax];
-					Slider s;for(i=0;i<imax;++i) {
-						s=view.m_Sliders[i];
-						if(s!=null) {m_Sliders[i]=s.transform.parent.GetComponent<UISliderView>();}
-					}
-				}
+				m_Sliders=view.m_Sliders.ToViews();
 			}
 			//
 			m_Convert=convert.Clone();
@@ -176,7 +170,7 @@ namespace YouSingStudio.Holograms {
 			//
 			if(value) {
 				m_Background=ImageConverter.settings.background;
-				ImageConverter.settings.background=false;
+				ImageConverter.settings.background=background;
 				//
 				EnableView();
 			}else {
@@ -243,9 +237,9 @@ namespace YouSingStudio.Holograms {
 			}
 		}
 
-		public virtual void Busy(int step,int count) {
+		public virtual void Busy(int step,string path,int count) {
 			if(count<0) {MessageBox.ShowInfo(view.m_Strings[0],view.m_Strings[1+step],null,Abort);}
-			else {convert.m_Frames=count;MessageBox.ShowProgress(view.m_Strings[1+2*step],null,null,Abort);}
+			else {convert.m_Frames=count;MessageBox.ShowProgress(view.m_Strings[4+step],path,"*.png",-1,count,Abort);}
 		}
 
 		public virtual void Abort() {
@@ -357,6 +351,18 @@ namespace YouSingStudio.Holograms {
 			DepthRenderer.s_Vectors.Remove(key);
 		}
 
+		protected virtual void Execute(string path,string argument,System.Action<string,string> action,System.Func<string,bool> func) {
+			var b=GetBehaviour();
+			if(m_Coroutine!=null) {b.StopCoroutine(m_Coroutine);}
+			//
+			m_Coroutine=b.StartCoroutine(ExecuteDelayed(path,argument,action,func));
+		}
+
+		protected virtual System.Collections.IEnumerator ExecuteDelayed(string path,string argument,System.Action<string,string> action,System.Func<string,bool> func) {
+			yield return null;
+			m_Task=ImageConverter.FFmpeg.Obtain(path,argument,action,func);
+		}
+
 		protected virtual void Execute(int step) {
 			if(convert.done) {/*OnConvert()*/;return;}
 			int m=convert.steps&(1<<step);
@@ -370,14 +376,16 @@ namespace YouSingStudio.Holograms {
 		}
 
 		protected virtual void VideoToImage() {
-			string path=convert.m_Path;
+			string path=convert.m_Path;int cnt=-1;
 			if(string.IsNullOrEmpty(path)) {path=convert.srcVideo;}
 			//
 			if(video!=null) {
 				if(string.IsNullOrEmpty(path)) {path=video.url;}
-				convert.m_Frames=(int)System.Math.Round(video.frameRate*video.length);
+				cnt=(int)System.Math.Round(video.frameRate*video.length);
+				if(cnt>1) {++cnt;}
 			}
 			//
+			convert.m_Frames=cnt;
 			Pick(0,(x)=>{Pick(3,(y)=>{
 				VideoToImage(x,y);
 			},convert.srcImage);},path);
@@ -391,9 +399,9 @@ namespace YouSingStudio.Holograms {
 			if(fmt.StartsWith('_')) {fmt=Path.GetFileNameWithoutExtension(fmt);}
 			else {fmt=GetDevice().ParseQuilt().ToQuilt_LKG();}
 			//
-			Busy(0,convert.m_Frames);
+			Busy(0,dst,convert.m_Frames);
 			ImageConverter.BeginStreams();
-			m_Task=ImageConverter.FFmpeg.Obtain(
+			Execute(
 				src,$"-y -i \"{{0}}\" -report \"{Path.Combine(dst,$"%08d{fmt}.png")}\"",
 				(x,y)=>OnVideoToImage(src,dst),(x)=>true
 			);
@@ -419,7 +427,7 @@ namespace YouSingStudio.Holograms {
 		}
 
 		protected virtual void VideoToAudio(string src,string dst) {
-			m_Task=ImageConverter.FFmpeg.Obtain(
+			Execute(
 				src,$"-y -i \"{{0}}\" \"{Path.Combine(dst,"audio.wav")}\"",
 				(x,y)=>OnComplete(0,y.GetDirectoryName()),(x)=>true
 			);
@@ -442,11 +450,12 @@ namespace YouSingStudio.Holograms {
 			CheckFile(src,dst,"stream.json");
 			// TODO: RGB-D????
 			string[] tmp=Directory.GetFiles(src,"*.png");
-			Busy(1,-1+0*(tmp?.Length??0));
+			Busy(1,dst,tmp?.Length??0);
 			m_Coroutine=GetBehaviour().StartCoroutine(ImageToRaw(tmp,Path.Combine(dst,"{0:D8}.png")));
 		}
 
 		protected virtual System.Collections.IEnumerator ImageToRaw(IList<string> paths,string path) {
+			yield return null;
 			if(player!=null) {
 				string key="Temp"+path.GetFileExtension(),tmp;
 				//
@@ -454,6 +463,8 @@ namespace YouSingStudio.Holograms {
 				player.BeginCapture(GetDevice());
 				//
 				for(int i=0,imax=paths.Count;i<imax;++i) {
+					if(m_Coroutine==null) {break;}
+					//
 					yield return player.OnCapture(paths[i]);
 					tmp=string.Format(path,i);
 					//
@@ -495,8 +506,8 @@ namespace YouSingStudio.Holograms {
 			if(f<0.0f&&m_Stream.framerate!=0.0f) {f=m_Stream.framerate;}
 			if(f>=0.0f) {pre=$"-r {f} ";}
 			//
-			Busy(2,-1);
-			m_Task=ImageConverter.FFmpeg.Obtain(
+			Busy(2,null,-1);
+			Execute(
 				src,$"-y {pre}-i \"{Path.Combine(src,"%08d.png")}\" {GetEncoder()} {tmp}\"{dst}\"",
 				(x,y)=>OnComplete(2,y),(x)=>true
 			);

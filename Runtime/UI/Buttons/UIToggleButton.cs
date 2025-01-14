@@ -84,6 +84,8 @@ namespace YouSingStudio.Holograms {
 
 		public virtual void OnPointerClick(PointerEventData eventData) {
 			SetIsOn(!isOn);
+			//
+			UnityExtension.BlurUI();
 		}
 
 		#endregion Unity Messages

@@ -30,7 +30,6 @@ namespace YouSingStudio.Holograms {
 			if(device==null) {device=FindAnyObjectByType<LenticularDevice>();}
 			//
 			if(view!=null) {
-				m_Actor=view.gameObject;
 				m_Display=view.m_GameObjects[0].GetComponent<UIDisplaySelector>();
 				int i=0,imax=3;m_Sliders=new UISliderView[imax];
 				for(;i<imax;++i) {m_Sliders[i]=view.m_GameObjects[1+i].GetComponent<UISliderView>();}

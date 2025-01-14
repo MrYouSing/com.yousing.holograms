@@ -6,6 +6,11 @@ using UnityEngine.UI;
 namespace YouSingStudio.Holograms {
 	public class UIMenuButton
 		:UIPopupView
+		,IPointerDownHandler
+		,IPointerUpHandler
+		,IPointerEnterHandler
+		,IPointerMoveHandler
+		,IPointerExitHandler
 	{
 		#region Fields
 
@@ -15,6 +20,7 @@ namespace YouSingStudio.Holograms {
 		public RectTransform main;
 		public List<Button> buttons;
 
+		[System.NonSerialized]protected bool m_Hover;
 		[System.NonSerialized]protected Vector2 m_Length=Vector2.zero;
 		[System.NonSerialized]protected RectTransform[] m_Buttons;
 
@@ -41,6 +47,47 @@ namespace YouSingStudio.Holograms {
 				}
 			}
 			it=button;button=null;SetButton(it);
+		}
+
+		protected virtual void OnEnable() {
+			m_Hover=false;
+			button.SetPressed(false);
+		}
+
+		public virtual void OnPointerEnter(PointerEventData e) {
+			if(!m_Click) {return;}
+			if(!RectTransformUtility.RectangleContainsScreenPoint(m_ButtonT,e.position)) {
+				SetHover(false);return;
+			}
+			//
+			SetHover(true);
+		}
+
+		public virtual void OnPointerMove(PointerEventData e) {
+			if(!m_Click) {return;}
+			//
+			bool b=RectTransformUtility.RectangleContainsScreenPoint(m_ButtonT,e.position);
+			if(b!=m_Hover) {SetHover(b);}
+		}
+
+		public virtual void OnPointerExit(PointerEventData e) {
+			if(!m_Click) {return;}
+			//
+			SetHover(false);
+		}
+
+		public virtual void OnPointerDown(PointerEventData e) {
+			if(!m_Click) {return;}
+			//
+			if((show&(1<<(int)e.button))!=0) {}
+			else {button.SetPressed(true);}
+		}
+
+		public virtual void OnPointerUp(PointerEventData e) {
+			if(!m_Click) {return;}
+			//
+			if((show&(1<<(int)e.button))!=0) {}
+			else {button.SetPressed(false);}
 		}
 
 		public override void OnPointerClick(PointerEventData e) {
@@ -99,7 +146,7 @@ namespace YouSingStudio.Holograms {
 
 		public override void SetButton(Button value) {
 			if(value==button) {return;}
-			if(button!=null) {button.transform.SetParent(content,false);}
+			if(button!=null) {button.transform.SetParent(content,false);button.SetPressed(false);}
 			button=value;
 			if(button!=null) {button.transform.SetParent(main,false);}
 			base.SetButton(button);m_Click=true;
@@ -110,6 +157,11 @@ namespace YouSingStudio.Holograms {
 					it.SetAsLastSibling();it.ResetAnchor();
 				}
 			}
+		}
+
+		public virtual void SetHover(bool value) {
+			m_Hover=value;
+			if(button!=null) {button.SetHighlighted(m_Hover);}
 		}
 
 		#endregion Methods

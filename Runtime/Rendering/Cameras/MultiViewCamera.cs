@@ -198,7 +198,10 @@ namespace YouSingStudio.Holograms {
 		}
 
 		public virtual void OnPlaneDirty() {
-			if(m_Viewer!=null&&focus!=null) {m_Viewer.position=GetCameraPoint();}
+			if(m_Viewer!=null&&focus!=null) {
+				m_Viewer.position=GetCameraPoint();
+				focus.hasChanged=true;
+			}
 		}
 
 		// Rendering

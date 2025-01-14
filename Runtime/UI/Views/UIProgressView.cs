@@ -54,6 +54,13 @@ System.Func<float>,value,null,,
 System.Func<string>,text,null,,
 System.Action,dispose,null,,
  Macro.End --> */
+/* <!-- Macro.Table FileProgress
+string,path,null,#,
+string,key,null,,
+int,start,0,,
+int,count,0,,
+System.Action,dispose,null,,
+ Macro.End --> */
 /* <!-- Macro.Table WebRequestProgress
 UnityWebRequest,www,null,#,
 AsyncOperation,ao,null,,
@@ -64,6 +71,10 @@ ulong,size,0,,
  Macro.End --> */
 /* <!-- Macro.BatchCall DeclareGet DelegateProgress
  Macro.End --> */
+/* <!-- Macro.BatchCall DeclareStruct FileProgress
+ Macro.End --> */
+/* <!-- Macro.BatchCall DeclareGet FileProgress
+ Macro.End --> */
 /* <!-- Macro.Replace
 #&#44;, 
  Macro.End --> */
@@ -71,6 +82,7 @@ ulong,size,0,,
 ,AutoGen
  Macro.End --> */
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
@@ -111,6 +123,37 @@ namespace YouSingStudio.Holograms {
 				,dispose=dispose
 			};
 		}
+		public partial class FileProgress:IProgress {
+			public string path;
+			public string key;
+			public int start;
+			public int count;
+			public System.Action dispose;
+
+			public virtual void Reset() {
+				path=null;
+				key=null;
+				start=0;
+				count=0;
+				dispose=null;
+			}
+		}
+
+		public static IProgress Get(
+			 string path=null
+			,string key=null
+			,int start=0
+			,int count=0
+			,System.Action dispose=null
+		) {
+			return new FileProgress{
+				 path=path
+				,key=key
+				,start=start
+				,count=count
+				,dispose=dispose
+			};
+		}
 // Macro.Patch -->
 		#region Nested Types
 
@@ -130,6 +173,22 @@ namespace YouSingStudio.Holograms {
 			public virtual void Dispose() {
 				dispose?.Invoke();
 				Reset();
+			}
+		}
+
+		public partial class FileProgress
+		{
+			string IProgress.name=>path;
+			float IProgress.value=>(GetCount()-start)/(float)count;
+			string IProgress.text=>$"{GetCount()-start}/{count}";
+			public virtual void Dispose() {
+				dispose?.Invoke();
+				Reset();
+			}
+
+			protected virtual int GetCount() {
+				int ret=Directory.GetFiles(path,key,SearchOption.TopDirectoryOnly)?.Length??0;
+				if(start<0) {start=ret;}return ret;
 			}
 		}
 

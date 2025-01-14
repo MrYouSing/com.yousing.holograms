@@ -95,7 +95,7 @@ namespace YouSingStudio.Holograms {
 				}
 			}
 
-			protected override void OnComplete() {
+			protected override void OnExecute() {
 				int i=id;int tc=System.Environment.TickCount;
 				GetOutput(out var tmp,out var ext);
 				//

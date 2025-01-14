@@ -69,6 +69,8 @@ Error,
  Macro.End --> */
 /* <!-- Macro.BatchCall DeclareProgress DelegateProgress
  Macro.End --> */
+/* <!-- Macro.BatchCall DeclareProgress FileProgress
+ Macro.End --> */
 /* <!-- Macro.BatchCall DeclareProgress WebRequestProgress
  Macro.End --> */
 /* <!-- Macro.Replace
@@ -163,6 +165,28 @@ namespace YouSingStudio.Holograms {
 					 name:name
 					,value:value
 					,text:text
+					,dispose:dispose
+				));
+				return Show(tmp.gameObject);
+			}
+			return null;
+		}
+
+		public static GameObject ShowProgress(
+			 string style
+			,string path=null
+			,string key=null
+			,int start=0
+			,int count=0
+			,System.Action dispose=null
+		) {
+			UIProgressView tmp=Show<UIProgressView>(style,s_Style_Progress);
+			if(tmp!=null) {
+				tmp.Set(UIProgressView.Get(
+					 path:path
+					,key:key
+					,start:start
+					,count:count
 					,dispose:dispose
 				));
 				return Show(tmp.gameObject);

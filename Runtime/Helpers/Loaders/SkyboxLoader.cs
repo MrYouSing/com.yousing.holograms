@@ -1,4 +1,3 @@
-// TODO: Sliders????
 using UnityEngine;
 using YouSingStudio.Private;
 
@@ -13,6 +12,9 @@ namespace YouSingStudio.Holograms {
 
 		public Material[] materials;
 		public DialogPicker picker;
+
+		[System.NonSerialized]public int type;
+		[System.NonSerialized]public System.Action onLoaded=null;
 
 		#endregion Fields
 
@@ -40,11 +42,17 @@ namespace YouSingStudio.Holograms {
 				int w=texture.width,h=texture.height;
 				if(w==2.0f*h) {type=1;}
 			}
+			if(type<0) {Load(materials[0]);return;}
 			//
 			Material material=materials[type];
 			material.mainTexture=texture;
 			switch(type) {
 				case 1:
+					if(texture.mipmapCount>1) {
+						Debug.LogWarning($"{texture.name} has mipmap.");
+					}
+					texture.wrapMode=TextureWrapMode.Clamp;
+					//
 					material.SetFloat(_Rotation,0.0f);
 					material.SetFloat(_Exposure,1.0f);
 				break;
@@ -55,6 +63,9 @@ namespace YouSingStudio.Holograms {
 
 		public virtual void Load(Material material) {
 			RenderSettings.skybox=material;
+			type=System.Array.IndexOf(materials,material);
+			//
+			onLoaded?.Invoke();
 		}
 
 		#endregion Methods

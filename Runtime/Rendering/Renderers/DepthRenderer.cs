@@ -130,6 +130,8 @@ namespace YouSingStudio.Holograms {
 		}
 
 		protected override void OnAspectUpdated() {
+			if(depth==null&&texture==null) {return;}
+			//
 			UpdateMaterial();
 			UpdateTransform();
 		}
@@ -236,6 +238,8 @@ namespace YouSingStudio.Holograms {
 		}
 
 		public virtual void LoadVector(string path) {
+			if(!m_IsInited) {Init();}
+			//
 			s_Sliders.TryGetValue(path,out m_Value);m_Vector=Vector2.zero;
 			if(s_Vectors.TryGetValue(path,out var v)||s_Vectors.TryGetValue("*",out v)) {
 				range.Set(v.x,v.y);factor.Set(v.z,v.w);
@@ -246,6 +250,8 @@ namespace YouSingStudio.Holograms {
 		}
 
 		public virtual void UpdateMaterial() {
+			if(!m_IsInited) {Init();}
+			//
 			if(depth==texture) {
 				material.Set(_MainTex,layout.GetRect(0));
 				material.Set(_Depth,layout.GetRect(1));
@@ -336,7 +342,7 @@ namespace YouSingStudio.Holograms {
 				m_Value=value;
 				//
 				if(saveVector&&!string.IsNullOrEmpty(m_Path)) {s_Sliders[m_Path]=m_Value;}
-				if(material!=null) {material.SetVector(_Offset,m_Vector*(1.0f+m_Value));}
+				if(material!=null) {material.SetVector(_Offset,m_Vector*(1.0f-m_Value));}
 			}
 		}
 

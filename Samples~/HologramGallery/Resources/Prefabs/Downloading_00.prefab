@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &5282947097639407064
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: -3405835967774100000, guid: 866d2a123cc25a641bfa6802bb471dcf, type: 3}
+      propertyPath: shortCount
+      value: 48
+      objectReference: {fileID: 0}
+    - target: {fileID: -3405835967774100000, guid: 866d2a123cc25a641bfa6802bb471dcf, type: 3}
+      propertyPath: 'formats.Array.data[0]'
+      value: "\u6B63\u5728\u4E0B\u8F7D{0}"
+      objectReference: {fileID: 0}
+    - target: {fileID: 8253441415254870720, guid: 866d2a123cc25a641bfa6802bb471dcf, type: 3}
+      propertyPath: m_Name
+      value: Downloading_00
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 866d2a123cc25a641bfa6802bb471dcf, type: 3}

@@ -26,6 +26,24 @@ FileUtility,File
 else if(texture.GetSizeI()!=s) {,if(texture.GetSizeI()!=s) {
 GetFieldOfView(),fieldOfView
  Macro.End --> */
+
+/* <!-- Macro.Table ColorBlock
+n,N,ormal,disabled,
+h,H,ighlighted,normal,
+p,P,ressed,normal,
+d,D,isabled,normal,
+ Macro.End --> */
+/* <!-- Macro.Call  ColorBlock
+		public static void Set{1}{2}(this Selectable thiz,bool value,bool instant=false) {{
+			if(thiz!=null) {{var g=thiz.targetGraphic;
+			if(g!=null) {{
+				var cb=thiz.colors;float f=instant?0.0f:cb.fadeDuration;
+				if(value) {{g.CrossFadeColor(cb.{0}{2}Color,f,true,true);}}
+				else {{g.CrossFadeColor(cb.{3}Color,f,true,true);}}
+			}}}}
+		}}
+
+ Macro.End --> */
 /* <!-- Macro.Patch
 ,AutoGen
  Macro.End --> */
@@ -302,6 +320,42 @@ namespace YouSingStudio.Holograms {
 				return b;
 			}}}
 			return new Bounds();
+		}
+
+		public static void SetNormal(this Selectable thiz,bool value,bool instant=false) {
+			if(thiz!=null) {var g=thiz.targetGraphic;
+			if(g!=null) {
+				var cb=thiz.colors;float f=instant?0.0f:cb.fadeDuration;
+				if(value) {g.CrossFadeColor(cb.normalColor,f,true,true);}
+				else {g.CrossFadeColor(cb.disabledColor,f,true,true);}
+			}}
+		}
+
+		public static void SetHighlighted(this Selectable thiz,bool value,bool instant=false) {
+			if(thiz!=null) {var g=thiz.targetGraphic;
+			if(g!=null) {
+				var cb=thiz.colors;float f=instant?0.0f:cb.fadeDuration;
+				if(value) {g.CrossFadeColor(cb.highlightedColor,f,true,true);}
+				else {g.CrossFadeColor(cb.normalColor,f,true,true);}
+			}}
+		}
+
+		public static void SetPressed(this Selectable thiz,bool value,bool instant=false) {
+			if(thiz!=null) {var g=thiz.targetGraphic;
+			if(g!=null) {
+				var cb=thiz.colors;float f=instant?0.0f:cb.fadeDuration;
+				if(value) {g.CrossFadeColor(cb.pressedColor,f,true,true);}
+				else {g.CrossFadeColor(cb.normalColor,f,true,true);}
+			}}
+		}
+
+		public static void SetDisabled(this Selectable thiz,bool value,bool instant=false) {
+			if(thiz!=null) {var g=thiz.targetGraphic;
+			if(g!=null) {
+				var cb=thiz.colors;float f=instant?0.0f:cb.fadeDuration;
+				if(value) {g.CrossFadeColor(cb.disabledColor,f,true,true);}
+				else {g.CrossFadeColor(cb.normalColor,f,true,true);}
+			}}
 		}
 
 // Macro.Patch -->
@@ -799,6 +853,14 @@ namespace YouSingStudio.Holograms {
 		public static bool ContainsScreenPoint(this RectTransform thiz,Vector2 point,bool value=false) {
 			if(thiz!=null) {value=RectTransformUtility.RectangleContainsScreenPoint(thiz,point);}
 			return value;
+		}
+
+		/// <summary>
+		/// Blur ui for avoiding submission.
+		/// </summary>
+		public static void BlurUI() {
+			var es=EventSystem.current;
+			if(es!=null) {es.SetSelectedGameObject(null);}
 		}
 
 		public static void SetOnClick(this Button thiz,UnityAction action) {

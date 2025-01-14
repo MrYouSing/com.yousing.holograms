@@ -100,11 +100,12 @@ namespace YouSingStudio.Holograms {
 		}
 
 		protected virtual void RenameSnapshot() {
+			string tmp=null;
 			if(text!=null) {
-				text.text=null;
+				tmp=text.text;text.text=null;
 			}
 			if(field!=null) {
-				field.SetTextWithoutNotify(text.text);
+				field.SetTextWithoutNotify(tmp);
 				m_FieldV.SetActive(true);
 			}
 			//
@@ -148,8 +149,7 @@ namespace YouSingStudio.Holograms {
 		protected virtual void OnSnapshotRenamed(string value) {
 			snapshot.name=value;
 			//
-			var es=UnityEngine.EventSystems.EventSystem.current;
-			if(es!=null) {es.SetSelectedGameObject(null);}
+			UnityExtension.BlurUI();
 			//
 			m_Popup=popup.GetActive();
 				OnSceneLoaded(scene);

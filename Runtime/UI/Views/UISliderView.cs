@@ -24,11 +24,18 @@ namespace YouSingStudio.Holograms {
 	public static partial class UIExtension {
 		#region Methods
 
-		public static float GetValue(this UISliderView thiz,float value) {
-			if(thiz!=null&&thiz.slider!=null) {
-				return thiz.slider.value;
+		public static void SetActive(this UISliderView thiz,bool value) {
+			if(thiz!=null) {
+				if(value) {thiz.UpdateSlider(thiz.GetValue(0.0f));}
+				else {thiz.HideSlider();}
 			}
-			return value;
+		}
+
+		public static Vector2 GetRange(this UISliderView thiz) {
+			if(thiz!=null&&thiz.slider!=null) {
+				return new Vector2(thiz.slider.minValue,thiz.slider.maxValue);
+			}
+			return Vector2.zero;
 		}
 
 		public static void SetRange(this UISliderView thiz,Vector2 range) {
@@ -38,8 +45,15 @@ namespace YouSingStudio.Holograms {
 			}
 		}
 
+		public static float GetValue(this UISliderView thiz,float value) {
+			if(thiz!=null&&thiz.slider!=null) {
+				return thiz.slider.value;
+			}
+			return value;
+		}
+
 		public static void SetValueWithoutNotify(this UISliderView thiz,float value) {
-			if(thiz!=null) {thiz.UpdateSlider(value);}
+			if(thiz!=null&&!float.IsNaN(value)) {thiz.UpdateSlider(value);}
 		}
 
 		#endregion Methods
@@ -126,7 +140,7 @@ namespace YouSingStudio.Holograms {
 			if(m_FieldV!=null) {m_FieldV.SetActive(true);}
 		}
 
-		protected virtual void HideSlider() {
+		internal virtual void HideSlider() {
 			SetText(0,null);SetText(1,null);SetText(2,null);
 			if(m_SliderV!=null) {m_SliderV.SetActive(false);}
 			if(m_FieldV!=null) {m_FieldV.SetActive(false);}
