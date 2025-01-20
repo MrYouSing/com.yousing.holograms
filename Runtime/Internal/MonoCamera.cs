@@ -62,15 +62,16 @@ namespace YouSingStudio.Holograms {
 
 		public virtual void PrepareCamera() {
 			//
+			HologramDevice best=null;
 			HologramDevice it;for(int i=0,imax=devices?.Length??0;i<imax;++i) {
 				it=devices[i];if(it!=null) {
-					if(it.IsPresent()) {
-						if(device!=null) {device.gameObject.SetActive(false);}
-						device=it;break;
-					}else {
-						it.gameObject.SetActive(false);
-					}
+					if(it.IsPresent()) {if(best==null) {best=it;}}
+					else {it.gameObject.SetActive(false);}
 				}
+			}
+			if(best!=null&&device!=best) {
+				if(device!=null) {device.gameObject.SetActive(false);}
+				device=best;
 			}
 			//
 			if(device==null) {device=FindAnyObjectByType<HologramDevice>();}

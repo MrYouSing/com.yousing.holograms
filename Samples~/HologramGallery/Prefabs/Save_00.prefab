@@ -320,7 +320,7 @@ MonoBehaviour:
   - {fileID: 1025141026724228168}
   - {fileID: 5722011919698909819}
   convert:
-    bitrate: 20M
+    bitrate: 16M
 --- !u!224 &6731658530947664932 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 3367287388285646162, guid: 8b0a69e3b96acc2419c800ab8d82c961, type: 3}

@@ -21,6 +21,7 @@ namespace YouSingStudio.Holograms {
 		public float pitch;
 		public float slope;
 		public float center;
+		public bool rotated;
 
 		[System.NonSerialized]protected int m_Display=int.MinValue;// User Display.
 
@@ -35,7 +36,7 @@ namespace YouSingStudio.Holograms {
 			if(material!=null) {
 				material.SetVector(_InputSize,new Vector4(quiltSize.x,quiltSize.y));
 				material.SetVector(_OutputSize,new Vector4(resolution.x,resolution.y));
-				material.SetVector(_Arguments,new Vector4(slope,pitch,center));
+				material.SetVector(_Arguments,new Vector4(pitch,slope,center,rotated?1.0f:0.0f));
 			}
 			base.InternalRender();
 		}
@@ -65,6 +66,7 @@ namespace YouSingStudio.Holograms {
 		protected virtual void ToJson(JObject jo) {
 			jo[nameof(name)]=name;
 			jo[nameof(display)]=m_Display;
+			jo[nameof(rotated)]=rotated;
 			jo[nameof(pitch)]=pitch;
 			jo[nameof(slope)]=slope;
 			jo[nameof(center)]=center;

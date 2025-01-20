@@ -123,10 +123,6 @@ PrefabInstance:
       value: UnityEngine.UI.Slider, UnityEngine.UI
       objectReference: {fileID: 0}
     - target: {fileID: 4078552018510952386, guid: 5c11655db624d974bb4937cb4fb1331c, type: 3}
-      propertyPath: m_Pivot.x
-      value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 4078552018510952386, guid: 5c11655db624d974bb4937cb4fb1331c, type: 3}
       propertyPath: m_AnchorMax.y
       value: 1
       objectReference: {fileID: 0}
@@ -140,10 +136,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4078552018510952386, guid: 5c11655db624d974bb4937cb4fb1331c, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4078552018510952386, guid: 5c11655db624d974bb4937cb4fb1331c, type: 3}
-      propertyPath: m_AnchoredPosition.x
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4477595558989842647, guid: 5c11655db624d974bb4937cb4fb1331c, type: 3}

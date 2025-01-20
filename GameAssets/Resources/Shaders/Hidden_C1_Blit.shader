@@ -45,15 +45,15 @@ Shader "Hidden/C1_Blit"
 
 			float4 _InputSize;
 			float2 _OutputSize;
-			float3 _Arguments;
+			float4 _Arguments;
 
 			// Core Functions
 
 			float2 get_choice(float2 pos, float bias) 
 			{
 				// TODO: Translation
-				float slope=_Arguments.x;
-				float interval=_Arguments.y;
+				float interval=_Arguments.x;
+				float slope=_Arguments.y;
 				float x0=_Arguments.z;
 				float row_img_num=_InputSize.x;
 				float col_img_num=_InputSize.y;
@@ -93,6 +93,7 @@ Shader "Hidden/C1_Blit"
 			{
 				v2f o;
 				o.vertex = UnityObjectToClipPos(v.vertex);
+				v.uv=lerp(v.uv,float2(1.0-v.uv.x,1.0-v.uv.y),_Arguments.w);
 				o.uv = TRANSFORM_TEX(v.uv, _MainTex);
 				UNITY_TRANSFER_FOG(o,o.vertex);
 				return o;
@@ -100,10 +101,12 @@ Shader "Hidden/C1_Blit"
 
 			fixed4 frag (v2f i) : SV_Target
 			{
+				int k=lerp(1,-1,_Arguments.w);
+				int c=lerp(0,2,_Arguments.w);
 				// sample the texture
-				fixed4 col= fixed4(tex2D(_MainTex, get_choice(i.uv,0)).r,
-					tex2D(_MainTex, get_choice(i.uv,1)).g,
-					tex2D(_MainTex, get_choice(i.uv,2)).b,
+				fixed4 col= fixed4(tex2D(_MainTex, get_choice(i.uv,k*0+c)).r,
+					tex2D(_MainTex, get_choice(i.uv,k*1+c)).g,
+					tex2D(_MainTex, get_choice(i.uv,k*2+c)).b,
 				1.0);
 				// apply fog
 				UNITY_APPLY_FOG(i.fogCoord, col);

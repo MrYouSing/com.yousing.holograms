@@ -40,7 +40,7 @@ namespace YouSingStudio.Holograms {
 
 		protected override void SetEvents(bool value) {
 			base.SetEvents(value);
-			int i=1;
+			int i=1,imax;
 			view.BindButton(i,Copy,value);++i;
 			view.BindButton(i,Paste,value);++i;
 			view.BindButton(i,Open,value);++i;
@@ -51,8 +51,11 @@ namespace YouSingStudio.Holograms {
 				if(value) {m_Display.onValueChanged+=OnDisplay;}
 				else {m_Display.onValueChanged-=OnDisplay;}
 			}
-			int imax=m_Sliders?.Length??0;Button btn;
-			UISliderView s;for(i=0;i<imax;++i) {
+			for(i=0,imax=view.m_Toggles?.Length??0;i<imax;++i) {
+				view.BindToggle(i,OnToggle,value);
+			}
+			Button btn;UISliderView s;
+			for(i=0,imax=m_Sliders?.Length??0;i<imax;++i) {
 				s=m_Sliders[i];if(s==null) {continue;}
 				if(value) {s.onSliderChanged+=OnSlider;}
 				else {s.onSliderChanged-=OnSlider;}
@@ -76,7 +79,7 @@ namespace YouSingStudio.Holograms {
 
 		public override void SetView(bool value) {
 			HologramDevice tmp=GetDevice();
-			if(tmp==null||!tmp.enabled) {value=false;}
+			if(tmp==null||!tmp.gameObject.activeSelf) {value=false;}
 			//
 			var b=m_Awaking;m_Awaking=value;
 				base.SetView(value);
@@ -102,8 +105,9 @@ namespace YouSingStudio.Holograms {
 			string tmp=GetText();
 			if(view==null||string.IsNullOrEmpty(tmp)) {return;}
 			//
+			int i=2+(view.m_Toggles?.Length??0);
 			JObject jo=JObject.Parse(tmp);
-			jo[view.m_Strings[2+index]]=m_Arguments[index];
+			jo[view.m_Strings[i+index]]=m_Arguments[index];
 			//
 			SetText(jo.ToString());
 		}
@@ -112,15 +116,19 @@ namespace YouSingStudio.Holograms {
 			string tmp=GetText();
 			if(view==null||string.IsNullOrEmpty(tmp)) {return;}
 			//
-			int i,imax=m_Sliders?.Length??0;
+			int i,imax,j;
 			JObject jo=JObject.Parse(tmp);float f;
 			view.SetText(0,jo[view.m_Strings[0]]?.Value<string>()??GetDevice().name);
 			i=jo[view.m_Strings[1]]?.Value<int>()??-1;
 			if(m_Display!=null) {m_Display.SetValueWithoutNotify(i);}
 			//
-			UISliderView s;for(i=0;i<imax;++i) {
+			for(i=0,imax=view.m_Toggles?.Length??0,j=2;i<imax;++i,++j) {
+				view.SetToggleBetter(i,jo[view.m_Strings[j]]?.Value<bool>()??false);
+			}
+			//
+			UISliderView s;for(i=0,imax=m_Sliders?.Length??0;i<imax;++i,++j) {
 				s=m_Sliders[i];if(s==null) {continue;}
-				f=jo[view.m_Strings[2+i]].Value<float>();
+				f=jo[view.m_Strings[j]].Value<float>();
 				if(float.IsNaN(m_Arguments[i])) {m_Arguments[i]=f;}
 				s.SetValueWithoutNotify(f);
 			}
@@ -131,13 +139,17 @@ namespace YouSingStudio.Holograms {
 			string tmp=GetText();
 			if(view==null||string.IsNullOrEmpty(tmp)) {return;}
 			//
-			int i,imax=m_Sliders?.Length??0;
+			int i,imax,j;
 			JObject jo=JObject.Parse(tmp);
 			if(m_Display!=null) {jo[view.m_Strings[1]]=m_Display.value;}
 			//
-			UISliderView s;for(i=0;i<imax;++i) {
+			for(i=0,imax=view.m_Toggles?.Length??0,j=2;i<imax;++i,++j) {
+				jo[view.m_Strings[j]]=view.GetToggle(i);
+			}
+			//
+			UISliderView s;for(i=0,imax=m_Sliders?.Length??0;i<imax;++i,++j) {
 				s=m_Sliders[i];if(s==null) {continue;}
-				jo[view.m_Strings[2+i]]=s.GetValue(0.0f);
+				jo[view.m_Strings[j]]=s.GetValue(0.0f);
 			}
 			//
 			SetText(jo.ToString());
@@ -184,6 +196,10 @@ namespace YouSingStudio.Holograms {
 		}
 
 		protected virtual void OnDisplay(int index) {
+			Apply();
+		}
+
+		protected virtual void OnToggle(bool value) {
 			Apply();
 		}
 

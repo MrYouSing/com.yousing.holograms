@@ -34,7 +34,6 @@ string,bitrate,,,,,
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.Pool;
 using UnityEngine.UI;
 using UnityEngine.Video;
@@ -81,6 +80,7 @@ namespace YouSingStudio.Holograms {
 		public Convert convert=new Convert();
 
 		[System.NonSerialized]protected bool m_Background;
+		[System.NonSerialized]protected bool m_Video;
 		[System.NonSerialized]protected Convert m_Convert;
 		[System.NonSerialized]protected Coroutine m_Coroutine;
 		[System.NonSerialized]protected ImageConverter.FFmpeg m_Task;
@@ -155,13 +155,13 @@ namespace YouSingStudio.Holograms {
 				view.BindButton(1,Execute,value);
 				//
 				i=0;
-				BindField(i,OnPick0,value);++i;
-				BindField(i,OnPick1,value);++i;
-				BindField(i,OnPick2,value);++i;
-				BindField(i,OnPick3,value);++i;
+				view.BindFieldButton(i,OnPick0,value);++i;
+				view.BindFieldButton(i,OnPick1,value);++i;
+				view.BindFieldButton(i,OnPick2,value);++i;
+				view.BindFieldButton(i,OnPick3,value);++i;
 				++i;
 				++i;
-				BindField(i,()=>ResetArgument(2),value);++i;
+				view.BindFieldButton(i,()=>ResetArgument(2),value);++i;
 			}
 		}
 
@@ -188,6 +188,10 @@ namespace YouSingStudio.Holograms {
 					view.SetToggleWithoutNotify(i,b);
 					view.SetActive(i,b);
 				}
+				TextureType tt=convert.srcVideo.ToTextureType(TextureType.Depth);
+				b=tt==TextureType.Depth;
+				view.SetActive(i,b);++i;view.SetActive(i,b);++i;
+				view.SetActive(i,b||tt==TextureType.Quilt);++i;
 				//
 				i=0;
 // <!-- Macro.Patch Render
@@ -238,6 +242,7 @@ namespace YouSingStudio.Holograms {
 		}
 
 		public virtual void Busy(int step,string path,int count) {
+			SetVideo(false);
 			if(count<0) {MessageBox.ShowInfo(view.m_Strings[0],view.m_Strings[1+step],null,Abort);}
 			else {convert.m_Frames=count;MessageBox.ShowProgress(view.m_Strings[4+step],path,"*.png",-1,count,Abort);}
 		}
@@ -278,6 +283,13 @@ namespace YouSingStudio.Holograms {
 			return c+b;
 		}
 
+		protected virtual void SetVideo(bool value) {
+			if(video!=null&&!string.IsNullOrEmpty(video.url)) {
+				if(value) {if(m_Video) {video.Play();}m_Video=false;}
+				else {m_Video=video.isPlaying;video.Pause();}
+			}
+		}
+
 		protected virtual void ResetArgument(int index) {
 			if(view!=null) {
 			switch(index) {
@@ -291,17 +303,6 @@ namespace YouSingStudio.Holograms {
 			if(preview!=null&&preview.screen!=null) {
 				preview.screen.Render();
 				preview.screen.Screenshot(path);
-			}
-		}
-
-		protected virtual void BindField(int index,UnityAction action,bool value) {
-			if(view!=null&&index>=0&&index<(view.m_InputFields?.Length??0)) {
-				Component com=view.m_InputFields[index];
-				Button btn=com!=null?com.GetComponentInChildren<Button>():null;
-				if(btn!=null) {
-					if(value) {btn.SetOnClick(action);}
-					else {btn.SetOnClick(null);}
-				}
 			}
 		}
 
@@ -335,9 +336,9 @@ namespace YouSingStudio.Holograms {
 		protected virtual void EnableSliders(string key) {
 			if(view==null) {return;}
 			//
-			Vector4 slider=new Vector4(1.0f,0.0f,0.0f,0.0f);Slider s;
-			for(int i=0,imax=Mathf.Min(view.m_Sliders?.Length??0,4);i<imax;++i) {
-				s=view.m_Sliders[i];if(s!=null) {slider[i]=s.value;}
+			Vector4 slider=new Vector4(1.0f,0.0f,0.0f,0.0f);
+			for(int i=0,imax=Mathf.Min(m_Sliders?.Length??0,4);i<imax;++i) {
+				slider[i]=m_Sliders[i].GetValue(slider[i]);
 			}
 			//
 			QuiltRenderer.s_SliderValue=slider.z;
@@ -508,7 +509,7 @@ namespace YouSingStudio.Holograms {
 			//
 			Busy(2,null,-1);
 			Execute(
-				src,$"-y {pre}-i \"{Path.Combine(src,"%08d.png")}\" {GetEncoder()} {tmp}\"{dst}\"",
+				src,$"-y {pre}-i \"{Path.Combine(src,"%08d.png")}\" {tmp}{GetEncoder()} \"{dst}\"",
 				(x,y)=>OnComplete(2,y),(x)=>true
 			);
 			
@@ -536,7 +537,7 @@ namespace YouSingStudio.Holograms {
 			Debug.Log($"Step@{step}:{path}");
 			//
 			m_Coroutine=null;m_Task=null;m_Stream=null;
-			MessageBox.Clear();
+			MessageBox.Clear();SetVideo(true);
 			//
 			convert.m_Path=path;
 			convert.m_Steps&=1<<step;

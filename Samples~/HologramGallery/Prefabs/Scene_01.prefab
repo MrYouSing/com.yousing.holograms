@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 3117876460175202031}
   - component: {fileID: 8119715588184569563}
   - component: {fileID: 2511129590864762196}
+  - component: {fileID: 7767737796769631672}
   m_Layer: 5
   m_Name: Close
   m_TagString: Untagged
@@ -37,9 +38,9 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
-  m_AnchoredPosition: {x: -22, y: 0}
-  m_SizeDelta: {x: 40, y: 40}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: -4, y: 0}
+  m_SizeDelta: {x: 44, y: 44}
+  m_Pivot: {x: 1, y: 0.5}
 --- !u!222 &3117876460175202031
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -122,6 +123,26 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!1818360610 &7767737796769631672
+ScaleConstraint:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2278338240593542605}
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Weight: 1
+  m_ScaleAtRest: {x: 1, y: 1, z: 1}
+  m_ScaleOffset: {x: 1, y: 1, z: 1}
+  m_AffectScalingX: 1
+  m_AffectScalingY: 1
+  m_AffectScalingZ: 1
+  m_Active: 1
+  m_IsLocked: 1
+  m_Sources:
+  - sourceTransform: {fileID: 117424214826177792}
+    weight: 1
 --- !u!1 &3784589403303219593
 GameObject:
   m_ObjectHideFlags: 0

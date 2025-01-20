@@ -138,7 +138,7 @@ namespace YouSingStudio.Holograms {
 		[System.NonSerialized]protected int m_RenderId;
 		[System.NonSerialized]protected WaitForEndOfFrame m_RenderWait;
 
-		protected virtual IEnumerator RenderCoroutine() {
+		protected virtual System.Collections.IEnumerator RenderCoroutine() {
 			int id=++m_RenderId;
 			if(m_RenderWait==null) {m_RenderWait=new WaitForEndOfFrame();}
 			while(true) {
