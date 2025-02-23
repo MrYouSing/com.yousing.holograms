@@ -402,8 +402,11 @@ namespace YouSingStudio.Holograms {
 
 		public static bool IsSerialNumber(this string thiz) {
 			int cnt=thiz?.Length??0;if(cnt>0) {
-				int i=thiz.LastIndexOfAny(k_Split_Dir),j=thiz.LastIndexOf('.');
-				if(j<0) {j=cnt;}if(i<j) {
+				int i=thiz.LastIndexOfAny(k_Split_Dir),
+					j=thiz.LastIndexOf('.'),
+					k=thiz.LastIndexOf('_');
+				if(i<k) {i=k;}if(j<0) {j=cnt;}
+				if(i<j) {
 					char[] pch=thiz.ToCharArray();
 					for(++i;i<j;++i) {if(!char.IsDigit(pch[i])) {return false;}}
 					return true;
@@ -498,7 +501,7 @@ namespace YouSingStudio.Holograms {
 		/// <seealso href="https://docs.lookingglassfactory.com/software-tools/looking-glass-studio/quilt-photo-video"/>
 		/// </summary>
 		public static Vector3 ParseQuilt(this string thiz) {
-			if(!string.IsNullOrEmpty(thiz)) {
+			if(!string.IsNullOrEmpty(thiz)&&!thiz.IsSerialNumber()) {
 				//
 				if(s_QuiltMap.TryGetValue(Path.GetFileNameWithoutExtension(thiz),out var v)) {return v;}
 				//

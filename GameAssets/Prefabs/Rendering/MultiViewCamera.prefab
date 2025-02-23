@@ -142,6 +142,7 @@ MonoBehaviour:
   canvas: {fileID: 0}
   material: {fileID: 0}
   quiltTexture: {fileID: 0}
+  quiltResolution: {x: 4320, y: 4800}
   quiltSize: {x: 8, y: 5}
   slope: 0
   interval: 0

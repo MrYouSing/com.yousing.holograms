@@ -169,9 +169,9 @@ MonoBehaviour:
   - name: Open RGB-D
     actors:
     - {fileID: 0}
-    - {fileID: 0}
     - {fileID: 548572155245713808}
-    behaviours: []
+    behaviours:
+    - {fileID: 0}
     onStart:
       m_PersistentCalls:
         m_Calls: []
@@ -211,6 +211,8 @@ MonoBehaviour:
   - name: $Open Model
     actors:
     - {fileID: 0}
+    - {fileID: 0}
+    behaviours:
     - {fileID: 0}
   - name: Open Model .obj
     actors:

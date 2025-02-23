@@ -146,6 +146,11 @@ namespace YouSingStudio.Holograms {
 			this.LoadSettings(name);
 			if(material==null) {material=new Material(Shader.Find("Unlit/Offset By Depth"));}
 			if(renderer==null) {renderer=GetComponentInChildren<Renderer>();}
+			if(device==null) {
+				if(MonoApplication.s_Instance!=null) {device=MonoApplication.s_Instance.device;}
+				else {device=FindAnyObjectByType<HologramDevice>();}
+			}
+			//
 			renderer.sharedMaterial=material;m_Renderer=renderer.transform;
 			if(device!=null&&resolution.x<0.0f&&resolution.y<0.0f) {// Resample
 				Vector4 v=device.PreferredSize();

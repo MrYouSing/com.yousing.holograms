@@ -231,6 +231,7 @@ namespace YouSingStudio.Holograms {
 			m_Viewer.position=GetCameraPoint();
 			m_View=camera.worldToCameraMatrix;m_Proj=camera.projectionMatrix;
 			Vector3 v=m_Viewer.position;Quaternion q=m_Viewer.rotation;
+			float cone=device.lens.y!=0.0f?device.lens.y:this.cone;
 			RenderTexture tmp=m_RT0.Begin();
 			GL.PushMatrix();
 				ClearBackground();

@@ -75,6 +75,8 @@ namespace YouSingStudio.Holograms {
 		}
 
 		protected virtual void StartDelayed() {
+			if(director!=null) {director.gameObject.SetActive(true);}
+			//
 			Refresh();
 			if(m_Index==0) {Play(0);}
 		}

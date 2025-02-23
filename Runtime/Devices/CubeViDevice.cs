@@ -3,7 +3,7 @@ using Newtonsoft.Json.Linq;
 using UnityEngine;
 
 namespace YouSingStudio.Holograms {
-	public class Companion1Device
+	public class CubeViDevice
 		:LenticularDevice
 	{
 		#region Fields
@@ -29,7 +29,7 @@ namespace YouSingStudio.Holograms {
 		protected override void OnDestroy() {
 			base.OnDestroy();
 			//
-			var sdk=OpenStageAiSdk.s_Instance;
+			var sdk=CubeViSdk.s_Instance;
 			if(sdk!=null) {
 				sdk.onDeviceUpdated-=OnDeviceUpdated;
 			}
@@ -62,17 +62,15 @@ namespace YouSingStudio.Holograms {
 		}
 
 		public override bool IsPresent() {
-			var sdk=OpenStageAiSdk.instance;
-			if(sdk!=null) {
-				return !string.IsNullOrEmpty(sdk.hardwareSN);
-			}
+			var sdk=CubeViSdk.instance;
+			if(sdk!=null&&!sdk.IsDetected) {return false;}
 			return FindDisplay(resolution)>=0;
 		}
 
 		public override void FromJson(string json) {
 			if(string.IsNullOrEmpty(json)) {
-				var sdk=OpenStageAiSdk.instance;
-				if(sdk!=null) {sdk.LoadDeviceConfig(json);}
+				var sdk=CubeViSdk.instance;
+				//if(sdk!=null) {sdk.LoadDeviceConfig(json);}
 				return;
 			}
 			//
@@ -86,14 +84,14 @@ namespace YouSingStudio.Holograms {
 			jo[nameof(sdkType)]="manual";
 			JsonConvert.PopulateObject(jo.ToString(),this);
 			//
-			var sdk=OpenStageAiSdk.instance;
+			var sdk=CubeViSdk.instance;
 			if(sdk!=null) {
-				jo["lineNumber"]=pitch;
-				jo["obliquity"]=slope;
-				jo["deviation"]=center;
+				jo["interval"]=pitch;
+				jo["slope"]=slope;
+				jo["x0"]=center;
 				//
 				jo[nameof(display)]=m_Display;
-				sdk.LoadDeviceConfig(jo.ToString());
+				sdk.LoadDeviceConfig(jo);
 			}
 			jo.RemoveAll();
 		}
@@ -107,11 +105,11 @@ namespace YouSingStudio.Holograms {
 		public override void Init() {
 			if(m_IsInited) {return;}
 			//
-			var sdk=OpenStageAiSdk.instance;
+			var sdk=CubeViSdk.instance;
 			if(sdk!=null) {
-				slope=OpenStageAiSdk.k_Device.slope;
-				interval=OpenStageAiSdk.k_Device.interval;
-				x0=OpenStageAiSdk.k_Device.x0;
+				slope=CubeViSdk.k_Device.slope;
+				interval=CubeViSdk.k_Device.interval;
+				x0=CubeViSdk.k_Device.x0;
 				//
 				sdk.onDeviceUpdated+=OnDeviceUpdated;
 			}

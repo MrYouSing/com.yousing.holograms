@@ -74,9 +74,14 @@ namespace YouSingStudio.Holograms {
 			m_IsInited=true;
 			//
 			this.LoadSettings(name);
-			if(device==null) {device=GetComponent<HologramDevice>();}
-			if(video==null) {video=FindAnyObjectByType<VideoPlayer>();}
-			m_RT1=device.canvas;
+			if(device==null) {
+				if(MonoApplication.s_Instance!=null) {device=MonoApplication.s_Instance.device;}
+				else {device=FindAnyObjectByType<HologramDevice>();}
+			}
+			if(video==null) {
+				video=FindAnyObjectByType<VideoPlayer>();
+			}
+			device.Init();m_RT1=device.canvas;
 			m_Wait=new WaitForSeconds(1.0f/refresh.x);
 			//
 			if(video!=null) {
@@ -92,6 +97,7 @@ namespace YouSingStudio.Holograms {
 			}
 			if(quilt!=null) {
 				m_RT0=quilt.destination;
+				if(m_RT0==null) {m_RT0=device.quiltTexture as RenderTexture;}
 			}
 			if(screen!=null) {
 				screen.Init();

@@ -54,6 +54,8 @@ namespace YouSingStudio.Holograms {
 
 		public int display=-1;
 		public Vector2Int resolution;
+		[Tooltip("The rendering arguments.\nx:Aspect\ny:ViewCone")]
+		public Vector4 lens;
 		[Tooltip("The size in real world.\nxy:Screen\nz:In Depth\nw:Out Depth")]
 		public Vector4 size;
 		public RenderTexture canvas;
@@ -247,8 +249,9 @@ namespace YouSingStudio.Holograms {
 		public virtual Vector3 ParseQuilt() {
 			if(!m_IsInited) {Init();}
 			//
-			return new Vector3(quiltSize.x,quiltSize.y,
-				(float)quiltTexture.width/quiltSize.x/quiltTexture.height*quiltSize.y);
+			float f=lens.x!=0.0f?lens.x:
+				((float)quiltTexture.width/quiltSize.x/quiltTexture.height*quiltSize.y);
+			return new Vector3(quiltSize.x,quiltSize.y,f);
 		}
 
 		public virtual Vector4 PreferredSize() {
