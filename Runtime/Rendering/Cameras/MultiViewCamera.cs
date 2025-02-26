@@ -77,6 +77,7 @@ namespace YouSingStudio.Holograms {
 		[System.NonSerialized]protected float m_Sweep;
 		[System.NonSerialized]protected float m_Modifier;
 		[System.NonSerialized]protected Vector2Int m_Size;
+		[System.NonSerialized]protected Vector3 m_Quilt;
 		[System.NonSerialized]protected Matrix4x4 m_View;
 		[System.NonSerialized]protected Matrix4x4 m_Proj;
 		[System.NonSerialized]protected Transform m_Viewer;
@@ -153,7 +154,7 @@ namespace YouSingStudio.Holograms {
 			device.onPreRender+=Render;
 			camera.enabled=false;
 			camera.targetTexture=m_RT1;
-			camera.aspect=device.ParseQuilt().z;
+			camera.aspect=Mathf.Abs(device.ParseQuilt().z);
 			//camera.cullingMask&=~(1<<LayerMask.NameToLayer("UI"));
 			//
 			SetupCamera(m_RT0,device.ParseQuilt());
@@ -170,12 +171,12 @@ namespace YouSingStudio.Holograms {
 		// Math & Geometry
 
 		protected virtual Rect ScreenRect(int x,int y,float w,float h) {
-			//y=device.quiltSize.y-1-y;
+			if(m_Quilt.z<0.0f) {y=device.quiltSize.y-1-y;}
 			return new Rect(x*w,y*h,w,h);
 		}
 
 		public virtual float GetAspect() {
-			if(device!=null) {return device.ParseQuilt().z;}
+			if(device!=null) {return Mathf.Abs(device.ParseQuilt().z);}
 			if(camera!=null) {return camera.aspect;}
 			return (float)Screen.width/Screen.height;
 		}
@@ -236,7 +237,7 @@ namespace YouSingStudio.Holograms {
 			GL.PushMatrix();
 				ClearBackground();
 				Vector3 arm=Quaternion.Inverse(focus.rotation)*(v-focus.position);
-				m_Size=m_RT0.GetSizeI();
+				m_Size=m_RT0.GetSizeI();m_Quilt=device.ParseQuilt();
 				m_Sweep=arm.z*Mathf.Tan(cone*0.5f*Mathf.Deg2Rad)*2;
 				m_Modifier=1.0f/(plane*0.5f*GetAspect());
 				GL.LoadPixelMatrix(0.0f,m_Size.x,m_Size.y,0.0f);

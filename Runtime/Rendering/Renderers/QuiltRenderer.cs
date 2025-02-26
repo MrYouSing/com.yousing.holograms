@@ -195,8 +195,8 @@ namespace YouSingStudio.Holograms {
 				if(ta!=null) {
 					ids=Newtonsoft.Json.JsonConvert.DeserializeObject<int[]>(ta.text);
 				}else {
-					if(x==y) {
-					}else if((float)x/y>=1.7f) {// (11*6)/(8*5)=1.65
+					float f=(float)x/y;if(x==y) {
+					}else if(f>=1.7f||f<1.0f) {// (11*6)/(8*5)=1.65
 						ids=CreateIndexes(m_Args,size);
 					}else {
 						m_Id=Mathf.FloorToInt((x-y)*0.5f);

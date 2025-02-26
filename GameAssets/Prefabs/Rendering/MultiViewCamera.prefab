@@ -1,5 +1,53 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &117079559220618804
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3521013896115991087}
+  - component: {fileID: 4741508582099356324}
+  m_Layer: 0
+  m_Name: LookingGlassDevice
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3521013896115991087
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 117079559220618804}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1557108194488961793}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4741508582099356324
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 117079559220618804}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c8722f959114dbb4cb7d56a72d43497d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  resolution: {x: 1440, y: 2560}
+  lens: {x: 0.5625, y: 54, z: 0, w: 0}
+  quiltResolution: {x: 4092, y: 4092}
+  quiltSize: {x: 11, y: 6}
 --- !u!1 &962436981191410876
 GameObject:
   m_ObjectHideFlags: 0
@@ -103,7 +151,7 @@ GameObject:
   - component: {fileID: 795532636303766842}
   - component: {fileID: 3477143271935593989}
   m_Layer: 0
-  m_Name: Companion1
+  m_Name: CubeViDevice
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -144,10 +192,6 @@ MonoBehaviour:
   quiltTexture: {fileID: 0}
   quiltResolution: {x: 4320, y: 4800}
   quiltSize: {x: 8, y: 5}
-  slope: 0
-  interval: 0
-  x0: 0
-  m_Actor: {fileID: 0}
 --- !u!1 &7278368657187936219
 GameObject:
   m_ObjectHideFlags: 0
@@ -180,6 +224,7 @@ Transform:
   m_Children:
   - {fileID: 6045753729280186163}
   - {fileID: 795532636303766842}
+  - {fileID: 3521013896115991087}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &4871715829485908187
@@ -194,10 +239,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6e3f16c81deb6c4386f31ffe64e706e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  device: {fileID: 3477143271935593989}
+  device: {fileID: 0}
   quilt: {fileID: 0}
   display: {fileID: 0}
-  devices: []
+  devices:
+  - {fileID: 3477143271935593989}
+  - {fileID: 4741508582099356324}
   camera: {fileID: 9127592113707809575}
   focus: {fileID: 0}
   preview: 0

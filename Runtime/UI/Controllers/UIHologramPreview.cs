@@ -1,5 +1,5 @@
 using UnityEngine;
-using UnityEngine.UI;
+using YouSingStudio.Private;
 
 namespace YouSingStudio.Holograms {
 	/// <summary>
@@ -35,6 +35,20 @@ namespace YouSingStudio.Holograms {
 			if(screen!=null) {screen.onDefaultChanged+=()=>SetWrap(wrap);}
 			m_Wrap=(WrapMode)PlayerPrefs.GetInt(name+".DefaultWrap");
 			SetWrap(wrap);
+			//
+			var app=MonoApplication.instance;
+			if(app!=null) {app.onStartup+=StartDelayed;}
+			else {AsyncTask.Obtain(0.1f,StartDelayed).StartAsCoroutine();}
+		}
+
+		protected virtual void StartDelayed() {
+			HologramDevice device=null;
+			var app=MonoApplication.instance;
+			if(app!=null) {device=app.device;}
+			else {device=FindAnyObjectByType<LenticularDevice>();}
+			//
+			screen.quiltSize=device.quiltSize;
+			screen.quiltFlip=device.ParseQuilt().z<0.0f;
 		}
 
 		protected virtual void OnDestroy() {

@@ -67,10 +67,16 @@ namespace YouSingStudio.Holograms {
 			return FindDisplay(resolution)>=0;
 		}
 
+		public override int GetPriority() {
+			var sdk=CubeViSdk.instance;
+			if(sdk!=null&&sdk.IsDetected) {return 1000;}
+			return base.GetPriority();
+		}
+
 		public override void FromJson(string json) {
 			if(string.IsNullOrEmpty(json)) {
 				var sdk=CubeViSdk.instance;
-				//if(sdk!=null) {sdk.LoadDeviceConfig(json);}
+				if(sdk!=null) {sdk.LoadDeviceConfig(json);}
 				return;
 			}
 			//

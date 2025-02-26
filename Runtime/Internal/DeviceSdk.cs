@@ -95,8 +95,10 @@ namespace YouSingStudio.Holograms {
 			}
 #else
 			var tmp=System.Diagnostics.Process.GetProcesses();
+			System.Diagnostics.Process it;
 			for(int i=0,imax=tmp?.Length??0;i<imax;++i) {
-				if(string.Equals(name,tmp[i].MainModule.ModuleName,UnityExtension.k_Comparison)) {return true;}
+				it=tmp[i];if(it.HasExited) {continue;}
+				if(string.Equals(name,it.MainModule?.ModuleName,UnityExtension.k_Comparison)) {return true;}
 			}
 #endif
 			return false;
@@ -140,9 +142,16 @@ namespace YouSingStudio.Holograms {
 
 		public virtual void LoadDeviceConfig(string value) {
 			m_DeviceConfig=value;
-			if(!string.IsNullOrEmpty(config)&&!string.IsNullOrEmpty(m_DeviceConfig)) {
-				File.WriteAllText(config.GetFullPath(),m_DeviceConfig);
+			//
+			if(!string.IsNullOrEmpty(config)) {
+				string path=config.GetFullPath();
+				if(string.IsNullOrEmpty(m_DeviceConfig)) {
+					if(File.Exists(path)) {File.Delete(path);}
+				}else {
+					File.WriteAllText(path,m_DeviceConfig);
+				}
 			}
+			//
 			m_OnDeviceUpdated?.Invoke(m_DeviceConfig);
 		}
 

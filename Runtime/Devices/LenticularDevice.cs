@@ -32,12 +32,14 @@ namespace YouSingStudio.Holograms {
 
 		#region Methods
 
+		protected virtual void UpdateMaterial() {
+			material.SetVector(_InputSize,new Vector4(quiltSize.x,quiltSize.y));
+			material.SetVector(_OutputSize,new Vector4(resolution.x,resolution.y));
+			material.SetVector(_Arguments,new Vector4(pitch,slope,center,rotated?1.0f:0.0f));
+		}
+
 		protected override void InternalRender() {
-			if(material!=null) {
-				material.SetVector(_InputSize,new Vector4(quiltSize.x,quiltSize.y));
-				material.SetVector(_OutputSize,new Vector4(resolution.x,resolution.y));
-				material.SetVector(_Arguments,new Vector4(pitch,slope,center,rotated?1.0f:0.0f));
-			}
+			if(material!=null) {UpdateMaterial();}
 			base.InternalRender();
 		}
 

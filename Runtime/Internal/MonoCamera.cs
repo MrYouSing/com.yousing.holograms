@@ -60,19 +60,33 @@ namespace YouSingStudio.Holograms {
 
 		#region Methods
 
-		public virtual void PrepareCamera() {
-			//
-			HologramDevice best=null;
-			HologramDevice it;for(int i=0,imax=devices?.Length??0;i<imax;++i) {
+		public virtual void ResolveDevice() {
+			int i,imax=devices?.Length??0;HologramDevice it;
+			// Find First
+			if(device==null) {
+				int p=-1,q;
+				for(i=0;i<imax;++i) {
+					it=devices[i];if(it!=null) {
+						q=it.GetPriority();
+						if(q>p) {p=q;device=it;}
+					}
+				}
+			}
+			// Find Best
+			HologramDevice best=null;for(i=0;i<imax;++i) {
 				it=devices[i];if(it!=null) {
 					if(it.IsPresent()) {if(best==null) {best=it;}}
-					else {it.gameObject.SetActive(false);}
+					else if(it!=device) {it.gameObject.SetActive(false);}
 				}
 			}
 			if(best!=null&&device!=best) {
 				if(device!=null) {device.gameObject.SetActive(false);}
 				device=best;
 			}
+		}
+
+		public virtual void PrepareCamera() {
+			ResolveDevice();
 			//
 			if(device==null) {device=FindAnyObjectByType<HologramDevice>();}
 			if(display==null) {

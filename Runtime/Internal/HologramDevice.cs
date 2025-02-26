@@ -169,9 +169,18 @@ namespace YouSingStudio.Holograms {
 			return true;
 		}
 
+		/// <summary>
+		/// <seealso cref="ThreadPriority"/>
+		/// </summary>
+		public virtual int GetPriority() {
+			return 0;
+		}
+
 		public virtual void FromJson(string json) {
 			if(string.IsNullOrEmpty(json)) {return;}
 			Newtonsoft.Json.JsonConvert.PopulateObject(json,this);
+			//
+			if(!isActiveAndEnabled) {Render();}
 		}
 
 		public virtual string ToJson() {
@@ -190,6 +199,7 @@ namespace YouSingStudio.Holograms {
 			if(display<0) {display=FindDisplay(resolution);}
 			CheckRenderTexture(ref canvas,resolution);
 			CheckRenderTexture(ref quiltTexture,quiltResolution);
+			if(lens.x==0.0f) {lens.x=ParseQuilt().z;}
 			SetRenderEvent(true);
 		}
 
@@ -249,8 +259,9 @@ namespace YouSingStudio.Holograms {
 		public virtual Vector3 ParseQuilt() {
 			if(!m_IsInited) {Init();}
 			//
-			float f=lens.x!=0.0f?lens.x:
-				((float)quiltTexture.width/quiltSize.x/quiltTexture.height*quiltSize.y);
+			float f;if(lens.x!=0.0f) {f=lens.x;}
+			else if(canvas!=null) {f=(float)canvas.width/canvas.height;}
+			else {f=(float)resolution.x/resolution.y;}
 			return new Vector3(quiltSize.x,quiltSize.y,f);
 		}
 

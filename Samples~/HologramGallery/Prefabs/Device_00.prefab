@@ -792,10 +792,10 @@ PrefabInstance:
       addedObject: {fileID: 9214729311229186962}
     - targetCorrespondingSourceObject: {fileID: 6123778369388326179, guid: fa7ce1b8b9b32ea45a7189d4ac8cc5b9, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 5838302976209967313}
+      addedObject: {fileID: 4970982977930954065}
     - targetCorrespondingSourceObject: {fileID: 6123778369388326179, guid: fa7ce1b8b9b32ea45a7189d4ac8cc5b9, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 4970982977930954065}
+      addedObject: {fileID: 5838302976209967313}
     - targetCorrespondingSourceObject: {fileID: 6123778369388326179, guid: fa7ce1b8b9b32ea45a7189d4ac8cc5b9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 5328894019628339579}
@@ -828,15 +828,15 @@ MonoBehaviour:
   - name
   - display
   - rotated
-  - slope
   - pitch
+  - slope
   - center
   m_Sprites: []
   m_Textures: []
   m_GameObjects:
   - {fileID: 7460506326990403893}
-  - {fileID: 303583405675423021}
   - {fileID: 1283279938924050605}
+  - {fileID: 303583405675423021}
   - {fileID: 2073716317663521927}
   m_Texts:
   - {fileID: 6759578960525384489}
