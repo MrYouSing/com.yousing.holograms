@@ -296,7 +296,7 @@ namespace YouSingStudio.Holograms {
 
 		public virtual Calibration GetCalibration() {
 			string json=null,it;int i,imax;
-			DriveInfo[] list=DriveInfo.GetDrives();
+			string [] list=Directory.GetLogicalDrives();
 			//
 			if(string.IsNullOrEmpty(json)) {
 			for(i=0,imax=paths?.Count??0;i<imax;++i) {
@@ -306,7 +306,7 @@ namespace YouSingStudio.Holograms {
 			//
 			if(string.IsNullOrEmpty(json)) {
 			for(i=0,imax=list?.Length??0;i<imax;++i) {
-				it=list[i].Name;it=Path.Combine(it,"LKG_calibration/visual.json");
+				it=Path.Combine(list[i],"LKG_calibration/visual.json");
 				if(File.Exists(it)) {json=File.ReadAllText(it);break;}
 			}}
 			//

@@ -45,13 +45,13 @@ namespace YouSingStudio.Holograms {
 #if ENABLE_IL2CPP&&UNITY_STANDALONE_WIN
 		// https://learn.microsoft.com/en-us/windows/win32/psapi/enumerating-all-processes
 		// dotnet451/Source/ndp/fx/src/Services/Monitoring/system/Diagnosticts/ProcessManager.cs
-		[DllImport("kernel32.dll")]
+		[DllImport("Psapi.dll")]
 		public static extern bool EnumProcesses(int[] lpidProcess,int cb,out int lpcbNeeded);
 		[DllImport("kernel32.dll")]
 		public static extern System.IntPtr OpenProcess(int dwDesiredAccess,bool bInheritHandle,int dwProcessId);
-		[DllImport("kernel32.dll")]
+		[DllImport("Psapi.dll")]
 		public static extern bool EnumProcessModulesEx(System.IntPtr hProcess,System.IntPtr[] lphModule,int cb,out int lpcbNeeded,int dwFilterFlag);
-		[DllImport("kernel32.dll")]
+		[DllImport("Psapi.dll")]
 		public static extern int GetModuleBaseNameA(System.IntPtr hProcess,System.IntPtr hModule,System.IntPtr lpBaseName,int nSize);
 
 		public static int[] GetProcessIds() {
@@ -122,6 +122,8 @@ namespace YouSingStudio.Holograms {
 
 		public virtual bool IsDetected {
 			get{
+				if(!IsInstalled) {return false;}
+				//
 				DeviceSdk it;int j=0;
 				for(int i=0,imax=s_All.Count;i<imax;++i) {
 					it=s_All[i];if(it!=null&&it!=this) {

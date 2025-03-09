@@ -48,7 +48,7 @@ namespace YouSingStudio.Holograms {
 			else {device=FindAnyObjectByType<LenticularDevice>();}
 			//
 			screen.quiltSize=device.quiltSize;
-			screen.quiltFlip=device.ParseQuilt().z<0.0f;
+			screen.quiltFlip=device.ParseQuilt().z>0.0f;
 		}
 
 		protected virtual void OnDestroy() {

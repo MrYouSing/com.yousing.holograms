@@ -111,8 +111,8 @@ namespace YouSingStudio.Holograms {
 
 		public virtual Vector4 GetUV(Vector3 from,Vector3 to,int id) {
 			//
-			int w,h;bool b=from.z*to.z<0.0f;
-			if(b) {// For looking glass media.
+			int w,h;
+			if(from.z<0.0f&&to.z>0.0f) {// For looking glass media.
 				w=(int)to.x;h=(int)to.y;
 				id=w*(h-1-id/w)+id%w;
 			}
@@ -122,6 +122,9 @@ namespace YouSingStudio.Holograms {
 			int x=id%w,y=id/w;
 			float dw=1.0f/w,dh=1.0f/h;
 			//
+			if(from.z>0.0f&&to.z<0.0f) {// For looking glass media.
+				y=h-1-y;
+			}
 			return GetQuad(x,y,dw,dh,aspect==VideoAspectRatio.FitOutside?1:0,from.z,to.z);
 		}
 
@@ -165,17 +168,28 @@ namespace YouSingStudio.Holograms {
 			return m;
 		}
 
+		protected virtual int FloatToIndex(float f) {
+			int i=Mathf.FloorToInt(f);
+			return Mathf.Approximately(f,i+1)?i+1:i;
+		}
+
 		public virtual int[] CreateIndexes(Vector3 from,Vector3 to) {
 			int x=(int)(from.x*from.y),y=(int)(to.x*to.y);
 			int[] ids=new int[y];float p=0.0f,d=(x-1.0f)/(y-1.0f);
 			if(from.z*to.z>=0.0f) {
-				for(x=0;x<y;++x) {ids[x]=(int)p;p+=d;}
-			}else {
+				for(x=0;x<y;++x) {ids[x]=FloatToIndex(p);p+=d;}
+			}else if(from.z<0.0f&&to.z>0.0f) {
 				int xmax=(int)to.x,ymax=(int)to.y;
 				for(y=ymax-1;y>=0;--y) {
 				for(x=0;x<xmax;++x) {
-					ids[y*xmax+x]=(int)p;p+=d;
+					ids[y*xmax+x]=FloatToIndex(p);p+=d;
 				}}
+			}else if(from.z>0.0f&&to.z<0.0f) {
+				int w=(int)from.x,h=(int)from.y,i;
+				for(x=0;x<y;++x) {
+					i=FloatToIndex(p);p+=d;
+					ids[x]=(h-1-i/w)*w+i%w;
+				}
 			}
 			return ids;
 		}
